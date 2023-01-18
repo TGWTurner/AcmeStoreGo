@@ -27,6 +27,7 @@ func (od *OrderDatabase) GetOrdersByCustomerId(customerId int) []utils.Order {
 func (od *OrderDatabase) AddOrder(customerId int, order utils.Order) {
 	order.UpdatedDate = time.Now().String()
 	order.CustomerId = customerId
+	order.Id = utils.UrlSafeUniqueId()
 
 	od.orders = append( //add id too?
 		od.orders,

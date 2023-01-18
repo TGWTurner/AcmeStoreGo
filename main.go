@@ -1,36 +1,38 @@
 package main
 
 import (
-	"bjssStoreGo/backend/layers/dataAccess"
 	"bjssStoreGo/backend/utils"
 	"fmt"
-	"os"
 )
 
 func main() {
-	file := "./test.db"
+	// db := dataAccess.DataAccess{}.InitiateConnection()
 
-	unlinkFile(file)
+	// db.Account.Add(utils.Account{
+	// 	Id:           0,
+	// 	Email:        "test@test.com",
+	// 	Name:         "test",
+	// 	Address:      "test Address",
+	// 	Postcode:     "TE57 7ST",
+	// 	PasswordHash: "This Is A Password Hash",
+	// })
 
-	db := dataAccess.DataAccess{}.InitiateConnection()
+	// fmt.Println(db.Account.GetByEmail("test@test.com"))
 
-	db.Account.Add(utils.Account{
-		Id:           0,
-		Email:        "test@test.com",
-		Name:         "test",
-		Address:      "test Address",
-		Postcode:     "TE57 7ST",
-		PasswordHash: "This Is A Password Hash",
-	})
+	// db.Order.AddOrder(
+	// 	5,
+	// 	utils.Order{
+	// 		Id:         3,
+	// 		CustomerId: 1,
+	// 		Total:      55,
+	// 		Email:      "Email",
+	// 		Address:    "Address",
+	// 		Postcode:   "Postcode",
+	// 	},
+	// )
 
-	fmt.Println(db.Account.GetByEmail("test@test.com"))
+	rand := utils.UrlSafeUniqueId()
 
-}
+	fmt.Println(rand)
 
-func unlinkFile(file string) {
-	if _, err := os.Stat(file); !os.IsNotExist(err) {
-		if err := os.Remove(file); err != nil {
-			panic("Failed to remove file: " + file)
-		}
-	}
 }

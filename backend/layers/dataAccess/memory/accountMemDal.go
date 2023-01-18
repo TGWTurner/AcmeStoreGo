@@ -3,7 +3,6 @@ package memory
 import (
 	"bjssStoreGo/backend/layers/dataAccess/testData"
 	"bjssStoreGo/backend/utils"
-	"fmt"
 	"sort"
 	"strconv"
 )
@@ -23,25 +22,11 @@ func (ad *AccountDatabase) GetAccount() []utils.Account {
 func (ad *AccountDatabase) Add(account utils.Account) {
 	index := sort.Search(len(ad.accounts), func(i int) bool { return ad.accounts[i].Email == account.Email })
 
-	fmt.Println("adding account: " + account.Email)
-	fmt.Println("Index of acc: " + strconv.Itoa(index))
-
 	if index != len(ad.accounts) {
 		panic(account.Email + " already registered")
 	}
 
 	ad.accounts = append(ad.accounts, account)
-
-	for _, acc := range ad.accounts {
-		fmt.Println("=======")
-		fmt.Println(acc.Address)
-		fmt.Println(acc.Name)
-		fmt.Println(acc.Email)
-		fmt.Println(acc.Id)
-		fmt.Println(acc.Postcode)
-	}
-
-	fmt.Println("finish add")
 }
 
 func (ad *AccountDatabase) GetByEmail(email string) utils.Account {

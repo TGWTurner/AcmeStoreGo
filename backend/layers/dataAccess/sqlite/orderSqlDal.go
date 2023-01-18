@@ -29,25 +29,6 @@ func (od OrderDatabase) getOrdersByCustomerId(customerId int) []utils.Order {
 	}
 
 	return orders
-
-	//TODO: Implement get orders by customer id
-	/*
-		SQL:
-		SELECT
-			id,
-			customerId,
-			total,
-			updatedDate,
-			email,
-			name,
-			address,
-			postcode,
-			Order.productId,
-			Order.quantity
-		FROM orders
-		INNER JOIN Order ON Order.orderId = orders.pk
-		AND orders.customerId = ?
-	*/
 }
 
 func (od OrderDatabase) getOrderByToken(orderToken int) utils.Order {
@@ -64,25 +45,6 @@ func (od OrderDatabase) getOrderByToken(orderToken int) utils.Order {
 	}
 
 	return order
-
-	//TODO: Implement get order by token
-	/*
-		SQL:
-		SELECT
-			id,
-			customerId,
-			total,
-			updatedDate,
-			email,
-			name,
-			address,
-			postcode,
-			Order.productId,
-			Order.quantity
-		FROM orders
-		INNER JOIN Order ON Order.orderId = orders.pk
-		AND orders.id = ?
-	*/
 }
 
 func (od OrderDatabase) addOrder(customerId int, order utils.Order) {
