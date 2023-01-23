@@ -17,19 +17,37 @@ func NewOrderDatabase(db *gorm.DB) OrderDatabase {
 }
 
 func (od *OrderDatabase) GetOrdersByCustomerId(customerId int) []utils.Order {
-	var orders []utils.Order
+	var orders []Order
 
-	//Need to add the Order columns too
-	response := od.db.Model(&orders).
-		Select("id, customerId, total, updatedDate, email, name, address, postcode, Order.productId, Order.quantity").
-		Joins("INNER JOIN Order ON Order.orderId = orders.pk").
-		Where("orders.customerId = ?", customerId)
+	response := od.db.Where("customerId = ?", customerId).Find(&orders)
 
 	if response.Error != nil {
 		panic("Failed to get orders for customerId: " + strconv.Itoa(customerId))
 	}
 
-	return orders
+	customerOrders := make([]utils.Order, len(orders))
+
+	for i, order := range orders {
+		customerOrders[i] = order.ConvertFromDbOrder()
+
+		orderItems := []OrderItem{}
+
+		response = od.db.Where("orderId = ?", order.Pk).Find(&orderItems)
+
+		if response.Error != nil {
+			panic("Failed to get order items for order: " + order.Id)
+		}
+
+		customerOrderItems := make([]utils.OrderItem, len(orderItems))
+
+		for i, orderItem := range orderItems {
+			customerOrderItems[i] = orderItem.ConvertFromDbOrderItem()
+		}
+
+		customerOrders[i].Items = customerOrderItems
+	}
+
+	return customerOrders
 }
 
 func (od *OrderDatabase) GetOrderByToken(orderToken int) utils.Order {
