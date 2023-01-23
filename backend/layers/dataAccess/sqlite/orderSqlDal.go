@@ -3,6 +3,7 @@ package sqlite
 import (
 	"bjssStoreGo/backend/utils"
 	"strconv"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -15,7 +16,7 @@ func NewOrderDatabase(db *gorm.DB) OrderDatabase {
 	return od
 }
 
-func (od OrderDatabase) getOrdersByCustomerId(customerId int) []utils.Order {
+func (od *OrderDatabase) GetOrdersByCustomerId(customerId int) []utils.Order {
 	var orders []utils.Order
 
 	//Need to add the Order columns too
@@ -31,51 +32,44 @@ func (od OrderDatabase) getOrdersByCustomerId(customerId int) []utils.Order {
 	return orders
 }
 
-func (od OrderDatabase) getOrderByToken(orderToken int) utils.Order {
+func (od *OrderDatabase) GetOrderByToken(orderToken int) utils.Order {
 	var order utils.Order
 
 	//Need to add the Order columns too
 	response := od.db.Model(&order).
-		Select("id, customerId, total, updatedDate, email, name, address, postcode, Order.productId, Order.quantity").
-		Joins("INNER JOIN Order ON Order.orderId = orders.pk").
+		Select("id, customerId, total, updatedDate, email, name, address, postcode, order_items.productId, order_items.quantity").
+		Joins("INNER JOIN order_items ON order_items.orderId = orders.pk").
 		Where("orders.Id = ?", orderToken)
 
 	if response.Error != nil {
-		panic("Failed to get orders for customerId: " + strconv.Itoa(orderToken))
+		panic("Failed to get orders for order Token: " + strconv.Itoa(orderToken))
 	}
+
+	// orderItems := od.GetOrderItemsFromOrderId(order.ID)
 
 	return order
 }
 
-func (od OrderDatabase) addOrder(customerId int, order utils.Order) {
+// func (od *OrderDatabase) GetOrderItemsFromOrderId(orderId uint) []utils.OrderItem {
+// 	var orderItems []utils.OrderItem
+
+// 	response := od.db.Where("order_id = ?", orderId).Find(&orderItems)
+// }
+
+func (od *OrderDatabase) AddOrder(customerId int, order utils.Order) utils.Order {
+	order.Id = utils.UrlSafeUniqueId()
+	order.CustomerId = customerId
+	order.UpdatedDate = time.Now().String()
+
 	response := od.db.Create(&order)
 
 	if response.Error != nil {
 		panic("Failed to create new Order")
 	}
 
-	//TODO: Rearrange order object to include way to store items
-	items := []utils.OrderItem{
-		{
-			ProductId: 1,
-			Quantity:  5,
-		},
-		{
-			ProductId: 2,
-			Quantity:  10,
-		},
-		{
-			ProductId: 3,
-			Quantity:  1,
-		},
-		{
-			ProductId: 3,
-			Quantity:  3,
-		},
-	}
-
-	for _, item := range items {
-		item.OrderId = int(order.ID)
+	for _, item := range order.Items {
+		//TODO: 1234 -Convert to use dbStructs version and conversions
+		item.OrderId = int(order.Id)
 		response := od.db.Create(&item)
 
 		if response.Error != nil {
@@ -83,23 +77,7 @@ func (od OrderDatabase) addOrder(customerId int, order utils.Order) {
 		}
 	}
 
-	//TODO: Implement get order by token
-	/*
-		SQL:
-		Create record of order
-		INSERT INTO orders (
-			id,
-			customerId,
-			total,
-			updatedDate,
-			email,
-			name,
-			address,
-			postcode
-		) VALUES (?)
-		Create record of order items
-		INSERT INTO Order (orderId, productId, quantity) VALUES (?)
-	*/
+	return od.GetOrderByToken(int(order.Id))
 }
 
 type OrderDatabase struct {

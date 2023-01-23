@@ -6,8 +6,8 @@ import (
 
 type Data struct {
 	Products   []utils.Product
-	Categories []utils.Category
-	Deals      []utils.Deal
+	Categories []utils.ProductCategory
+	Deals      []utils.ProductDeal
 }
 
 func (ptd ProductTestData) GetTestData() Data {
@@ -63,7 +63,7 @@ func (ptd ProductTestData) GetTestData() Data {
 				LongDescription:   "The orange is the fruit of various citrus species in the family Rutaceae (see list of plants known as orange); it primarily refers to Citrus × sinensis, which is also called sweet orange...",
 			},
 		},
-		Categories: []utils.Category{
+		Categories: []utils.ProductCategory{
 			{
 				Id:   1,
 				Name: "Animals",
@@ -73,7 +73,7 @@ func (ptd ProductTestData) GetTestData() Data {
 				Name: "Fruits",
 			},
 		},
-		Deals: []utils.Deal{
+		Deals: []utils.ProductDeal{
 			{
 				ProductId: 1,
 				StartDate: "2021-02-13",

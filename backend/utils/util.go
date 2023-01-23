@@ -3,66 +3,60 @@ package utils
 import (
 	"crypto/rand"
 	"encoding/base64"
-
-	"gorm.io/gorm"
 )
 
-type Product struct {
-	gorm.Model
-	Id                int      `gorm:"primaryKey"`
-	CategoryId        int      `gorm:"index;not null"`
-	Price             int      `gorm:"not null"`
-	QuantityRemaining int      `gorm:"not null"`
-	ShortDescription  string   `gorm:"not null"`
-	LongDescription   string   `gorm:"not null"`
-	Category          Category `gorm:"ForeignKey:CategoryId"`
-}
-
-type Category struct {
-	gorm.Model
-	Id   int    `gorm:"primaryKey"`
-	Name string `gorm:"not null"`
-}
-
-type Deal struct {
-	gorm.Model
-	ProductId int     `gorm:"not null"`
-	StartDate string  `gorm:"not null"`
-	EndDate   string  `gorm:"not null"`
-	Product   Product `gorm:"ForeignKey:ProductId"`
-}
-
-type Order struct {
-	gorm.Model
-	pk              int    `gorm:"primaryKey"`
-	Id              string `gorm:"unique;index;not null;"`
-	CustomerId      int    `gorm:"index"`
-	Total           int    `gorm:"not null"`
-	UpdatedDate     string `gorm:"not null"`
-	ShippingDetails ShippingDetails
-	Items           []OrderItem
-}
-
-type OrderItem struct {
-	gorm.Model
-	ProductId int     `gorm:"not null"`
-	Quantity  int     `gorm:"not null"`
-	Order     Order   `gorm:"ForeignKey:OrderId"`
-	Product   Product `gorm:"ForeignKey:ProductId"`
-}
+/*
+Missing:
+ - Basket
+ - Session
+ - AccountApiResponse
+*/
 
 type ShippingDetails struct {
-	Email    string `gorm:"unique;index;not null"`
-	Name     string `gorm:"not null"`
-	Address  string `gorm:"not null"`
-	Postcode string `gorm:"not null"`
+	Email    string
+	Name     string
+	Address  string
+	Postcode string
 }
 
 type Account struct {
-	gorm.Model
-	Id           int    `gorm:"primaryKey"`
-	PasswordHash string `gorm:"not null"`
+	Id           int
+	PasswordHash string
 	ShippingDetails
+}
+
+type Product struct {
+	Id                int
+	QuantityRemaining int
+	CategoryId        int
+	Price             int
+	ShortDescription  string
+	LongDescription   string
+}
+
+type ProductCategory struct {
+	Id   int
+	Name string
+}
+
+type ProductDeal struct {
+	ProductId int
+	StartDate string
+	EndDate   string
+}
+
+type OrderItem struct {
+	ProductId int
+	Quantity  int
+}
+
+type Order struct {
+	Id              string
+	Total           int
+	UpdatedDate     string
+	CustomerId      int
+	ShippingDetails ShippingDetails
+	Items           []OrderItem
 }
 
 func UrlSafeUniqueId() string {

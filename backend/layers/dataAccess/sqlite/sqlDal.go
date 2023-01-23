@@ -23,14 +23,15 @@ func NewDatabase(connection string) Database {
 	}
 }
 
+// TODO: 1234 -Convert to use dbStructs versions
 func autoMigration(db *gorm.DB) {
 	db.AutoMigrate(
 		&utils.Order{},
 		&utils.Product{},
 		&utils.OrderItem{},
 		&utils.Account{},
-		&utils.Deal{},
-		&utils.Category{},
+		&utils.ProductDeal{},
+		&utils.ProductCategory{},
 	)
 }
 

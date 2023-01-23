@@ -1,12 +1,12 @@
 package main
 
 import (
+	"bjssStoreGo/backend/layers/dataAccess"
 	"bjssStoreGo/backend/utils"
-	"fmt"
 )
 
 func main() {
-	// db := dataAccess.DataAccess{}.InitiateConnection()
+	db := dataAccess.DataAccess{}.InitiateConnection()
 
 	// db.Account.Add(utils.Account{
 	// 	Id:           0,
@@ -19,20 +19,29 @@ func main() {
 
 	// fmt.Println(db.Account.GetByEmail("test@test.com"))
 
-	// db.Order.AddOrder(
-	// 	5,
-	// 	utils.Order{
-	// 		Id:         3,
-	// 		CustomerId: 1,
-	// 		Total:      55,
-	// 		Email:      "Email",
-	// 		Address:    "Address",
-	// 		Postcode:   "Postcode",
-	// 	},
-	// )
+	db.Order.AddOrder(
+		5,
+		utils.Order{
+			Id:         utils.UrlSafeUniqueId(),
+			CustomerId: 1,
+			Total:      55,
+			ShippingDetails: utils.ShippingDetails{
+				Email:    "Email",
+				Address:  "Address",
+				Postcode: "Postcode",
+			},
+			Items: []utils.OrderItem{
+				{
+					ProductId: 1,
+					Quantity:  5,
+				},
+				{
+					ProductId: 2,
+					Quantity:  10,
+				},
+			},
+		},
+	)
 
-	rand := utils.UrlSafeUniqueId()
-
-	fmt.Println(rand)
-
+	//Create an order, add it to the db, try out the gorm request then figure out how to create order object from the db
 }

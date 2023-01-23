@@ -59,7 +59,7 @@ func (pd *ProductDatabase) getProductsByIds(Ids ...int) []utils.Product {
 	return products
 }
 
-func (pd *ProductDatabase) getProductCategories() []utils.Category {
+func (pd *ProductDatabase) getProductCategories() []utils.ProductCategory {
 	return pd.categories
 }
 
@@ -107,6 +107,6 @@ func (pd *ProductDatabase) decreaseStock(productQuantities map[int]int) {
 
 type ProductDatabase struct {
 	products   []utils.Product
-	categories []utils.Category
-	deals      []utils.Deal
+	categories []utils.ProductCategory
+	deals      []utils.ProductDeal
 }

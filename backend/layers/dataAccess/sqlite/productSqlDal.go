@@ -61,8 +61,8 @@ func (pd ProductDatabase) getProductsByIds(Ids ...int) []utils.Product {
 	return accounts
 }
 
-func (pd ProductDatabase) getProductCategories() []utils.Category {
-	var categories []utils.Category
+func (pd ProductDatabase) getProductCategories() []utils.ProductCategory {
+	var categories []utils.ProductCategory
 
 	response := pd.db.Find(&categories)
 
@@ -73,8 +73,8 @@ func (pd ProductDatabase) getProductCategories() []utils.Category {
 	return categories
 }
 
-func (pd ProductDatabase) getProductsByCategory(categoryId int) utils.Category {
-	var category utils.Category
+func (pd ProductDatabase) getProductsByCategory(categoryId int) utils.ProductCategory {
+	var category utils.ProductCategory
 
 	response := pd.db.First(category, categoryId)
 
