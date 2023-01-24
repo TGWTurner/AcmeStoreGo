@@ -3,7 +3,6 @@ package sqlite
 import (
 	"bjssStoreGo/backend/utils"
 	"strconv"
-	"time"
 
 	"gorm.io/gorm"
 )
@@ -14,6 +13,24 @@ func NewOrderDatabase(db *gorm.DB) OrderDatabase {
 	}
 
 	return od
+}
+
+func (od *OrderDatabase) getOrderItemsFromOrderPk(pk int) []utils.OrderItem {
+	orderItems := []OrderItem{}
+
+	response := od.db.Where("orderId = ?", pk).Find(&orderItems)
+
+	if response.Error != nil {
+		panic("Failed to get order items for order with pk: " + strconv.Itoa(pk))
+	}
+
+	customerOrderItems := make([]utils.OrderItem, len(orderItems))
+
+	for i, orderItem := range orderItems {
+		customerOrderItems[i] = orderItem.ConvertFromDbOrderItem()
+	}
+
+	return customerOrderItems
 }
 
 func (od *OrderDatabase) GetOrdersByCustomerId(customerId int) []utils.Order {
@@ -29,73 +46,48 @@ func (od *OrderDatabase) GetOrdersByCustomerId(customerId int) []utils.Order {
 
 	for i, order := range orders {
 		customerOrders[i] = order.ConvertFromDbOrder()
-
-		orderItems := []OrderItem{}
-
-		response = od.db.Where("orderId = ?", order.Pk).Find(&orderItems)
-
-		if response.Error != nil {
-			panic("Failed to get order items for order: " + order.Id)
-		}
-
-		customerOrderItems := make([]utils.OrderItem, len(orderItems))
-
-		for i, orderItem := range orderItems {
-			customerOrderItems[i] = orderItem.ConvertFromDbOrderItem()
-		}
-
-		customerOrders[i].Items = customerOrderItems
+		customerOrders[i].Items = od.getOrderItemsFromOrderPk(order.Pk)
 	}
 
 	return customerOrders
 }
 
-func (od *OrderDatabase) GetOrderByToken(orderToken int) utils.Order {
-	var order utils.Order
+func (od *OrderDatabase) GetOrderByToken(orderToken string) utils.Order {
+	var order Order
 
-	//Need to add the Order columns too
-	response := od.db.Model(&order).
-		Select("id, customerId, total, updatedDate, email, name, address, postcode, order_items.productId, order_items.quantity").
-		Joins("INNER JOIN order_items ON order_items.orderId = orders.pk").
-		Where("orders.Id = ?", orderToken)
+	response := od.db.Where("Id = ?", orderToken).First(&order)
 
 	if response.Error != nil {
-		panic("Failed to get orders for order Token: " + strconv.Itoa(orderToken))
+		panic("Failed to get orders for orderToken: " + orderToken)
 	}
 
-	// orderItems := od.GetOrderItemsFromOrderId(order.ID)
+	customerOrder := order.ConvertFromDbOrder()
+	customerOrder.Items = od.getOrderItemsFromOrderPk(order.Pk)
 
-	return order
+	return customerOrder
 }
 
-// func (od *OrderDatabase) GetOrderItemsFromOrderId(orderId uint) []utils.OrderItem {
-// 	var orderItems []utils.OrderItem
-
-// 	response := od.db.Where("order_id = ?", orderId).Find(&orderItems)
-// }
-
 func (od *OrderDatabase) AddOrder(customerId int, order utils.Order) utils.Order {
-	order.Id = utils.UrlSafeUniqueId()
-	order.CustomerId = customerId
-	order.UpdatedDate = time.Now().String()
+	dbOrder := ConvertToDbOrder(order)
+	dbOrder.SetUpNewOrder(customerId)
 
-	response := od.db.Create(&order)
+	response := od.db.Create(&dbOrder)
 
 	if response.Error != nil {
 		panic("Failed to create new Order")
 	}
 
-	for _, item := range order.Items {
-		//TODO: 1234 -Convert to use dbStructs version and conversions
-		item.OrderId = int(order.Id)
+	dbOrderItems := ConvertToDbOrderItems(dbOrder.Pk, order)
+
+	for _, item := range dbOrderItems {
 		response := od.db.Create(&item)
 
 		if response.Error != nil {
-			panic("Failed to create item entry for item")
+			panic("Failed to create item entry for pk: " + strconv.Itoa(item.ProductId))
 		}
 	}
 
-	return od.GetOrderByToken(int(order.Id))
+	return od.GetOrderByToken(order.Id)
 }
 
 type OrderDatabase struct {

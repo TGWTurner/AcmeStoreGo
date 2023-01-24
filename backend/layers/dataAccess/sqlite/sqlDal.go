@@ -1,8 +1,6 @@
 package sqlite
 
 import (
-	"bjssStoreGo/backend/utils"
-
 	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 )
@@ -23,15 +21,14 @@ func NewDatabase(connection string) Database {
 	}
 }
 
-// TODO: 1234 -Convert to use dbStructs versions
 func autoMigration(db *gorm.DB) {
 	db.AutoMigrate(
-		&utils.Order{},
-		&utils.Product{},
-		&utils.OrderItem{},
-		&utils.Account{},
-		&utils.ProductDeal{},
-		&utils.ProductCategory{},
+		&Order{},
+		&Product{},
+		&OrderItem{},
+		&Account{},
+		&Deal{},
+		&Category{},
 	)
 }
 

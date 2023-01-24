@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"bjssStoreGo/backend/utils"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -93,7 +94,7 @@ type OrderItem struct {
 	Product   Product `gorm:"ForeignKey:ProductId"`
 }
 
-func ConvertToDbOrderItem(orderId int, order utils.Order) []*OrderItem {
+func ConvertToDbOrderItems(orderId int, order utils.Order) []*OrderItem {
 	orderItems := []*OrderItem{}
 
 	for _, item := range order.Items {
@@ -138,6 +139,12 @@ func ConvertToDbOrder(order utils.Order) *Order {
 		Address:     order.ShippingDetails.Address,
 		Postcode:    order.ShippingDetails.Postcode,
 	}
+}
+
+func (o *Order) SetUpNewOrder(customerId int) {
+	o.Id = utils.UrlSafeUniqueId()
+	o.CustomerId = customerId
+	o.UpdatedDate = time.Now().String()
 }
 
 func (o *Order) ConvertFromDbOrder() utils.Order {
