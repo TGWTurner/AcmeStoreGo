@@ -15,7 +15,7 @@ func NewProductDatabase(db *gorm.DB) ProductDatabase {
 		db: db,
 	}
 
-	testData := testData.ProductTestData{}.GetTestData()
+	testData := testData.GetProductTestData()
 	products := testData.Products
 	categories := testData.Categories
 	deals := testData.Deals

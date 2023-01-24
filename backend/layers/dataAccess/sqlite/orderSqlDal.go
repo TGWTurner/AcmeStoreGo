@@ -1,6 +1,7 @@
 package sqlite
 
 import (
+	"bjssStoreGo/backend/layers/dataAccess/testData"
 	"bjssStoreGo/backend/utils"
 	"strconv"
 
@@ -10,6 +11,12 @@ import (
 func NewOrderDatabase(db *gorm.DB) OrderDatabase {
 	od := OrderDatabase{
 		db: db,
+	}
+
+	testOrders := testData.GetOrderTestData()
+
+	if res := db.Create(&testOrders); res.Error != nil {
+		panic("Failed to create test orders")
 	}
 
 	return od

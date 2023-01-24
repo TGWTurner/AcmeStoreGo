@@ -10,7 +10,7 @@ type Data struct {
 	Deals      []utils.ProductDeal
 }
 
-func (ptd ProductTestData) GetTestData() Data {
+func GetProductTestData() Data {
 
 	return Data{
 		Products: []utils.Product{
@@ -92,5 +92,3 @@ func (ptd ProductTestData) GetTestData() Data {
 		},
 	}
 }
-
-type ProductTestData struct{}

@@ -4,7 +4,7 @@ import (
 	"bjssStoreGo/backend/utils"
 )
 
-func (atd AccountTestData) GetTestData() []utils.Account {
+func GetAccountTestData() []utils.Account {
 	return []utils.Account{
 		{
 			Id: 1,
@@ -32,7 +32,7 @@ func (atd AccountTestData) GetTestData() []utils.Account {
 /*
 TODO: Question - Cant have defaults so variadic, test for existance?
 */
-func (atd AccountTestData) GetTestAccountCredentials(indexes ...int) struct {
+func GetTestAccountCredentials(indexes ...int) struct {
 	Email    string
 	Password string
 } {
@@ -42,7 +42,7 @@ func (atd AccountTestData) GetTestAccountCredentials(indexes ...int) struct {
 		index = indexes[0]
 	}
 
-	testAccount := AccountTestData{}.GetTestData()[index]
+	testAccount := GetAccountTestData()[index]
 
 	return struct {
 		Email    string
@@ -52,5 +52,3 @@ func (atd AccountTestData) GetTestAccountCredentials(indexes ...int) struct {
 		Password: "I am an insecure password",
 	}
 }
-
-type AccountTestData struct{}
