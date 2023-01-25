@@ -23,7 +23,12 @@ func NewOrderDatabase(db *gorm.DB) OrderDatabase {
 }
 
 func (ad OrderDatabase) Close() {
-	db, _ := ad.db.DB()
+	db, err := ad.db.DB()
+
+	if err != nil {
+		panic("Failed to get order db instance")
+	}
+
 	db.Close()
 }
 
@@ -36,13 +41,7 @@ func (od *OrderDatabase) getOrderItemsFromOrderPk(pk int) []utils.OrderItem {
 		panic("Failed to get order items for order with pk: " + strconv.Itoa(pk))
 	}
 
-	customerOrderItems := make([]utils.OrderItem, len(orderItems))
-
-	for i, orderItem := range orderItems {
-		customerOrderItems[i] = *orderItem.ConvertFromDbOrderItem()
-	}
-
-	return customerOrderItems
+	return ConvertFromDbOrderItems(orderItems)
 }
 
 func (od *OrderDatabase) GetByCustomerId(customerId int) []utils.Order {
@@ -57,7 +56,7 @@ func (od *OrderDatabase) GetByCustomerId(customerId int) []utils.Order {
 	customerOrders := make([]utils.Order, len(orders))
 
 	for i, order := range orders {
-		customerOrders[i] = order.ConvertFromDbOrder()
+		customerOrders[i] = ConvertFromDbOrder(order)
 		customerOrders[i].Items = od.getOrderItemsFromOrderPk(order.Pk)
 	}
 
@@ -73,7 +72,7 @@ func (od *OrderDatabase) GetByToken(orderToken string) utils.Order {
 		panic("Failed to get order for orderToken: " + orderToken)
 	}
 
-	customerOrder := order.ConvertFromDbOrder()
+	customerOrder := ConvertFromDbOrder(order)
 	customerOrder.Items = od.getOrderItemsFromOrderPk(order.Pk)
 
 	return customerOrder

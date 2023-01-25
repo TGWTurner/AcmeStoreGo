@@ -36,11 +36,16 @@ func NewProductDatabase(db *gorm.DB) ProductDatabase {
 }
 
 func (ad ProductDatabase) Close() {
-	db, _ := ad.db.DB()
+	db, err := ad.db.DB()
+
+	if err != nil {
+		panic("Failed to get product db instance")
+	}
+
 	db.Close()
 }
 
-func (pd ProductDatabase) GetAll() []*utils.Product {
+func (pd ProductDatabase) GetAll() []utils.Product {
 	var products []Product
 
 	response := pd.db.Find(&products)
@@ -53,9 +58,9 @@ func (pd ProductDatabase) GetAll() []*utils.Product {
 }
 
 func (pd ProductDatabase) GetByIds(Ids ...int) []utils.Product {
-	var accounts []utils.Product
+	var products []Product
 
-	response := pd.db.Find(&accounts, Ids)
+	response := pd.db.Find(&products, Ids)
 
 	if response.Error != nil {
 		Ids := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(Ids)), ","), "[]")
@@ -63,37 +68,36 @@ func (pd ProductDatabase) GetByIds(Ids ...int) []utils.Product {
 		panic("Failed to get products with id's: " + Ids)
 	}
 
-	return accounts
+	return ConvertFromDbProducts(products)
 }
 
 func (pd ProductDatabase) GetCategories() []utils.ProductCategory {
-	var categories []utils.ProductCategory
+	var categories []Category
 
 	response := pd.db.Find(&categories)
 
-	if response != nil {
+	if response.Error != nil {
 		panic("Failed tp get product categories")
 	}
 
-	return categories
+	return ConvertFromDbCategories(categories)
 }
 
 func (pd ProductDatabase) GetProductsByCategory(categoryId int) []utils.Product {
-	var products []utils.Product
+	var products []Product
 
-	var category utils.ProductCategory
-
-	response := pd.db.First(category, categoryId)
+	response := pd.db.Where("category_id = ?", categoryId).Find(&products)
 
 	if response.Error != nil {
 		panic("Unable to get product category with categoryId: " + strconv.Itoa(categoryId))
 	}
 
-	return category
+	return ConvertFromDbProducts(products)
 }
 
 func (pd ProductDatabase) GetByText(searchTerm string) []utils.Product {
-	var products []utils.Product
+	var products []Product
+
 	response := pd.db.
 		Where("short_description LIKE ?", searchTerm).
 		Or("long_description LIKE ?", searchTerm).
@@ -103,33 +107,35 @@ func (pd ProductDatabase) GetByText(searchTerm string) []utils.Product {
 		panic("Unable to get products for searchTerm: " + searchTerm)
 	}
 
-	return products
+	return ConvertFromDbProducts(products)
 }
 
 func (pd ProductDatabase) GetCurrentDeals(date string) []utils.Product {
-	var products []utils.Product
+	var products []Product
 
 	response := pd.db.Find(&products).
 		Joins("INNER JOIN deals ON deals.product_id = products.id").
-		Where("? >= deals.start_date and ? < deals.end_date", date, date)
+		Where("? >= deals.start_date", date).
+		Where("? < deals.end_date", date)
 
 	if response != nil {
 		panic("Unable to get products with current deals")
 	}
 
-	return products
+	return ConvertFromDbProducts(products)
 }
 
-func (pd ProductDatabase) DecreaseStock(productQuantities map[int]int) {
-	for productId, quantity := range productQuantities {
-		product := utils.Product{
-			Id: productId,
+// productQuantities := []utils.OrderItem
+func (pd ProductDatabase) DecreaseStock(productQuantities []utils.OrderItem) {
+	for _, item := range productQuantities {
+		product := Product{
+			Id: item.ProductId,
 		}
 
-		response := pd.db.Model(&product).Update("quantity_remaining", gorm.Expr("quantity - ?", quantity))
+		response := pd.db.Model(&product).Update("quantity_remaining", gorm.Expr("quantity - ?", item.Quantity))
 
 		if response.Error != nil {
-			panic("Failed to update quantity for productId: " + strconv.Itoa(productId))
+			panic("Failed to update quantity for productId: " + strconv.Itoa(item.ProductId))
 		}
 	}
 }

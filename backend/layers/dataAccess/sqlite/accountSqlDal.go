@@ -23,11 +23,16 @@ func NewAccountDatabase(db *gorm.DB) AccountDatabase {
 }
 
 func (ad AccountDatabase) Close() {
-	db, _ := ad.db.DB()
+	db, err := ad.db.DB()
+
+	if err != nil {
+		panic("Failed to get account db instance")
+	}
+
 	db.Close()
 }
 
-func (ad AccountDatabase) Add(account utils.Account) *utils.Account {
+func (ad AccountDatabase) Add(account utils.Account) utils.Account {
 	dbAccount := ConvertToDbAccount(account)
 
 	result := ad.db.Create(&dbAccount)
@@ -39,7 +44,7 @@ func (ad AccountDatabase) Add(account utils.Account) *utils.Account {
 	return ad.GetById(int(dbAccount.ID))
 }
 
-func (ad AccountDatabase) GetByEmail(email string) *utils.Account {
+func (ad AccountDatabase) GetByEmail(email string) utils.Account {
 	var account Account
 
 	result := ad.db.Where("email = ?", email).First(&account)
@@ -48,10 +53,10 @@ func (ad AccountDatabase) GetByEmail(email string) *utils.Account {
 		panic("Record with email: " + email + " not found")
 	}
 
-	return account.ConvertFromDbAccount()
+	return ConvertFromDbAccount(account)
 }
 
-func (ad AccountDatabase) GetById(accountId int) *utils.Account {
+func (ad AccountDatabase) GetById(accountId int) utils.Account {
 	var account Account
 
 	result := ad.db.First(&account, accountId)
@@ -60,10 +65,10 @@ func (ad AccountDatabase) GetById(accountId int) *utils.Account {
 		panic("Record with Id: " + strconv.Itoa(accountId) + " not found")
 	}
 
-	return account.ConvertFromDbAccount()
+	return ConvertFromDbAccount(account)
 }
 
-func (ad AccountDatabase) Update(account utils.Account) *utils.Account {
+func (ad AccountDatabase) Update(account utils.Account) utils.Account {
 	dbAccount := ConvertToDbAccount(account)
 
 	result := ad.db.Save(&dbAccount)

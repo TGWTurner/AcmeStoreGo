@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+
+	"golang.org/x/exp/slices"
 )
 
 func setUp() sqlite.Database {
@@ -34,6 +36,10 @@ func main() {
 	testCreateOrder()
 	testGetOrderByToken()
 	testGetOrdersByCustomerId()
+	testGetProductGivenId()
+	testGetProductsGivenIds()
+	testGetCategoriesReturnsCorrectCategories()
+	testGetProductsByCategoryProvidesCorrectProducts()
 }
 
 /*
@@ -107,7 +113,7 @@ func testGetOrderByToken() {
 		return
 	}
 
-	fmt.Println("TEST PASSED -- Order correctly retrieved")
+	fmt.Println("TEST PASSED -- Order correctly retrieved for token: " + order.Id)
 }
 
 func testGetOrdersByCustomerId() {
@@ -156,27 +162,36 @@ func testGetProductGivenId() {
 	db := setUp()
 	defer closeDbs(db)
 
-	product := db.Product.GetByIds(1)[0]
+	index := 1
 
-	if product.Id != 1 {
-		fmt.Println("TEST FAILED -- Recieved different product than was requested")
+	product := db.Product.GetByIds(index)[0]
+	expected := getTestProductById(index)
+
+	if ok, err := assertProductExpectedMatchesActual(expected, product); !ok {
+		fmt.Println("TEST FAILED -- " + err)
+		return
 	}
+
+	fmt.Println("TEST PASSED -- Received correct product for index: ", index)
 }
 
 func testGetProductsGivenIds() {
 	db := setUp()
 	defer closeDbs(db)
 
-	products := db.Product.GetByIds(1, 2, 3)
+	indexes := []int{1, 2, 3}
 
-	for i, product := range products {
-		if i != product.Id {
-			fmt.Println("TEST FAILED -- Recieved wrong set of products")
+	products := db.Product.GetByIds(indexes...)
+
+	for i, index := range indexes {
+		expected := getTestProductById(index)
+		if ok, err := assertProductExpectedMatchesActual(expected, products[i]); !ok {
+			fmt.Println("TEST FAILED -- " + err)
 			return
 		}
 	}
 
-	fmt.Println("TEST PASSED -- Got correct products")
+	fmt.Println("TEST PASSED -- Got correct products for ids: ", indexes)
 }
 
 func testGetCategoriesReturnsCorrectCategories() {
@@ -184,33 +199,93 @@ func testGetCategoriesReturnsCorrectCategories() {
 	defer closeDbs(db)
 
 	categories := db.Product.GetCategories()
-	if len(categories) != 2 {
+	expectedCategories := testData.GetProductTestData().Categories
+
+	if len(categories) != len(expectedCategories) {
 		fmt.Println("TEST FAILED -- Received incorrect number of categories")
 		return
 	}
 
 	for _, category := range categories {
-		if category.Name != "Animals" && category.Name == "Fruits" {
-			fmt.Println("TEST FAILED -- Did not receive expected category")
+		if ok, err := assertCategoryHasExpectedName(category); !ok {
+			fmt.Println("TEST FAILED -- " + err)
 			return
 		}
 	}
 
-	fmt.Println("TEST PASSED -- Recieved both expected categories")
+	fmt.Println("TEST PASSED -- Recieved expected categories")
 }
 
 func testGetProductsByCategoryProvidesCorrectProducts() {
 	db := setUp()
 	defer closeDbs(db)
 
-	products := db.Product.GetProductsByCategory(1)
-	testProducts := testData.GetProductTestData().Products
+	categoryId := 1
 
-	if assertProductContainsCorrectValues(testProducts[0], products[0]) {
+	products := db.Product.GetProductsByCategory(categoryId)
 
+	for _, product := range products {
+		if categoryId != product.CategoryId {
+			fmt.Println(
+				"TEST FAILED -- Product had wrong Category Id expected: " +
+					strconv.Itoa(categoryId) +
+					" actual: " +
+					strconv.Itoa(product.Id),
+			)
+		}
+
+		if ok, err := assertProductExpectedMatchesActual(getTestProductById(product.Id), product); !ok {
+			fmt.Println("TEST FAILED -- " + err)
+			return
+		}
 	}
+
+	fmt.Println("TEST PASSED -- Recieved correct products for category: " + strconv.Itoa(categoryId))
 }
 
-func assertProductContainsCorrectValues(expected utils.Product, actual utils.Product) bool {
+func assertCategoryHasExpectedName(category utils.ProductCategory) (bool, string) {
+	expectedCategories := testData.GetProductTestData().Categories
 
+	for _, expectedCategory := range expectedCategories {
+		if expectedCategory.Name == category.Name {
+			return true, ""
+		}
+	}
+
+	return false, "Category of name " + category.Name + " not expected"
+}
+
+func getTestProductById(id int) utils.Product {
+	expectedProducts := testData.GetProductTestData().Products
+	idx := slices.IndexFunc(
+		expectedProducts,
+		func(p utils.Product) bool { return p.Id == id },
+	)
+
+	return expectedProducts[idx]
+}
+
+func assertProductExpectedMatchesActual(expected utils.Product, actual utils.Product) (bool, string) {
+	if expected.Id != actual.Id {
+		return false, "Product Id did not match, expected: " + strconv.Itoa(expected.Id) + " actual: " + strconv.Itoa(actual.Id)
+	}
+	if expected.QuantityRemaining != actual.QuantityRemaining {
+		return false, "Quantity Remaining did not match, expected: " + strconv.Itoa(expected.Id) + " actual: " + strconv.Itoa(actual.Id)
+
+	}
+	if expected.CategoryId != actual.CategoryId {
+		return false, "Category Id did not match, expected: " + strconv.Itoa(expected.Id) + " actual: " + strconv.Itoa(actual.Id)
+
+	}
+	if expected.Price != actual.Price {
+		return false, "Price did not match, expected: " + strconv.Itoa(expected.Id) + " actual: " + strconv.Itoa(actual.Id)
+	}
+	if expected.ShortDescription != actual.ShortDescription {
+		return false, "Short Description did not match"
+	}
+	if expected.LongDescription != actual.LongDescription {
+		return false, "Long Description did not match"
+	}
+
+	return true, ""
 }
