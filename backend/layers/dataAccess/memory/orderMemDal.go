@@ -15,7 +15,6 @@ func NewOrderDatabase() OrderDatabase {
 }
 
 func (od *OrderDatabase) GetOrdersByCustomerId(customerId int) []utils.Order {
-	//need to search and get all the objects from the slice which have this customer id
 	orders := []utils.Order{}
 
 	for _, order := range od.orders {

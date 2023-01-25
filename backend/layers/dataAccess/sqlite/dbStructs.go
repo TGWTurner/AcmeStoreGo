@@ -51,6 +51,16 @@ func (a *Account) ConvertFromDbAccount() *utils.Account {
 	}
 }
 
+func ConvertFromDbAccounts(dbAccounts []Account) []*utils.Account {
+	accounts := make([]*utils.Account, len(dbAccounts))
+
+	for i, account := range dbAccounts {
+		accounts[i] = account.ConvertFromDbAccount()
+	}
+
+	return accounts
+}
+
 type Category struct {
 	gorm.Model
 	Id   int    `gorm:"primaryKey"`
@@ -79,6 +89,16 @@ func (c *Category) ConvertFromDbCategory() *utils.ProductCategory {
 		Id:   c.Id,
 		Name: c.Name,
 	}
+}
+
+func ConvertFromDbCategories(dbCategories []Category) []*utils.ProductCategory {
+	categories := make([]*utils.ProductCategory, len(dbCategories))
+
+	for i, category := range dbCategories {
+		categories[i] = category.ConvertFromDbCategory()
+	}
+
+	return categories
 }
 
 type Deal struct {
@@ -115,6 +135,16 @@ func (d *Deal) ConvertFromDbDeal() *utils.ProductDeal {
 	}
 }
 
+func ConvertFromDbDeals(dbDeals []Deal) []*utils.ProductDeal {
+	deals := make([]*utils.ProductDeal, len(dbDeals))
+
+	for i, account := range dbDeals {
+		deals[i] = account.ConvertFromDbDeal()
+	}
+
+	return deals
+}
+
 type OrderItem struct {
 	gorm.Model
 	OrderId   int     `gorm:"not null"`
@@ -142,11 +172,21 @@ func ConvertToDbOrderItems(orderId int, order utils.Order) []*OrderItem {
 	return orderItems
 }
 
-func (oi *OrderItem) ConvertFromDbOrderItem() utils.OrderItem {
-	return utils.OrderItem{
+func (oi *OrderItem) ConvertFromDbOrderItem() *utils.OrderItem {
+	return &utils.OrderItem{
 		ProductId: oi.ProductId,
 		Quantity:  oi.Quantity,
 	}
+}
+
+func ConvertFromDbOrderItems(dbOrderItems []OrderItem) []*utils.OrderItem {
+	orderItems := make([]*utils.OrderItem, len(dbOrderItems))
+
+	for i, orderItem := range dbOrderItems {
+		orderItems[i] = orderItem.ConvertFromDbOrderItem()
+	}
+
+	return orderItems
 }
 
 type Order struct {
@@ -191,8 +231,8 @@ func (o *Order) SetUpNewOrder(customerId int) {
 	o.UpdatedDate = time.Now().String()
 }
 
-func (o *Order) ConvertFromDbOrder() utils.Order {
-	return utils.Order{
+func (o *Order) ConvertFromDbOrder() *utils.Order {
+	return &utils.Order{
 		Id:          o.Id,
 		Total:       o.Total,
 		UpdatedDate: o.UpdatedDate,
@@ -204,6 +244,16 @@ func (o *Order) ConvertFromDbOrder() utils.Order {
 			Postcode: o.Postcode,
 		},
 	}
+}
+
+func ConvertFromDbOrder(dbOrders []Order) []*utils.Order { //YRKU19
+	orders := make([]*utils.Order, len(dbOrders))
+
+	for i, order := range dbOrders {
+		orders[i] = order.ConvertFromDbOrder()
+	}
+
+	return orders
 }
 
 type Product struct {

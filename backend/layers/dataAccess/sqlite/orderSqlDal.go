@@ -22,6 +22,11 @@ func NewOrderDatabase(db *gorm.DB) OrderDatabase {
 	return od
 }
 
+func (ad OrderDatabase) Close() {
+	db, _ := ad.db.DB()
+	db.Close()
+}
+
 func (od *OrderDatabase) getOrderItemsFromOrderPk(pk int) []utils.OrderItem {
 	orderItems := []OrderItem{}
 
@@ -34,7 +39,7 @@ func (od *OrderDatabase) getOrderItemsFromOrderPk(pk int) []utils.OrderItem {
 	customerOrderItems := make([]utils.OrderItem, len(orderItems))
 
 	for i, orderItem := range orderItems {
-		customerOrderItems[i] = orderItem.ConvertFromDbOrderItem()
+		customerOrderItems[i] = *orderItem.ConvertFromDbOrderItem()
 	}
 
 	return customerOrderItems

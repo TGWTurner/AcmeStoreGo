@@ -35,16 +35,21 @@ func NewProductDatabase(db *gorm.DB) ProductDatabase {
 	return pd
 }
 
-func (pd ProductDatabase) GetAll() []utils.Product {
-	var accounts []utils.Product
+func (ad ProductDatabase) Close() {
+	db, _ := ad.db.DB()
+	db.Close()
+}
 
-	response := pd.db.Find(&accounts)
+func (pd ProductDatabase) GetAll() []*utils.Product {
+	var products []Product
+
+	response := pd.db.Find(&products)
 
 	if response.Error != nil {
-		panic("Failed to get products")
+		panic("Failed to get all products")
 	}
 
-	return accounts
+	return ConvertFromDbProducts(products)
 }
 
 func (pd ProductDatabase) GetByIds(Ids ...int) []utils.Product {
@@ -73,7 +78,9 @@ func (pd ProductDatabase) GetCategories() []utils.ProductCategory {
 	return categories
 }
 
-func (pd ProductDatabase) GetProductsByCategory(categoryId int) utils.ProductCategory {
+func (pd ProductDatabase) GetProductsByCategory(categoryId int) []utils.Product {
+	var products []utils.Product
+
 	var category utils.ProductCategory
 
 	response := pd.db.First(category, categoryId)
