@@ -8,7 +8,7 @@ import (
 )
 
 func NewAccountDatabase() AccountDatabase {
-	testAccounts := testData.AccountTestData{}.GetTestData()
+	testAccounts := testData.GetAccountTestData()
 
 	return AccountDatabase{
 		accounts: testAccounts,

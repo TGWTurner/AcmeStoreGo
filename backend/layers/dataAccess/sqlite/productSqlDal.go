@@ -16,9 +16,9 @@ func NewProductDatabase(db *gorm.DB) ProductDatabase {
 	}
 
 	testData := testData.GetProductTestData()
-	products := testData.Products
-	categories := testData.Categories
-	deals := testData.Deals
+	products := ConvertToDbProducts(testData.Products)
+	categories := ConvertToDbCategories(testData.Categories)
+	deals := ConvertToDbDeals(testData.Deals)
 
 	if res := db.Create(products); res.Error != nil {
 		panic("Failed to create test products")
@@ -35,7 +35,7 @@ func NewProductDatabase(db *gorm.DB) ProductDatabase {
 	return pd
 }
 
-func (pd ProductDatabase) getAllProducts() []utils.Product {
+func (pd ProductDatabase) GetAll() []utils.Product {
 	var accounts []utils.Product
 
 	response := pd.db.Find(&accounts)
@@ -47,7 +47,7 @@ func (pd ProductDatabase) getAllProducts() []utils.Product {
 	return accounts
 }
 
-func (pd ProductDatabase) getProductsByIds(Ids ...int) []utils.Product {
+func (pd ProductDatabase) GetByIds(Ids ...int) []utils.Product {
 	var accounts []utils.Product
 
 	response := pd.db.Find(&accounts, Ids)
@@ -61,7 +61,7 @@ func (pd ProductDatabase) getProductsByIds(Ids ...int) []utils.Product {
 	return accounts
 }
 
-func (pd ProductDatabase) getProductCategories() []utils.ProductCategory {
+func (pd ProductDatabase) GetCategories() []utils.ProductCategory {
 	var categories []utils.ProductCategory
 
 	response := pd.db.Find(&categories)
@@ -73,7 +73,7 @@ func (pd ProductDatabase) getProductCategories() []utils.ProductCategory {
 	return categories
 }
 
-func (pd ProductDatabase) getProductsByCategory(categoryId int) utils.ProductCategory {
+func (pd ProductDatabase) GetProductsByCategory(categoryId int) utils.ProductCategory {
 	var category utils.ProductCategory
 
 	response := pd.db.First(category, categoryId)
@@ -85,11 +85,11 @@ func (pd ProductDatabase) getProductsByCategory(categoryId int) utils.ProductCat
 	return category
 }
 
-func (pd ProductDatabase) getProductsByText(searchTerm string) []utils.Product {
+func (pd ProductDatabase) GetByText(searchTerm string) []utils.Product {
 	var products []utils.Product
 	response := pd.db.
-		Where("shortDescription LIKE ?", searchTerm).
-		Or("longDescription LIKE ?", searchTerm).
+		Where("short_description LIKE ?", searchTerm).
+		Or("long_description LIKE ?", searchTerm).
 		Find(&products)
 
 	if response.Error != nil {
@@ -99,12 +99,12 @@ func (pd ProductDatabase) getProductsByText(searchTerm string) []utils.Product {
 	return products
 }
 
-func (pd ProductDatabase) getProductsWithCurrentDeals(date string) []utils.Product {
+func (pd ProductDatabase) GetCurrentDeals(date string) []utils.Product {
 	var products []utils.Product
 
 	response := pd.db.Find(&products).
-		Joins("INNER JOIN deals ON deals.productId = products.ProductId").
-		Where("? >= deals.startDate and ? < deals.EndDate", date, date)
+		Joins("INNER JOIN deals ON deals.product_id = products.id").
+		Where("? >= deals.start_date and ? < deals.end_date", date, date)
 
 	if response != nil {
 		panic("Unable to get products with current deals")
@@ -113,13 +113,13 @@ func (pd ProductDatabase) getProductsWithCurrentDeals(date string) []utils.Produ
 	return products
 }
 
-func (pd ProductDatabase) decreaseStock(productQuantities map[int]int) {
+func (pd ProductDatabase) DecreaseStock(productQuantities map[int]int) {
 	for productId, quantity := range productQuantities {
 		product := utils.Product{
 			Id: productId,
 		}
 
-		response := pd.db.Model(&product).Update("quantityRemaining", gorm.Expr("quantity - ?", quantity))
+		response := pd.db.Model(&product).Update("quantity_remaining", gorm.Expr("quantity - ?", quantity))
 
 		if response.Error != nil {
 			panic("Failed to update quantity for productId: " + strconv.Itoa(productId))

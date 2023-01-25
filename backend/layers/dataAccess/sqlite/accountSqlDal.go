@@ -13,7 +13,7 @@ func NewAccountDatabase(db *gorm.DB) AccountDatabase {
 		db: db,
 	}
 
-	testAccounts := testData.GetAccountTestData()
+	testAccounts := ConvertToDbAccounts(testData.GetAccountTestData())
 
 	if res := db.Create(&testAccounts); res.Error != nil {
 		panic("Failed to create test accounts")

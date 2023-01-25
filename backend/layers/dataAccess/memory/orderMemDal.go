@@ -1,13 +1,16 @@
 package memory
 
 import (
+	"bjssStoreGo/backend/layers/dataAccess/testData"
 	"bjssStoreGo/backend/utils"
 	"time"
 )
 
 func NewOrderDatabase() OrderDatabase {
+	testOrders := testData.GetOrderTestData()
+
 	return OrderDatabase{
-		orders: []utils.Order{},
+		orders: testOrders,
 	}
 }
 

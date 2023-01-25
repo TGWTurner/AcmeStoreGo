@@ -13,7 +13,7 @@ func NewOrderDatabase(db *gorm.DB) OrderDatabase {
 		db: db,
 	}
 
-	testOrders := testData.GetOrderTestData()
+	testOrders := ConvertToDbOrders(testData.GetOrderTestData())
 
 	if res := db.Create(&testOrders); res.Error != nil {
 		panic("Failed to create test orders")
@@ -25,7 +25,7 @@ func NewOrderDatabase(db *gorm.DB) OrderDatabase {
 func (od *OrderDatabase) getOrderItemsFromOrderPk(pk int) []utils.OrderItem {
 	orderItems := []OrderItem{}
 
-	response := od.db.Where("orderId = ?", pk).Find(&orderItems)
+	response := od.db.Where("order_id = ?", pk).Find(&orderItems)
 
 	if response.Error != nil {
 		panic("Failed to get order items for order with pk: " + strconv.Itoa(pk))
@@ -40,10 +40,10 @@ func (od *OrderDatabase) getOrderItemsFromOrderPk(pk int) []utils.OrderItem {
 	return customerOrderItems
 }
 
-func (od *OrderDatabase) GetOrdersByCustomerId(customerId int) []utils.Order {
+func (od *OrderDatabase) GetByCustomerId(customerId int) []utils.Order {
 	var orders []Order
 
-	response := od.db.Where("customerId = ?", customerId).Find(&orders)
+	response := od.db.Where("customer_id = ?", customerId).Find(&orders)
 
 	if response.Error != nil {
 		panic("Failed to get orders for customerId: " + strconv.Itoa(customerId))
@@ -59,13 +59,13 @@ func (od *OrderDatabase) GetOrdersByCustomerId(customerId int) []utils.Order {
 	return customerOrders
 }
 
-func (od *OrderDatabase) GetOrderByToken(orderToken string) utils.Order {
+func (od *OrderDatabase) GetByToken(orderToken string) utils.Order {
 	var order Order
 
-	response := od.db.Where("Id = ?", orderToken).First(&order)
+	response := od.db.Where("id = ?", orderToken).First(&order)
 
 	if response.Error != nil {
-		panic("Failed to get orders for orderToken: " + orderToken)
+		panic("Failed to get order for orderToken: " + orderToken)
 	}
 
 	customerOrder := order.ConvertFromDbOrder()
@@ -74,7 +74,7 @@ func (od *OrderDatabase) GetOrderByToken(orderToken string) utils.Order {
 	return customerOrder
 }
 
-func (od *OrderDatabase) AddOrder(customerId int, order utils.Order) utils.Order {
+func (od *OrderDatabase) Add(customerId int, order utils.Order) utils.Order {
 	dbOrder := ConvertToDbOrder(order)
 	dbOrder.SetUpNewOrder(customerId)
 
@@ -94,7 +94,7 @@ func (od *OrderDatabase) AddOrder(customerId int, order utils.Order) utils.Order
 		}
 	}
 
-	return od.GetOrderByToken(order.Id)
+	return od.GetByToken(dbOrder.Id)
 }
 
 type OrderDatabase struct {

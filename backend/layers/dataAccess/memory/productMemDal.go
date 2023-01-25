@@ -7,7 +7,7 @@ import (
 )
 
 func NewProductDatabase() ProductDatabase {
-	testData := testData.ProductTestData{}.GetTestData()
+	testData := testData.GetProductTestData()
 	products := testData.Products
 	categories := testData.Categories
 	deals := testData.Deals

@@ -6,7 +6,7 @@ import (
 )
 
 // needs to be an interface that is returned
-func (da DataAccess) InitiateConnection() sqlite.Database /*sqlite.Database*/ {
+func InitiateConnection() sqlite.Database {
 	dbConnection := "sql" //"sql" //TODO: Change to env variable check
 
 	if dbConnection == "sql" {
@@ -35,5 +35,3 @@ func connectToSqlite() sqlite.Database {
 func connectToInMemory() sqlite.Database {
 	return sqlite.NewDatabase(":memory:")
 }
-
-type DataAccess struct{}

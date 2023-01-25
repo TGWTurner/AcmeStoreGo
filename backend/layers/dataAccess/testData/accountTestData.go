@@ -29,9 +29,6 @@ func GetAccountTestData() []utils.Account {
 	}
 }
 
-/*
-TODO: Question - Cant have defaults so variadic, test for existance?
-*/
 func GetTestAccountCredentials(indexes ...int) struct {
 	Email    string
 	Password string
