@@ -115,26 +115,25 @@ func (pd ProductDatabase) GetByText(searchTerm string) []utils.Product {
 func (pd ProductDatabase) GetWithCurrentDeals(date string) []utils.Product {
 	var products []Product
 
-	response := pd.db.Find(&products).
-		Joins("INNER JOIN deals ON deals.product_id = products.id").
+	response := pd.db.Joins("INNER JOIN deals ON deals.product_id = products.id").
 		Where("? >= deals.start_date", date).
-		Where("? < deals.end_date", date)
+		Where("? < deals.end_date", date).
+		Find(&products)
 
-	if response != nil {
+	if response.Error != nil {
 		panic("Unable to get products with current deals")
 	}
 
 	return ConvertFromDbProducts(products)
 }
 
-// productQuantities := []utils.OrderItem
 func (pd ProductDatabase) DecreaseStock(productQuantities []utils.OrderItem) {
 	for _, item := range productQuantities {
 		product := Product{
 			Id: item.ProductId,
 		}
 
-		response := pd.db.Model(&product).Update("quantity_remaining", gorm.Expr("quantity - ?", item.Quantity))
+		response := pd.db.Model(&product).Update("quantity_remaining", gorm.Expr("quantity_remaining - ?", item.Quantity))
 
 		if response.Error != nil {
 			panic("Failed to update quantity for productId: " + strconv.Itoa(item.ProductId))
