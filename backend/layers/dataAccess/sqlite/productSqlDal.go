@@ -98,9 +98,11 @@ func (pd ProductDatabase) GetProductsByCategory(categoryId int) []utils.Product 
 func (pd ProductDatabase) GetByText(searchTerm string) []utils.Product {
 	var products []Product
 
+	searchTerm = strings.TrimSpace(searchTerm)
+
 	response := pd.db.
-		Where("short_description LIKE ?", searchTerm).
-		Or("long_description LIKE ?", searchTerm).
+		Where("short_description LIKE ?", "%"+searchTerm+"%").
+		Or("long_description LIKE ?", "%"+searchTerm+"%").
 		Find(&products)
 
 	if response.Error != nil {
