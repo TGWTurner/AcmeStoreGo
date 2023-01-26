@@ -112,7 +112,7 @@ func (pd ProductDatabase) GetByText(searchTerm string) []utils.Product {
 	return ConvertFromDbProducts(products)
 }
 
-func (pd ProductDatabase) GetCurrentDeals(date string) []utils.Product {
+func (pd ProductDatabase) GetWithCurrentDeals(date string) []utils.Product {
 	var products []Product
 
 	response := pd.db.Find(&products).
