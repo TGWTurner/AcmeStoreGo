@@ -41,7 +41,7 @@ func (ad AccountDatabase) Add(account utils.Account) utils.Account {
 		panic(account.Email + " already registered")
 	}
 
-	return ad.GetById(int(dbAccount.ID))
+	return ad.GetById(int(dbAccount.Id))
 }
 
 func (ad AccountDatabase) GetByEmail(email string) utils.Account {
@@ -77,7 +77,7 @@ func (ad AccountDatabase) Update(account utils.Account) utils.Account {
 		panic("Could not save record" + result.Error.Error())
 	}
 
-	return ad.GetById(int(dbAccount.ID))
+	return ad.GetById(int(dbAccount.Id))
 }
 
 type AccountDatabase struct {
