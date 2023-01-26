@@ -83,7 +83,7 @@ func (pd ProductDatabase) GetCategories() []utils.ProductCategory {
 	return ConvertFromDbCategories(categories)
 }
 
-func (pd ProductDatabase) GetProductsByCategory(categoryId int) []utils.Product {
+func (pd ProductDatabase) GetByCategory(categoryId int) []utils.Product {
 	var products []Product
 
 	response := pd.db.Where("category_id = ?", categoryId).Find(&products)

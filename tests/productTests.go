@@ -78,7 +78,7 @@ func TestGetProductsByCategoryProvidesCorrectProducts() {
 
 	categoryId := 1
 
-	products := db.Product.GetProductsByCategory(categoryId)
+	products := db.Product.GetByCategory(categoryId)
 	expectedProducts := getTestProductsByCategory(categoryId)
 
 	if len(expectedProducts) != len(products) {

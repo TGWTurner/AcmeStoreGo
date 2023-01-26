@@ -43,11 +43,13 @@ func productMatchesText(product utils.Product, searchTerm string) bool {
 	return false
 }
 
-func (pd *ProductDatabase) getAllProducts() []utils.Product {
+func (ad *ProductDatabase) Close() {}
+
+func (pd *ProductDatabase) GetAll() []utils.Product {
 	return pd.products
 }
 
-func (pd *ProductDatabase) getProductsByIds(Ids ...int) []utils.Product {
+func (pd *ProductDatabase) GetByIds(Ids ...int) []utils.Product {
 	products := []utils.Product{}
 
 	for _, product := range pd.products {
@@ -59,11 +61,11 @@ func (pd *ProductDatabase) getProductsByIds(Ids ...int) []utils.Product {
 	return products
 }
 
-func (pd *ProductDatabase) getProductCategories() []utils.ProductCategory {
+func (pd *ProductDatabase) GetCategories() []utils.ProductCategory {
 	return pd.categories
 }
 
-func (pd *ProductDatabase) getProductsByCategory(categoryId int) []utils.Product {
+func (pd *ProductDatabase) GetByCategory(categoryId int) []utils.Product {
 	products := []utils.Product{}
 
 	for _, product := range pd.products {
@@ -75,7 +77,7 @@ func (pd *ProductDatabase) getProductsByCategory(categoryId int) []utils.Product
 	return products
 }
 
-func (pd *ProductDatabase) getProductsByText(searchTerm string) []utils.Product {
+func (pd *ProductDatabase) GetByText(searchTerm string) []utils.Product {
 	products := []utils.Product{}
 
 	for _, product := range pd.products {
@@ -87,21 +89,21 @@ func (pd *ProductDatabase) getProductsByText(searchTerm string) []utils.Product 
 	return products
 }
 
-func (pd *ProductDatabase) getProductsWithCurrentDeals(date string) []utils.Product {
+func (pd *ProductDatabase) GetWithCurrentDeals(date string) []utils.Product {
 	products := []utils.Product{}
 
 	for _, deal := range pd.deals {
 		if deal.StartDate > date && deal.EndDate < date {
-			products = append(products, pd.getProductsByIds(deal.ProductId)[0])
+			products = append(products, pd.GetByIds(deal.ProductId)[0])
 		}
 	}
 
 	return products
 }
 
-func (pd *ProductDatabase) decreaseStock(productQuantities map[int]int) {
-	for _, product := range pd.products {
-		product.QuantityRemaining = product.QuantityRemaining - productQuantities[product.Id]
+func (pd *ProductDatabase) DecreaseStock(productQuantities []utils.OrderItem) {
+	for _, product := range productQuantities {
+		pd.products[product.ProductId].QuantityRemaining = pd.products[product.ProductId].QuantityRemaining - product.Quantity
 	}
 }
 

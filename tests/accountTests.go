@@ -1,7 +1,7 @@
 package tests
 
 import (
-	"bjssStoreGo/backend/layers/dataAccess/sqlite"
+	"bjssStoreGo/backend/layers/dataAccess/memory"
 	"bjssStoreGo/backend/layers/dataAccess/testData"
 	"bjssStoreGo/backend/utils"
 	"reflect"
@@ -46,7 +46,7 @@ func TestGetAccountByEmail() {
 	db := SetUp()
 	defer CloseDb(db)
 
-	expected := createAccount(db)
+	expected := createAccount(&db)
 	email := "testEmail@email.com"
 
 	actual := db.Account.GetByEmail(email)
@@ -122,7 +122,7 @@ func TestUpdateAccount() {
 	)
 }
 
-func createAccount(db sqlite.Database) utils.Account {
+func createAccount(db *memory.Database /*sqlite.Database*/) utils.Account {
 	expected := utils.Account{
 		PasswordHash: "This is a password",
 		ShippingDetails: utils.ShippingDetails{

@@ -2,26 +2,17 @@ package tests
 
 import (
 	"bjssStoreGo/backend/layers/dataAccess"
-	"bjssStoreGo/backend/layers/dataAccess/sqlite"
+	"bjssStoreGo/backend/layers/dataAccess/memory"
 	"fmt"
-	"os"
 )
 
-func SetUp() sqlite.Database {
-	file := "./sqlite.db"
-
-	if _, err := os.Stat(file); !os.IsNotExist(err) {
-		if err := os.Remove(file); err != nil {
-			fmt.Println(err)
-			panic("Failed to remove file: " + file)
-		}
-	}
+func SetUp() memory.Database /*sqlite.Database*/ {
 	db := dataAccess.InitiateConnection()
 
 	return db
 }
 
-func CloseDb(db sqlite.Database) {
+func CloseDb(db memory.Database /*sqlite.Database*/) {
 	db.Order.Close()
 	db.Account.Close()
 	db.Product.Close()
