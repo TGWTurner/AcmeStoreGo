@@ -93,7 +93,7 @@ func (pd *ProductDatabase) GetWithCurrentDeals(date string) []utils.Product {
 	products := []utils.Product{}
 
 	for _, deal := range pd.deals {
-		if deal.StartDate > date && deal.EndDate < date {
+		if date >= deal.StartDate && date < deal.EndDate {
 			products = append(products, pd.GetByIds(deal.ProductId)[0])
 		}
 	}

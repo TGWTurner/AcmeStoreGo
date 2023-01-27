@@ -4,20 +4,20 @@ import "bjssStoreGo/tests"
 
 func main() {
 	//Order Tests
-	// tests.TestCreateOrder()
-	// tests.TestGetOrderByToken()
-	// tests.TestGetOrdersByCustomerId()
+	tests.TestCreateOrder()
+	tests.TestGetOrderByToken()
+	tests.TestGetOrdersByCustomerId()
 	//Product Tests
-	// tests.TestGetProductGivenId()
-	// tests.TestGetProductsGivenIds()
-	// tests.TestGetCategoriesReturnsCorrectCategories()
-	// tests.TestGetProductsByCategoryProvidesCorrectProducts()
-	// tests.TestGetProductsByText()
-	// tests.TestGetProductsWithCurrentDeals()
-	// tests.TestDecreaseStockReducesStockByCorrectQuantity()
+	tests.TestGetProductGivenId()
+	tests.TestGetProductsGivenIds()
+	tests.TestGetCategoriesReturnsCorrectCategories()
+	tests.TestGetProductsByCategoryProvidesCorrectProducts()
+	tests.TestGetProductsByText()
+	tests.TestGetProductsWithCurrentDeals()
+	tests.TestDecreaseStockReducesStockByCorrectQuantity()
 	//Account Tests
-	// tests.TestCreateAccount()
-	// tests.TestGetAccountByEmail()
+	tests.TestCreateAccount()
+	tests.TestGetAccountByEmail()
 	tests.TestGetById()
-	// tests.TestUpdateAccount()
+	tests.TestUpdateAccount()
 }

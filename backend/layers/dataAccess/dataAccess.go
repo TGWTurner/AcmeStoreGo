@@ -1,14 +1,13 @@
 package dataAccess
 
 import (
-	"bjssStoreGo/backend/layers/dataAccess/memory"
 	"bjssStoreGo/backend/layers/dataAccess/sqlite"
 	"os"
 )
 
 // needs to be an interface that is returned
-func InitiateConnection() memory.Database /*sqlite.Database*/ {
-	dbConnection := "sql" //"sql" //TODO: Change to env variable check
+func InitiateConnection() /*memory.Database*/ sqlite.Database {
+	dbConnection := "" //"sql" //TODO: Change to env variable check
 
 	if dbConnection == "sql" {
 		// return connectToSqlite()
@@ -17,8 +16,8 @@ func InitiateConnection() memory.Database /*sqlite.Database*/ {
 		// return connectToInMemory()
 	}
 
-	return memory.NewDatabase()
-	// return connectToSqlite()
+	// return memory.NewDatabase()
+	return connectToSqlite()
 }
 
 func connectToSqlite() sqlite.Database {

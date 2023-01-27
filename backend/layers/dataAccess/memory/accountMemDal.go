@@ -36,7 +36,6 @@ func (ad *AccountDatabase) Add(account utils.Account) utils.Account {
 }
 
 func (ad *AccountDatabase) GetByEmail(email string) utils.Account {
-
 	index := sort.Search(len(ad.accounts), func(i int) bool { return ad.accounts[i].Email == email })
 
 	if index == len(ad.accounts) {
@@ -63,14 +62,20 @@ func (ad *AccountDatabase) GetById(accountId int) utils.Account {
 	return ad.accounts[index]
 }
 
-func (ad *AccountDatabase) Update(account utils.Account) utils.Account {
-	index := sort.Search(len(ad.accounts), func(i int) bool { return ad.accounts[i].Email == account.Email })
-
-	if index == len(ad.accounts) {
-		panic("Could not find record for account with email: " + account.Email)
+func (ad *AccountDatabase) Update(updateAccount utils.Account) utils.Account {
+	index := 0
+	for i, account := range ad.accounts {
+		if account.Id == updateAccount.Id {
+			index = i
+			break
+		}
 	}
 
-	ad.accounts[index] = account
+	if index == len(ad.accounts) {
+		panic("Could not find record for account with email: " + updateAccount.Email)
+	}
+
+	ad.accounts[index] = updateAccount
 
 	return ad.accounts[index]
 }

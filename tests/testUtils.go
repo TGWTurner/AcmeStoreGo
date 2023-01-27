@@ -2,17 +2,17 @@ package tests
 
 import (
 	"bjssStoreGo/backend/layers/dataAccess"
-	"bjssStoreGo/backend/layers/dataAccess/memory"
+	"bjssStoreGo/backend/layers/dataAccess/sqlite"
 	"fmt"
 )
 
-func SetUp() memory.Database /*sqlite.Database*/ {
+func SetUp() /*memory.Database*/ sqlite.Database {
 	db := dataAccess.InitiateConnection()
 
 	return db
 }
 
-func CloseDb(db memory.Database /*sqlite.Database*/) {
+func CloseDb(db /*memory.Database*/ sqlite.Database) {
 	db.Order.Close()
 	db.Account.Close()
 	db.Product.Close()

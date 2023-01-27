@@ -1,7 +1,7 @@
 package tests
 
 import (
-	"bjssStoreGo/backend/layers/dataAccess/memory"
+	"bjssStoreGo/backend/layers/dataAccess/sqlite"
 	"bjssStoreGo/backend/utils"
 	"reflect"
 	"strconv"
@@ -11,7 +11,7 @@ func TestCreateOrder() {
 	db := SetUp()
 	defer CloseDb(db)
 
-	createOrder(db, 2)
+	createOrder(&db, 2)
 	PrintTestResult(true, "testCreateOrder", "Order Created")
 }
 
@@ -21,7 +21,7 @@ func TestGetOrderByToken() {
 
 	customerId := 2
 
-	expectedOrder := createOrder(db, customerId)
+	expectedOrder := createOrder(&db, customerId)
 
 	order := db.Order.GetByToken(expectedOrder.Id)
 
@@ -37,8 +37,8 @@ func TestGetOrdersByCustomerId() {
 	db := SetUp()
 	defer CloseDb(db)
 
-	createOrder(db, 2)
-	createOrder(db, 2)
+	createOrder(&db, 2)
+	createOrder(&db, 2)
 
 	orders := db.Order.GetByCustomerId(2)
 
@@ -50,7 +50,7 @@ func TestGetOrdersByCustomerId() {
 	PrintTestResult(true, "testGetOrderByToken", "Got correct number of orders")
 }
 
-func createOrder(db memory.Database /*sqlite.Database*/, customerId int) utils.Order {
+func createOrder(db * /*memory.Database*/ sqlite.Database, customerId int) utils.Order {
 	order := utils.Order{
 		Total: 5,
 		ShippingDetails: utils.ShippingDetails{
