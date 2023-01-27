@@ -1,11 +1,13 @@
 package sqlite
 
 import (
+	"bjssStoreGo/backend/utils"
+
 	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 )
 
-func NewDatabase(connection string) Database {
+func NewDatabase(connection string) utils.Database {
 	db, err := gorm.Open(sqlite.Open(connection), &gorm.Config{})
 
 	if err != nil {
@@ -14,7 +16,7 @@ func NewDatabase(connection string) Database {
 
 	autoMigration(db)
 
-	return Database{
+	return utils.Database{
 		Account: NewAccountDatabase(db),
 		Product: NewProductDatabase(db),
 		Order:   NewOrderDatabase(db),
@@ -30,10 +32,4 @@ func autoMigration(db *gorm.DB) {
 		&Deal{},
 		&Category{},
 	)
-}
-
-type Database struct {
-	Account AccountDatabase
-	Product ProductDatabase
-	Order   OrderDatabase
 }

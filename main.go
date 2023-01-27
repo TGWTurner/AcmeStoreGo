@@ -1,8 +1,13 @@
 package main
 
-import "bjssStoreGo/tests"
+import (
+	"bjssStoreGo/tests"
+	"os"
+)
 
 func main() {
+	setUp()
+
 	//Order Tests
 	tests.TestCreateOrder()
 	tests.TestGetOrderByToken()
@@ -20,4 +25,8 @@ func main() {
 	tests.TestGetAccountByEmail()
 	tests.TestGetById()
 	tests.TestUpdateAccount()
+}
+
+func setUp() {
+	os.Setenv("DB_CONNECTION", "sql")
 }

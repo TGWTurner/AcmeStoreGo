@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"bjssStoreGo/backend/layers/dataAccess/sqlite"
 	"bjssStoreGo/backend/layers/dataAccess/testData"
 	"bjssStoreGo/backend/utils"
 	"reflect"
@@ -122,7 +121,7 @@ func TestUpdateAccount() {
 	)
 }
 
-func createAccount(db /*memory.Database*/ *sqlite.Database) utils.Account {
+func createAccount(db *utils.Database) utils.Account {
 	expected := utils.Account{
 		PasswordHash: "This is a password",
 		ShippingDetails: utils.ShippingDetails{

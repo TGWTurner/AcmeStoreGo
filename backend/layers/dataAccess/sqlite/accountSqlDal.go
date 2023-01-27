@@ -8,8 +8,8 @@ import (
 	"gorm.io/gorm"
 )
 
-func NewAccountDatabase(db *gorm.DB) AccountDatabase {
-	ad := AccountDatabase{
+func NewAccountDatabase(db *gorm.DB) *AccountDatabaseImpl {
+	ad := AccountDatabaseImpl{
 		db: db,
 	}
 
@@ -19,10 +19,10 @@ func NewAccountDatabase(db *gorm.DB) AccountDatabase {
 		panic("Failed to create test accounts")
 	}
 
-	return ad
+	return &ad
 }
 
-func (ad AccountDatabase) Close() {
+func (ad AccountDatabaseImpl) Close() {
 	db, err := ad.db.DB()
 
 	if err != nil {
@@ -32,7 +32,7 @@ func (ad AccountDatabase) Close() {
 	db.Close()
 }
 
-func (ad AccountDatabase) Add(account utils.Account) utils.Account {
+func (ad AccountDatabaseImpl) Add(account utils.Account) utils.Account {
 	dbAccount := ConvertToDbAccount(account)
 
 	result := ad.db.Create(&dbAccount)
@@ -44,7 +44,7 @@ func (ad AccountDatabase) Add(account utils.Account) utils.Account {
 	return ad.GetById(int(dbAccount.Id))
 }
 
-func (ad AccountDatabase) GetByEmail(email string) utils.Account {
+func (ad AccountDatabaseImpl) GetByEmail(email string) utils.Account {
 	var account Account
 
 	result := ad.db.Where("email = ?", email).First(&account)
@@ -56,7 +56,7 @@ func (ad AccountDatabase) GetByEmail(email string) utils.Account {
 	return ConvertFromDbAccount(account)
 }
 
-func (ad AccountDatabase) GetById(accountId int) utils.Account {
+func (ad AccountDatabaseImpl) GetById(accountId int) utils.Account {
 	var account Account
 
 	result := ad.db.First(&account, accountId)
@@ -68,7 +68,7 @@ func (ad AccountDatabase) GetById(accountId int) utils.Account {
 	return ConvertFromDbAccount(account)
 }
 
-func (ad AccountDatabase) Update(account utils.Account) utils.Account {
+func (ad AccountDatabaseImpl) Update(account utils.Account) utils.Account {
 	dbAccount := ConvertToDbAccount(account)
 
 	result := ad.db.Save(&dbAccount)
@@ -80,6 +80,6 @@ func (ad AccountDatabase) Update(account utils.Account) utils.Account {
 	return ad.GetById(int(dbAccount.Id))
 }
 
-type AccountDatabase struct {
+type AccountDatabaseImpl struct {
 	db *gorm.DB
 }

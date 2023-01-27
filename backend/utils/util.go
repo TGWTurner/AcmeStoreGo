@@ -70,3 +70,34 @@ func UrlSafeUniqueId() string {
 
 	return base64.RawURLEncoding.EncodeToString(random128bitNumber)
 }
+
+type AccountDatabase interface {
+	Close()
+	Add(account Account) Account
+	GetByEmail(email string) Account
+	GetById(accountId int) Account
+	Update(updateAccount Account) Account
+}
+
+type OrderDatabase interface {
+	Close()
+	GetByCustomerId(customerId int) []Order
+	GetByToken(orderId string) Order
+	Add(customerId int, order Order) Order
+}
+
+type ProductDatabase interface {
+	Close()
+	GetByIds(Ids ...int) []Product
+	GetCategories() []ProductCategory
+	GetByCategory(categoryId int) []Product
+	GetByText(searchTerm string) []Product
+	GetWithCurrentDeals(date string) []Product
+	DecreaseStock(productQuantities []OrderItem)
+}
+
+type Database struct {
+	Account AccountDatabase
+	Product ProductDatabase
+	Order   OrderDatabase
+}

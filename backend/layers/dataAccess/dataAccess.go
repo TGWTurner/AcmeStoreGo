@@ -1,26 +1,26 @@
 package dataAccess
 
 import (
+	"bjssStoreGo/backend/layers/dataAccess/memory"
 	"bjssStoreGo/backend/layers/dataAccess/sqlite"
+	"bjssStoreGo/backend/utils"
 	"os"
 )
 
-// needs to be an interface that is returned
-func InitiateConnection() /*memory.Database*/ sqlite.Database {
-	dbConnection := "" //"sql" //TODO: Change to env variable check
+func InitiateConnection() utils.Database {
+	dbConnection := os.Getenv("DB_CONNECTION")
 
 	if dbConnection == "sql" {
-		// return connectToSqlite()
+		return connectToSqlite()
 	} else if dbConnection == "sql-mem" {
 		//In-memory SQL database. Makes unit tests a whole lot faster
-		// return connectToInMemory()
+		return connectToInMemory()
 	}
 
-	// return memory.NewDatabase()
-	return connectToSqlite()
+	return memory.NewDatabase()
 }
 
-func connectToSqlite() sqlite.Database {
+func connectToSqlite() utils.Database {
 	file := "./sqlite.db"
 
 	if _, err := os.Stat(file); !os.IsNotExist(err) {
@@ -32,6 +32,6 @@ func connectToSqlite() sqlite.Database {
 	return sqlite.NewDatabase(file)
 }
 
-func connectToInMemory() sqlite.Database {
+func connectToInMemory() utils.Database {
 	return sqlite.NewDatabase(":memory:")
 }

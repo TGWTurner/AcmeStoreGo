@@ -6,17 +6,17 @@ import (
 	"time"
 )
 
-func NewOrderDatabase() OrderDatabase {
+func NewOrderDatabase() *OrderDatabaseImpl {
 	testOrders := testData.GetOrderTestData()
 
-	return OrderDatabase{
+	return &OrderDatabaseImpl{
 		orders: testOrders,
 	}
 }
 
-func (ad *OrderDatabase) Close() {}
+func (ad *OrderDatabaseImpl) Close() {}
 
-func (od *OrderDatabase) GetByCustomerId(customerId int) []utils.Order {
+func (od *OrderDatabaseImpl) GetByCustomerId(customerId int) []utils.Order {
 	orders := []utils.Order{}
 
 	for _, order := range od.orders {
@@ -28,7 +28,7 @@ func (od *OrderDatabase) GetByCustomerId(customerId int) []utils.Order {
 	return orders
 }
 
-func (od *OrderDatabase) GetByToken(orderId string) utils.Order {
+func (od *OrderDatabaseImpl) GetByToken(orderId string) utils.Order {
 	for _, order := range od.orders {
 		if order.Id == orderId {
 			return order
@@ -38,7 +38,7 @@ func (od *OrderDatabase) GetByToken(orderId string) utils.Order {
 	panic("Failed to get orders for order Token: " + orderId)
 }
 
-func (od *OrderDatabase) Add(customerId int, order utils.Order) utils.Order {
+func (od *OrderDatabaseImpl) Add(customerId int, order utils.Order) utils.Order {
 	order.UpdatedDate = time.Now().String()
 	order.CustomerId = customerId
 	order.Id = utils.UrlSafeUniqueId()
@@ -51,6 +51,6 @@ func (od *OrderDatabase) Add(customerId int, order utils.Order) utils.Order {
 	return order
 }
 
-type OrderDatabase struct {
+type OrderDatabaseImpl struct {
 	orders []utils.Order
 }

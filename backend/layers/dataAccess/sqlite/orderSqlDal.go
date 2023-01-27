@@ -8,8 +8,8 @@ import (
 	"gorm.io/gorm"
 )
 
-func NewOrderDatabase(db *gorm.DB) OrderDatabase {
-	od := OrderDatabase{
+func NewOrderDatabase(db *gorm.DB) *OrderDatabaseImpl {
+	od := OrderDatabaseImpl{
 		db: db,
 	}
 
@@ -19,10 +19,10 @@ func NewOrderDatabase(db *gorm.DB) OrderDatabase {
 		panic("Failed to create test orders")
 	}
 
-	return od
+	return &od
 }
 
-func (ad OrderDatabase) Close() {
+func (ad OrderDatabaseImpl) Close() {
 	db, err := ad.db.DB()
 
 	if err != nil {
@@ -32,7 +32,7 @@ func (ad OrderDatabase) Close() {
 	db.Close()
 }
 
-func (od *OrderDatabase) getOrderItemsFromOrderPk(pk int) []utils.OrderItem {
+func (od *OrderDatabaseImpl) getOrderItemsFromOrderPk(pk int) []utils.OrderItem {
 	orderItems := []OrderItem{}
 
 	response := od.db.Where("order_id = ?", pk).Find(&orderItems)
@@ -44,7 +44,7 @@ func (od *OrderDatabase) getOrderItemsFromOrderPk(pk int) []utils.OrderItem {
 	return ConvertFromDbOrderItems(orderItems)
 }
 
-func (od *OrderDatabase) GetByCustomerId(customerId int) []utils.Order {
+func (od *OrderDatabaseImpl) GetByCustomerId(customerId int) []utils.Order {
 	var orders []Order
 
 	response := od.db.Where("customer_id = ?", customerId).Find(&orders)
@@ -63,7 +63,7 @@ func (od *OrderDatabase) GetByCustomerId(customerId int) []utils.Order {
 	return customerOrders
 }
 
-func (od *OrderDatabase) GetByToken(orderToken string) utils.Order {
+func (od *OrderDatabaseImpl) GetByToken(orderToken string) utils.Order {
 	var order Order
 
 	response := od.db.Where("id = ?", orderToken).First(&order)
@@ -78,7 +78,7 @@ func (od *OrderDatabase) GetByToken(orderToken string) utils.Order {
 	return customerOrder
 }
 
-func (od *OrderDatabase) Add(customerId int, order utils.Order) utils.Order {
+func (od *OrderDatabaseImpl) Add(customerId int, order utils.Order) utils.Order {
 	dbOrder := ConvertToDbOrder(order)
 	dbOrder.SetUpNewOrder(customerId)
 
@@ -101,6 +101,6 @@ func (od *OrderDatabase) Add(customerId int, order utils.Order) utils.Order {
 	return od.GetByToken(dbOrder.Id)
 }
 
-type OrderDatabase struct {
+type OrderDatabaseImpl struct {
 	db *gorm.DB
 }

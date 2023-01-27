@@ -10,8 +10,8 @@ import (
 	"gorm.io/gorm"
 )
 
-func NewProductDatabase(db *gorm.DB) ProductDatabase {
-	pd := ProductDatabase{
+func NewProductDatabase(db *gorm.DB) *ProductDatabaseImpl {
+	pd := ProductDatabaseImpl{
 		db: db,
 	}
 
@@ -32,10 +32,10 @@ func NewProductDatabase(db *gorm.DB) ProductDatabase {
 		panic("Failed to create test products")
 	}
 
-	return pd
+	return &pd
 }
 
-func (ad ProductDatabase) Close() {
+func (ad ProductDatabaseImpl) Close() {
 	db, err := ad.db.DB()
 
 	if err != nil {
@@ -45,7 +45,7 @@ func (ad ProductDatabase) Close() {
 	db.Close()
 }
 
-func (pd ProductDatabase) GetAll() []utils.Product {
+func (pd ProductDatabaseImpl) GetAll() []utils.Product {
 	var products []Product
 
 	response := pd.db.Find(&products)
@@ -57,7 +57,7 @@ func (pd ProductDatabase) GetAll() []utils.Product {
 	return ConvertFromDbProducts(products)
 }
 
-func (pd ProductDatabase) GetByIds(Ids ...int) []utils.Product {
+func (pd ProductDatabaseImpl) GetByIds(Ids ...int) []utils.Product {
 	var products []Product
 
 	response := pd.db.Find(&products, Ids)
@@ -71,7 +71,7 @@ func (pd ProductDatabase) GetByIds(Ids ...int) []utils.Product {
 	return ConvertFromDbProducts(products)
 }
 
-func (pd ProductDatabase) GetCategories() []utils.ProductCategory {
+func (pd ProductDatabaseImpl) GetCategories() []utils.ProductCategory {
 	var categories []Category
 
 	response := pd.db.Find(&categories)
@@ -83,7 +83,7 @@ func (pd ProductDatabase) GetCategories() []utils.ProductCategory {
 	return ConvertFromDbCategories(categories)
 }
 
-func (pd ProductDatabase) GetByCategory(categoryId int) []utils.Product {
+func (pd ProductDatabaseImpl) GetByCategory(categoryId int) []utils.Product {
 	var products []Product
 
 	response := pd.db.Where("category_id = ?", categoryId).Find(&products)
@@ -95,7 +95,7 @@ func (pd ProductDatabase) GetByCategory(categoryId int) []utils.Product {
 	return ConvertFromDbProducts(products)
 }
 
-func (pd ProductDatabase) GetByText(searchTerm string) []utils.Product {
+func (pd ProductDatabaseImpl) GetByText(searchTerm string) []utils.Product {
 	var products []Product
 
 	searchTerm = strings.TrimSpace(searchTerm)
@@ -112,7 +112,7 @@ func (pd ProductDatabase) GetByText(searchTerm string) []utils.Product {
 	return ConvertFromDbProducts(products)
 }
 
-func (pd ProductDatabase) GetWithCurrentDeals(date string) []utils.Product {
+func (pd ProductDatabaseImpl) GetWithCurrentDeals(date string) []utils.Product {
 	var products []Product
 
 	response := pd.db.Joins("INNER JOIN deals ON deals.product_id = products.id").
@@ -127,7 +127,7 @@ func (pd ProductDatabase) GetWithCurrentDeals(date string) []utils.Product {
 	return ConvertFromDbProducts(products)
 }
 
-func (pd ProductDatabase) DecreaseStock(productQuantities []utils.OrderItem) {
+func (pd ProductDatabaseImpl) DecreaseStock(productQuantities []utils.OrderItem) {
 	for _, item := range productQuantities {
 		product := Product{
 			Id: item.ProductId,
@@ -141,6 +141,6 @@ func (pd ProductDatabase) DecreaseStock(productQuantities []utils.OrderItem) {
 	}
 }
 
-type ProductDatabase struct {
+type ProductDatabaseImpl struct {
 	db *gorm.DB
 }

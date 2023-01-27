@@ -7,21 +7,17 @@ import (
 	"strconv"
 )
 
-func NewAccountDatabase() AccountDatabase {
+func NewAccountDatabase() *AccountDatabaseImpl {
 	testAccounts := testData.GetAccountTestData()
 
-	return AccountDatabase{
+	return &AccountDatabaseImpl{
 		accounts: testAccounts,
 	}
 }
 
-func (ad *AccountDatabase) Close() {}
+func (ad *AccountDatabaseImpl) Close() {}
 
-func (ad *AccountDatabase) GetAccounts() []utils.Account {
-	return ad.accounts
-}
-
-func (ad *AccountDatabase) Add(account utils.Account) utils.Account {
+func (ad *AccountDatabaseImpl) Add(account utils.Account) utils.Account {
 	index := sort.Search(len(ad.accounts), func(i int) bool { return ad.accounts[i].Email == account.Email })
 
 	if index != len(ad.accounts) {
@@ -35,7 +31,7 @@ func (ad *AccountDatabase) Add(account utils.Account) utils.Account {
 	return ad.GetById(account.Id)
 }
 
-func (ad *AccountDatabase) GetByEmail(email string) utils.Account {
+func (ad *AccountDatabaseImpl) GetByEmail(email string) utils.Account {
 	index := sort.Search(len(ad.accounts), func(i int) bool { return ad.accounts[i].Email == email })
 
 	if index == len(ad.accounts) {
@@ -45,7 +41,7 @@ func (ad *AccountDatabase) GetByEmail(email string) utils.Account {
 	return ad.accounts[index]
 }
 
-func (ad *AccountDatabase) GetById(accountId int) utils.Account {
+func (ad *AccountDatabaseImpl) GetById(accountId int) utils.Account {
 	index := len(ad.accounts)
 
 	for i, a := range ad.accounts {
@@ -62,7 +58,7 @@ func (ad *AccountDatabase) GetById(accountId int) utils.Account {
 	return ad.accounts[index]
 }
 
-func (ad *AccountDatabase) Update(updateAccount utils.Account) utils.Account {
+func (ad *AccountDatabaseImpl) Update(updateAccount utils.Account) utils.Account {
 	index := 0
 	for i, account := range ad.accounts {
 		if account.Id == updateAccount.Id {
@@ -80,6 +76,6 @@ func (ad *AccountDatabase) Update(updateAccount utils.Account) utils.Account {
 	return ad.accounts[index]
 }
 
-type AccountDatabase struct {
+type AccountDatabaseImpl struct {
 	accounts []utils.Account
 }
