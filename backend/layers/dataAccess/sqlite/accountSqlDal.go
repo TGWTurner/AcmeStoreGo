@@ -3,6 +3,8 @@ package sqlite
 import (
 	"bjssStoreGo/backend/layers/dataAccess/testData"
 	"bjssStoreGo/backend/utils"
+	"errors"
+	"reflect"
 	"strconv"
 
 	"gorm.io/gorm"
@@ -32,49 +34,61 @@ func (ad AccountDatabaseImpl) Close() {
 	db.Close()
 }
 
-func (ad AccountDatabaseImpl) Add(account utils.Account) utils.Account {
+func (ad AccountDatabaseImpl) Add(account utils.Account) (utils.Account, error) {
 	dbAccount := ConvertToDbAccount(account)
+
+	_, err := ad.GetByEmail(account.Email)
+
+	if err == nil {
+		return utils.Account{}, errors.New("Account with email: " + account.Email + " already exists")
+	}
 
 	result := ad.db.Create(&dbAccount)
 
 	if result.Error != nil {
-		panic(account.Email + " already registered")
+		return utils.Account{}, result.Error
 	}
 
 	return ad.GetById(int(dbAccount.Id))
 }
 
-func (ad AccountDatabaseImpl) GetByEmail(email string) utils.Account {
+func (ad AccountDatabaseImpl) GetByEmail(email string) (utils.Account, error) {
 	var account Account
 
-	result := ad.db.Where("email = ?", email).First(&account)
+	result := ad.db.Where("email = ?", email).Limit(1).Find(&account)
 
-	if result.Error != nil {
-		panic("Record with email: " + email + " not found")
+	if reflect.DeepEqual(account, Account{}) || result.Error != nil {
+		return utils.Account{}, errors.New("Account with email: " + email + " not found")
 	}
 
-	return ConvertFromDbAccount(account)
+	return ConvertFromDbAccount(account), nil
 }
 
-func (ad AccountDatabaseImpl) GetById(accountId int) utils.Account {
+func (ad AccountDatabaseImpl) GetById(accountId int) (utils.Account, error) {
 	var account Account
 
-	result := ad.db.First(&account, accountId)
+	result := ad.db.Limit(1).Find(&account, accountId)
 
-	if result.Error != nil {
-		panic("Record with Id: " + strconv.Itoa(accountId) + " not found")
+	if reflect.DeepEqual(account, Account{}) || result.Error != nil {
+		return utils.Account{}, errors.New("Account with id: " + strconv.Itoa(accountId) + " not found")
 	}
 
-	return ConvertFromDbAccount(account)
+	return ConvertFromDbAccount(account), nil
 }
 
-func (ad AccountDatabaseImpl) Update(account utils.Account) utils.Account {
+func (ad AccountDatabaseImpl) Update(account utils.Account) (utils.Account, error) {
 	dbAccount := ConvertToDbAccount(account)
+
+	_, err := ad.GetById(account.Id)
+
+	if err != nil {
+		return utils.Account{}, err
+	}
 
 	result := ad.db.Save(&dbAccount)
 
 	if result.Error != nil {
-		panic("Could not save record" + result.Error.Error())
+		return utils.Account{}, result.Error
 	}
 
 	return ad.GetById(int(dbAccount.Id))

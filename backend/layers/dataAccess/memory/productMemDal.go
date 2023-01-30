@@ -45,11 +45,11 @@ func productMatchesText(product utils.Product, searchTerm string) bool {
 
 func (ad *ProductDatabaseImpl) Close() {}
 
-func (pd *ProductDatabaseImpl) GetAll() []utils.Product {
-	return pd.products
+func (pd *ProductDatabaseImpl) GetAll() ([]utils.Product, error) {
+	return pd.products, nil
 }
 
-func (pd *ProductDatabaseImpl) GetByIds(Ids ...int) []utils.Product {
+func (pd *ProductDatabaseImpl) GetByIds(Ids ...int) ([]utils.Product, error) {
 	products := []utils.Product{}
 
 	for _, product := range pd.products {
@@ -58,14 +58,14 @@ func (pd *ProductDatabaseImpl) GetByIds(Ids ...int) []utils.Product {
 		}
 	}
 
-	return products
+	return products, nil
 }
 
-func (pd *ProductDatabaseImpl) GetCategories() []utils.ProductCategory {
-	return pd.categories
+func (pd *ProductDatabaseImpl) GetCategories() ([]utils.ProductCategory, error) {
+	return pd.categories, nil
 }
 
-func (pd *ProductDatabaseImpl) GetByCategory(categoryId int) []utils.Product {
+func (pd *ProductDatabaseImpl) GetByCategory(categoryId int) ([]utils.Product, error) {
 	products := []utils.Product{}
 
 	for _, product := range pd.products {
@@ -74,10 +74,10 @@ func (pd *ProductDatabaseImpl) GetByCategory(categoryId int) []utils.Product {
 		}
 	}
 
-	return products
+	return products, nil
 }
 
-func (pd *ProductDatabaseImpl) GetByText(searchTerm string) []utils.Product {
+func (pd *ProductDatabaseImpl) GetByText(searchTerm string) ([]utils.Product, error) {
 	products := []utils.Product{}
 
 	for _, product := range pd.products {
@@ -86,25 +86,33 @@ func (pd *ProductDatabaseImpl) GetByText(searchTerm string) []utils.Product {
 		}
 	}
 
-	return products
+	return products, nil
 }
 
-func (pd *ProductDatabaseImpl) GetWithCurrentDeals(date string) []utils.Product {
+func (pd *ProductDatabaseImpl) GetWithCurrentDeals(date string) ([]utils.Product, error) {
 	products := []utils.Product{}
 
 	for _, deal := range pd.deals {
 		if date >= deal.StartDate && date < deal.EndDate {
-			products = append(products, pd.GetByIds(deal.ProductId)[0])
+			product, err := pd.GetByIds(deal.ProductId)
+
+			if err != nil {
+				return []utils.Product{}, err
+			}
+
+			products = append(products, product[0])
 		}
 	}
 
-	return products
+	return products, nil
 }
 
-func (pd *ProductDatabaseImpl) DecreaseStock(productQuantities []utils.OrderItem) {
+func (pd *ProductDatabaseImpl) DecreaseStock(productQuantities []utils.OrderItem) error {
 	for _, product := range productQuantities {
 		pd.products[product.ProductId].QuantityRemaining = pd.products[product.ProductId].QuantityRemaining - product.Quantity
 	}
+
+	return nil
 }
 
 type ProductDatabaseImpl struct {

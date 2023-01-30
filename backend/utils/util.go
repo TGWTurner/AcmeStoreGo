@@ -73,27 +73,27 @@ func UrlSafeUniqueId() string {
 
 type AccountDatabase interface {
 	Close()
-	Add(account Account) Account
-	GetByEmail(email string) Account
-	GetById(accountId int) Account
-	Update(updateAccount Account) Account
+	Add(account Account) (Account, error)
+	GetByEmail(email string) (Account, error)
+	GetById(accountId int) (Account, error)
+	Update(updateAccount Account) (Account, error)
 }
 
 type OrderDatabase interface {
 	Close()
-	GetByCustomerId(customerId int) []Order
-	GetByToken(orderId string) Order
-	Add(customerId int, order Order) Order
+	GetByCustomerId(customerId int) ([]Order, error)
+	GetByToken(orderId string) (Order, error)
+	Add(customerId int, order Order) (Order, error)
 }
 
 type ProductDatabase interface {
 	Close()
-	GetByIds(Ids ...int) []Product
-	GetCategories() []ProductCategory
-	GetByCategory(categoryId int) []Product
-	GetByText(searchTerm string) []Product
-	GetWithCurrentDeals(date string) []Product
-	DecreaseStock(productQuantities []OrderItem)
+	GetByIds(Ids ...int) ([]Product, error)
+	GetCategories() ([]ProductCategory, error)
+	GetByCategory(categoryId int) ([]Product, error)
+	GetByText(searchTerm string) ([]Product, error)
+	GetWithCurrentDeals(date string) ([]Product, error)
+	DecreaseStock(productQuantities []OrderItem) error
 }
 
 type Database struct {

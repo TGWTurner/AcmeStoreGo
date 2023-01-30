@@ -3,6 +3,7 @@ package memory
 import (
 	"bjssStoreGo/backend/layers/dataAccess/testData"
 	"bjssStoreGo/backend/utils"
+	"errors"
 	"time"
 )
 
@@ -16,7 +17,7 @@ func NewOrderDatabase() *OrderDatabaseImpl {
 
 func (ad *OrderDatabaseImpl) Close() {}
 
-func (od *OrderDatabaseImpl) GetByCustomerId(customerId int) []utils.Order {
+func (od *OrderDatabaseImpl) GetByCustomerId(customerId int) ([]utils.Order, error) {
 	orders := []utils.Order{}
 
 	for _, order := range od.orders {
@@ -25,20 +26,20 @@ func (od *OrderDatabaseImpl) GetByCustomerId(customerId int) []utils.Order {
 		}
 	}
 
-	return orders
+	return orders, nil
 }
 
-func (od *OrderDatabaseImpl) GetByToken(orderId string) utils.Order {
+func (od *OrderDatabaseImpl) GetByToken(orderId string) (utils.Order, error) {
 	for _, order := range od.orders {
 		if order.Id == orderId {
-			return order
+			return order, nil
 		}
 	}
 
-	panic("Failed to get orders for order Token: " + orderId)
+	return utils.Order{}, errors.New("Failed to get orders for order Token: " + orderId)
 }
 
-func (od *OrderDatabaseImpl) Add(customerId int, order utils.Order) utils.Order {
+func (od *OrderDatabaseImpl) Add(customerId int, order utils.Order) (utils.Order, error) {
 	order.UpdatedDate = time.Now().String()
 	order.CustomerId = customerId
 	order.Id = utils.UrlSafeUniqueId()
@@ -48,7 +49,7 @@ func (od *OrderDatabaseImpl) Add(customerId int, order utils.Order) utils.Order 
 		order,
 	)
 
-	return order
+	return order, nil
 }
 
 type OrderDatabaseImpl struct {

@@ -6,50 +6,65 @@ import (
 	"strconv"
 )
 
-func TestCreateOrder() {
+func TestCreateOrder() (bool, string, string) {
 	db := SetUp()
 	defer CloseDb(db)
 
-	createOrder(&db, 2)
-	PrintTestResult(true, "testCreateOrder", "Order Created")
+	_, err := createOrder(&db, 2)
+
+	if err != nil {
+		return false, "testGetOrderByToken", "Failed to create order"
+	}
+
+	return true, "testCreateOrder", "Order Created"
 }
 
-func TestGetOrderByToken() {
+func TestGetOrderByToken() (bool, string, string) {
 	db := SetUp()
 	defer CloseDb(db)
 
 	customerId := 2
 
-	expectedOrder := createOrder(&db, customerId)
+	expectedOrder, err := createOrder(&db, customerId)
 
-	order := db.Order.GetByToken(expectedOrder.Id)
-
-	if !reflect.DeepEqual(expectedOrder, order) {
-		PrintTestResult(false, "testGetOrderByToken", "Actual Order did not match expected")
-		return
+	if err != nil {
+		return false, "testGetOrderByToken", "Failed to create order"
 	}
 
-	PrintTestResult(true, "testGetOrderByToken", "Order correctly retrieved for token: "+expectedOrder.Id)
+	order, err := db.Order.GetByToken(expectedOrder.Id)
+
+	if err != nil {
+		return false, "testGetOrderByToken", "Failed to get order by token"
+	}
+
+	if !reflect.DeepEqual(expectedOrder, order) {
+		return false, "testGetOrderByToken", "Actual Order did not match expected"
+	}
+
+	return true, "testGetOrderByToken", "Order correctly retrieved for token: " + expectedOrder.Id
 }
 
-func TestGetOrdersByCustomerId() {
+func TestGetOrdersByCustomerId() (bool, string, string) {
 	db := SetUp()
 	defer CloseDb(db)
 
 	createOrder(&db, 2)
 	createOrder(&db, 2)
 
-	orders := db.Order.GetByCustomerId(2)
+	orders, err := db.Order.GetByCustomerId(2)
 
-	if len(orders) != 2 {
-		PrintTestResult(false, "testGetOrdersByCustomerId", "Recieved wrong number of orders, expected: 2 actual: "+strconv.Itoa(len(orders)))
-		return
+	if err != nil {
+		return false, "testGetOrdersByCustomerId", "Failed to get order by customer id"
 	}
 
-	PrintTestResult(true, "testGetOrderByToken", "Got correct number of orders")
+	if len(orders) != 2 {
+		return false, "testGetOrdersByCustomerId", "Recieved wrong number of orders, expected: 2 actual: " + strconv.Itoa(len(orders))
+	}
+
+	return true, "testGetOrderByToken", "Got correct number of orders"
 }
 
-func createOrder(db *utils.Database, customerId int) utils.Order {
+func createOrder(db *utils.Database, customerId int) (utils.Order, error) {
 	order := utils.Order{
 		Total: 5,
 		ShippingDetails: utils.ShippingDetails{

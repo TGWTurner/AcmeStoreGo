@@ -3,6 +3,7 @@ package sqlite
 import (
 	"bjssStoreGo/backend/layers/dataAccess/testData"
 	"bjssStoreGo/backend/utils"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -45,19 +46,20 @@ func (ad ProductDatabaseImpl) Close() {
 	db.Close()
 }
 
-func (pd ProductDatabaseImpl) GetAll() []utils.Product {
+func (pd ProductDatabaseImpl) GetAll() ([]utils.Product, error) {
 	var products []Product
 
 	response := pd.db.Find(&products)
 
 	if response.Error != nil {
+		return []utils.Product{}, errors.New("Failed to get all products:" + response.Error.Error())
 		panic("Failed to get all products")
 	}
 
-	return ConvertFromDbProducts(products)
+	return ConvertFromDbProducts(products), nil
 }
 
-func (pd ProductDatabaseImpl) GetByIds(Ids ...int) []utils.Product {
+func (pd ProductDatabaseImpl) GetByIds(Ids ...int) ([]utils.Product, error) {
 	var products []Product
 
 	response := pd.db.Find(&products, Ids)
@@ -65,37 +67,37 @@ func (pd ProductDatabaseImpl) GetByIds(Ids ...int) []utils.Product {
 	if response.Error != nil {
 		Ids := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(Ids)), ","), "[]")
 
-		panic("Failed to get products with id's: " + Ids)
+		return []utils.Product{}, errors.New("Failed to get products with id's: " + Ids + " error: " + response.Error.Error())
 	}
 
-	return ConvertFromDbProducts(products)
+	return ConvertFromDbProducts(products), nil
 }
 
-func (pd ProductDatabaseImpl) GetCategories() []utils.ProductCategory {
+func (pd ProductDatabaseImpl) GetCategories() ([]utils.ProductCategory, error) {
 	var categories []Category
 
 	response := pd.db.Find(&categories)
 
 	if response.Error != nil {
-		panic("Failed tp get product categories")
+		return []utils.ProductCategory{}, errors.New("Failed to get product categories, error: " + response.Error.Error())
 	}
 
-	return ConvertFromDbCategories(categories)
+	return ConvertFromDbCategories(categories), nil
 }
 
-func (pd ProductDatabaseImpl) GetByCategory(categoryId int) []utils.Product {
+func (pd ProductDatabaseImpl) GetByCategory(categoryId int) ([]utils.Product, error) {
 	var products []Product
 
 	response := pd.db.Where("category_id = ?", categoryId).Find(&products)
 
 	if response.Error != nil {
-		panic("Unable to get product category with categoryId: " + strconv.Itoa(categoryId))
+		return []utils.Product{}, errors.New("Unable to get product category with categoryId: " + strconv.Itoa(categoryId) + ", error:" + response.Error.Error())
 	}
 
-	return ConvertFromDbProducts(products)
+	return ConvertFromDbProducts(products), nil
 }
 
-func (pd ProductDatabaseImpl) GetByText(searchTerm string) []utils.Product {
+func (pd ProductDatabaseImpl) GetByText(searchTerm string) ([]utils.Product, error) {
 	var products []Product
 
 	searchTerm = strings.TrimSpace(searchTerm)
@@ -106,13 +108,13 @@ func (pd ProductDatabaseImpl) GetByText(searchTerm string) []utils.Product {
 		Find(&products)
 
 	if response.Error != nil {
-		panic("Unable to get products for searchTerm: " + searchTerm)
+		return []utils.Product{}, errors.New("Unable to get products for searchTerm: " + searchTerm + ", error: " + response.Error.Error())
 	}
 
-	return ConvertFromDbProducts(products)
+	return ConvertFromDbProducts(products), nil
 }
 
-func (pd ProductDatabaseImpl) GetWithCurrentDeals(date string) []utils.Product {
+func (pd ProductDatabaseImpl) GetWithCurrentDeals(date string) ([]utils.Product, error) {
 	var products []Product
 
 	response := pd.db.Joins("INNER JOIN deals ON deals.product_id = products.id").
@@ -121,13 +123,13 @@ func (pd ProductDatabaseImpl) GetWithCurrentDeals(date string) []utils.Product {
 		Find(&products)
 
 	if response.Error != nil {
-		panic("Unable to get products with current deals")
+		return []utils.Product{}, errors.New("Unable to get products with current deals, error: " + response.Error.Error())
 	}
 
-	return ConvertFromDbProducts(products)
+	return ConvertFromDbProducts(products), nil
 }
 
-func (pd ProductDatabaseImpl) DecreaseStock(productQuantities []utils.OrderItem) {
+func (pd ProductDatabaseImpl) DecreaseStock(productQuantities []utils.OrderItem) error {
 	for _, item := range productQuantities {
 		product := Product{
 			Id: item.ProductId,
@@ -136,9 +138,11 @@ func (pd ProductDatabaseImpl) DecreaseStock(productQuantities []utils.OrderItem)
 		response := pd.db.Model(&product).Update("quantity_remaining", gorm.Expr("quantity_remaining - ?", item.Quantity))
 
 		if response.Error != nil {
-			panic("Failed to update quantity for productId: " + strconv.Itoa(item.ProductId))
+			return errors.New("Failed to update quantity for productId: " + strconv.Itoa(item.ProductId) + ", error: " + response.Error.Error())
 		}
 	}
+
+	return nil
 }
 
 type ProductDatabaseImpl struct {

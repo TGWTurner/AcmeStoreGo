@@ -3,6 +3,7 @@ package sqlite
 import (
 	"bjssStoreGo/backend/layers/dataAccess/testData"
 	"bjssStoreGo/backend/utils"
+	"errors"
 	"strconv"
 
 	"gorm.io/gorm"
@@ -32,60 +33,72 @@ func (ad OrderDatabaseImpl) Close() {
 	db.Close()
 }
 
-func (od *OrderDatabaseImpl) getOrderItemsFromOrderPk(pk int) []utils.OrderItem {
+func (od *OrderDatabaseImpl) getOrderItemsFromOrderPk(pk int) ([]utils.OrderItem, error) {
 	orderItems := []OrderItem{}
 
 	response := od.db.Where("order_id = ?", pk).Find(&orderItems)
 
 	if response.Error != nil {
-		panic("Failed to get order items for order with pk: " + strconv.Itoa(pk))
+		return []utils.OrderItem{}, errors.New("Failed to get order items for order with pk: " + strconv.Itoa(pk) + ", error: " + response.Error.Error())
 	}
 
-	return ConvertFromDbOrderItems(orderItems)
+	return ConvertFromDbOrderItems(orderItems), nil
 }
 
-func (od *OrderDatabaseImpl) GetByCustomerId(customerId int) []utils.Order {
+func (od *OrderDatabaseImpl) GetByCustomerId(customerId int) ([]utils.Order, error) {
 	var orders []Order
 
 	response := od.db.Where("customer_id = ?", customerId).Find(&orders)
 
 	if response.Error != nil {
-		panic("Failed to get orders for customerId: " + strconv.Itoa(customerId))
+		return []utils.Order{}, errors.New("Failed to get orders for customerId: " + strconv.Itoa(customerId) + ", error: " + response.Error.Error())
 	}
 
 	customerOrders := make([]utils.Order, len(orders))
 
 	for i, order := range orders {
 		customerOrders[i] = ConvertFromDbOrder(order)
-		customerOrders[i].Items = od.getOrderItemsFromOrderPk(order.Pk)
+		items, err := od.getOrderItemsFromOrderPk(order.Pk)
+
+		if err != nil {
+			return []utils.Order{}, err
+		}
+
+		customerOrders[i].Items = items
 	}
 
-	return customerOrders
+	return customerOrders, nil
 }
 
-func (od *OrderDatabaseImpl) GetByToken(orderToken string) utils.Order {
+func (od *OrderDatabaseImpl) GetByToken(orderToken string) (utils.Order, error) {
 	var order Order
 
-	response := od.db.Where("id = ?", orderToken).First(&order)
+	response := od.db.Where("id = ?", orderToken).Limit(1).Find(&order)
 
 	if response.Error != nil {
-		panic("Failed to get order for orderToken: " + orderToken)
+		return utils.Order{}, errors.New("Failed to get order for orderToken: " + orderToken + ", error: " + response.Error.Error())
 	}
 
 	customerOrder := ConvertFromDbOrder(order)
-	customerOrder.Items = od.getOrderItemsFromOrderPk(order.Pk)
+	items, err := od.getOrderItemsFromOrderPk(order.Pk)
 
-	return customerOrder
+	if err != nil {
+		return utils.Order{}, err
+	}
+
+	customerOrder.Items = items
+
+	return customerOrder, nil
 }
 
-func (od *OrderDatabaseImpl) Add(customerId int, order utils.Order) utils.Order {
+func (od *OrderDatabaseImpl) Add(customerId int, order utils.Order) (utils.Order, error) {
 	dbOrder := ConvertToDbOrder(order)
 	dbOrder.SetUpNewOrder(customerId)
 
 	response := od.db.Create(&dbOrder)
 
 	if response.Error != nil {
-		panic("Failed to create new Order")
+		return utils.Order{}, errors.New("Failed to create new Order, error: " + response.Error.Error())
 	}
 
 	dbOrderItems := ConvertToDbOrderItems(dbOrder.Pk, order)
@@ -94,7 +107,7 @@ func (od *OrderDatabaseImpl) Add(customerId int, order utils.Order) utils.Order 
 		response := od.db.Create(&item)
 
 		if response.Error != nil {
-			panic("Failed to create item entry for pk: " + strconv.Itoa(item.ProductId))
+			return utils.Order{}, errors.New("Failed to create item entry for pk: " + strconv.Itoa(item.ProductId) + ", error: " + response.Error.Error())
 		}
 	}
 

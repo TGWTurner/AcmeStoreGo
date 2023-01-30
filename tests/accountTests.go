@@ -9,7 +9,7 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-func TestCreateAccount() {
+func TestCreateAccountWithNewAccountPasses() (bool, string, string) {
 	db := SetUp()
 	defer CloseDb(db)
 
@@ -23,105 +23,212 @@ func TestCreateAccount() {
 		},
 	}
 
-	actual := db.Account.Add(expected)
+	actual, err := db.Account.Add(expected)
 
-	if reflect.DeepEqual(expected, actual) {
-		PrintTestResult(
-			false,
-			"testCreateAccount",
-			"Returned account differs from expected response",
-		)
-		return
+	if err != nil {
+		return false,
+			"testCreateAccountWithNewAccountPasses",
+			"Account addition error: " + err.Error()
 	}
 
-	PrintTestResult(
-		true,
-		"testCreateAccount",
-		"Created account successfully",
-	)
+	if reflect.DeepEqual(expected, actual) {
+		return false,
+			"testCreateAccountWithNewAccountPasses",
+			"Returned account differs from expected response"
+	}
+
+	return true,
+		"testCreateAccountWithNewAccountPasses",
+		"Created account successfully"
 }
 
-func TestGetAccountByEmail() {
+func TestCreateAccountWithExistingAccountFails() (bool, string, string) {
 	db := SetUp()
 	defer CloseDb(db)
 
-	expected := createAccount(&db)
-	email := "testEmail@email.com"
+	accountId := 1
 
-	actual := db.Account.GetByEmail(email)
+	account, err := db.Account.GetById(accountId)
 
-	if !reflect.DeepEqual(expected, actual) {
-		PrintTestResult(
-			false,
-			"testGetAccountByEmail",
-			"Returned account differs from expected response for email: "+email,
-		)
-		return
+	if err != nil {
+		return false,
+			"testCreateAccountWithExistingAccountFails",
+			"Failed to get account with Id: " + strconv.Itoa(accountId)
 	}
 
-	PrintTestResult(
-		true,
-		"testGetAccountByEmail",
-		"Account with email "+email+" successfully retrieved",
-	)
+	_, err = db.Account.Add(account)
+
+	if err == nil {
+		return false,
+			"testCreateAccountWithExistingAccountFails",
+			"Succeeded creating already existing account"
+	}
+
+	return true,
+		"testCreateAccountWithExistingAccountFails",
+		"Failed to create already existing account"
 }
 
-func TestGetById() {
+func TestGetAccountByEmail() (bool, string, string) {
+	db := SetUp()
+	defer CloseDb(db)
+
+	expected, err := createAccount(&db)
+
+	if err != nil {
+		return false,
+			"testGetAccountByEmail",
+			"Failed to create account, err: " + err.Error()
+	}
+
+	email := "testEmail@email.com"
+
+	actual, err := db.Account.GetByEmail(email)
+
+	if err != nil {
+		return false,
+			"testGetAccountByEmail",
+			"Failed to get account for email:" + email
+	}
+
+	if !reflect.DeepEqual(expected, actual) {
+		return false,
+			"testGetAccountByEmail",
+			"Returned account differs from expected response for email: " + email
+	}
+
+	return true,
+		"testGetAccountByEmail",
+		"Account with email " + email + " successfully retrieved"
+}
+
+func TestGetAccountByNonExistingEmailFails() (bool, string, string) {
+	db := SetUp()
+	defer CloseDb(db)
+
+	email := "emailThatDoesntExist@email.com"
+
+	_, err := db.Account.GetByEmail(email)
+
+	if err == nil {
+		return false,
+			"testGetAccountByNonExistingEmailFails",
+			"Retrieved account when should not have"
+	}
+
+	return true,
+		"testGetAccountByNonExistingEmailFails",
+		"Successfully returned error when retrieved for non existant email"
+}
+
+func TestGetByIdSucceedsForExistingAccount() (bool, string, string) {
 	db := SetUp()
 	defer CloseDb(db)
 
 	index := 1
 
-	actual := db.Account.GetById(index)
+	actual, err := db.Account.GetById(index)
+
+	if err != nil {
+		return false,
+			"testGetByIdSucceedsForExistingAccount",
+			"Failed to get Account with id: " + strconv.Itoa(index)
+	}
+
 	expected := getTestAccountById(index)
 
 	if !reflect.DeepEqual(expected, actual) {
-		PrintTestResult(
-			false,
-			"testGetById",
-			"Failed to get Account with id: "+strconv.Itoa(index),
-		)
-		return
+		return false,
+			"testGetByIdSucceedsForExistingAccount",
+			"Failed to get Account with id: " + strconv.Itoa(index)
 	}
 
-	PrintTestResult(
-		true,
+	return true,
 		"testGetById",
-		"Successfully got Account with id: "+strconv.Itoa(index),
-	)
+		"Successfully got Account with id: " + strconv.Itoa(index)
 }
 
-func TestUpdateAccount() {
+func TestGetByIdFailsForNonExistingId() (bool, string, string) {
+	db := SetUp()
+	defer CloseDb(db)
+
+	index := 1337
+
+	_, err := db.Account.GetById(index)
+
+	if err == nil {
+		return false,
+			"testGetByIdFailsForNonExistingId",
+			"Recieved account when should not have"
+	}
+
+	return true,
+		"testGetById",
+		"Successfully failed to get account with non existant id"
+}
+
+func TestUpdateAccountSucceedsForExistingAccount() (bool, string, string) {
 	db := SetUp()
 	defer CloseDb(db)
 
 	accountId := 1
 	newEmail := "differentTestEmail@test.com"
 
-	account := db.Account.GetById(accountId)
+	account, err := db.Account.GetById(accountId)
+
+	if err != nil {
+		return false,
+			"testUpdateAccountSucceedsForExistingAccount",
+			"Failed to get account with Id: " + strconv.Itoa(accountId)
+	}
+
 	account.Email = newEmail
 
-	actual := db.Account.Update(account)
+	actual, err := db.Account.Update(account)
 	expected := getTestAccountById(accountId)
 
 	expected.Email = newEmail
 
-	if !reflect.DeepEqual(expected, actual) {
-		PrintTestResult(
-			false,
-			"testUpdateAccount",
-			"Failed to update email of account with Id: "+strconv.Itoa(actual.Id),
-		)
+	if !reflect.DeepEqual(expected, actual) || err != nil {
+		return false,
+			"testUpdateAccountSucceedsForExistingAccount",
+			"Failed to update email of account with Id: " + strconv.Itoa(actual.Id)
 	}
 
-	PrintTestResult(
-		true,
-		"testUpdateAccount",
-		"Succeeded updating email for account with id: "+strconv.Itoa(actual.Id),
-	)
+	return true,
+		"testUpdateAccountSucceedsForExistingAccount",
+		"Succeeded updating email for account with id: " + strconv.Itoa(actual.Id)
 }
 
-func createAccount(db *utils.Database) utils.Account {
+func TestUpdateAccountFailsForNonExistingAccount() (bool, string, string) {
+	db := SetUp()
+	defer CloseDb(db)
+
+	account := utils.Account{
+		Id:           1337,
+		PasswordHash: "This is a non existing password",
+		ShippingDetails: utils.ShippingDetails{
+			Email:    "nonExisting@email.com",
+			Name:     "nonExistingName",
+			Address:  "nonExistingAddress",
+			Postcode: "nonExistingPostcode",
+		},
+	}
+
+	_, err := db.Account.Update(account)
+
+	if err == nil {
+		return false,
+			"testUpdateAccountFailsForNonExistingAccount",
+			"Succeeded updating account that does not exist"
+	}
+
+	return true,
+		"testUpdateAccountFailsForNonExistingAccount",
+		"Successfully failed to update non existant account"
+}
+
+func createAccount(db *utils.Database) (utils.Account, error) {
 	expected := utils.Account{
 		PasswordHash: "This is a password",
 		ShippingDetails: utils.ShippingDetails{
