@@ -1,5 +1,13 @@
 package businessLogic
 
+import "bjssStoreGo/backend/utils"
+
+func NewOrderService(orderDatabase utils.OrderDatabase) *OrderService {
+	return &OrderService{
+		db: orderDatabase,
+	}
+}
+
 func (os OrderService) updateBasket(basket []string) {
 	//TODO: Implement update basket
 }
@@ -16,4 +24,6 @@ func (os OrderService) getOrderByToken(token string) {
 	//TODO: Implement get order by token
 }
 
-type OrderService struct{}
+type OrderService struct {
+	db utils.OrderDatabase
+}

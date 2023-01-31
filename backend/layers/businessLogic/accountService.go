@@ -1,7 +1,9 @@
 package businessLogic
 
-func NewAccountService(accountDb string) AccountService {
-	return AccountService{
+import "bjssStoreGo/backend/utils"
+
+func NewAccountService(accountDb utils.AccountDatabase) *AccountService {
+	return &AccountService{
 		accountDb: accountDb,
 	}
 }
@@ -23,5 +25,5 @@ func (as AccountService) getById(accountId int) {
 }
 
 type AccountService struct {
-	accountDb string //TODO: UPDATE
+	accountDb utils.AccountDatabase
 }

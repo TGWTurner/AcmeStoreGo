@@ -14,8 +14,10 @@ func setSignedInUserId(req string, customerId string) {
 	customerId = "userId"
 }
 
-func NewAccountApi(accountService businessLogic.AccountService) AccountApi {
-	return AccountApi{}
+func NewAccountApi(accountService *businessLogic.AccountService) *AccountApi {
+	return &AccountApi{
+		as: *accountService,
+	}
 }
 
 func (a AccountApi) postSignIn() {
@@ -35,5 +37,5 @@ func (a AccountApi) postAccount() {
 }
 
 type AccountApi struct {
-	accountService businessLogic.AccountService
+	as businessLogic.AccountService
 }

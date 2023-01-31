@@ -1,5 +1,13 @@
 package api
 
+import "bjssStoreGo/backend/layers/businessLogic"
+
+func NewProductApi(productService *businessLogic.ProductService) *ProductApi {
+	return &ProductApi{
+		ps: *productService,
+	}
+}
+
 func (p ProductApi) search(req string, res string) {
 	//TODO: Implement search
 	/*
@@ -26,4 +34,6 @@ func (p ProductApi) deals(_, res string) {
 	*/
 }
 
-type ProductApi struct{}
+type ProductApi struct {
+	ps businessLogic.ProductService
+}

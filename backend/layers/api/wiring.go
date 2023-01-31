@@ -25,4 +25,21 @@ TODO:
 
 package api
 
-type wiring struct{}
+import (
+	"bjssStoreGo/backend/layers/businessLogic"
+	"bjssStoreGo/backend/layers/dataAccess"
+
+	"github.com/gorilla/mux"
+)
+
+func run() {
+	db := dataAccess.InitiateConnection()
+
+	accountApi := NewAccountApi(businessLogic.NewAccountService(db.Account))
+	orderApi := NewOrderApi(businessLogic.NewOrderService(db.Order))
+	productApi := NewProductApi(businessLogic.NewProductService(db.Product))
+
+	r := mux.NewRouter()
+
+	r.Handle("/").Methods("GET")
+}
