@@ -4,6 +4,7 @@ import (
 	"bjssStoreGo/backend/layers/dataAccess/testData"
 	"bjssStoreGo/backend/utils"
 	"errors"
+	"reflect"
 	"strconv"
 
 	"gorm.io/gorm"
@@ -77,6 +78,10 @@ func (od *OrderDatabaseImpl) GetByToken(orderToken string) (utils.Order, error) 
 
 	if response.Error != nil {
 		return utils.Order{}, errors.New("Failed to get order for orderToken: " + orderToken + ", error: " + response.Error.Error())
+	}
+
+	if reflect.DeepEqual(order, Order{}) {
+		return utils.Order{}, errors.New("Order does not exist with orderToken: " + orderToken)
 	}
 
 	customerOrder := ConvertFromDbOrder(order)

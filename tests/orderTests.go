@@ -19,6 +19,25 @@ func TestCreateOrder() (bool, string, string) {
 	return true, "testCreateOrder", "Order Created"
 }
 
+func TestSucceedsCreatingTwoIdenticalOrders() (bool, string, string) {
+	db := SetUp()
+	defer CloseDb(db)
+
+	_, err := createOrder(&db, 2)
+
+	if err != nil {
+		return false, "testSucceedsCreatingTwoIdenticalOrders", "Failed to create first order"
+	}
+
+	_, err = createOrder(&db, 2)
+
+	if err != nil {
+		return false, "testSucceedsCreatingTwoIdenticalOrders", "Failed to create second order"
+	}
+
+	return true, "testSucceedsCreatingTwoIdenticalOrders", "Successfully placed two identical orders"
+}
+
 func TestGetOrderByToken() (bool, string, string) {
 	db := SetUp()
 	defer CloseDb(db)
@@ -44,14 +63,30 @@ func TestGetOrderByToken() (bool, string, string) {
 	return true, "testGetOrderByToken", "Order correctly retrieved for token: " + expectedOrder.Id
 }
 
+func TestFailsToGetOrderWithFakeToken() (bool, string, string) {
+	db := SetUp()
+	defer CloseDb(db)
+
+	token := "ThisIsAFakeToken"
+	_, err := db.Order.GetByToken(token)
+
+	if err.Error() != "Order does not exist with orderToken: "+token {
+		return false, "testFailsToGetOrderWithFakeToken", "Failed to get order by token"
+	}
+
+	return true, "testFailsToGetOrderWithFakeToken", "Succeeded to return empty order for fake token"
+}
+
 func TestGetOrdersByCustomerId() (bool, string, string) {
 	db := SetUp()
 	defer CloseDb(db)
 
-	createOrder(&db, 2)
-	createOrder(&db, 2)
+	customerId := 2
 
-	orders, err := db.Order.GetByCustomerId(2)
+	createOrder(&db, customerId)
+	createOrder(&db, customerId)
+
+	orders, err := db.Order.GetByCustomerId(customerId)
 
 	if err != nil {
 		return false, "testGetOrdersByCustomerId", "Failed to get order by customer id"
@@ -62,6 +97,23 @@ func TestGetOrdersByCustomerId() (bool, string, string) {
 	}
 
 	return true, "testGetOrderByToken", "Got correct number of orders"
+}
+
+func TestFailsToGetOrderByFakeCustomerId() (bool, string, string) {
+	db := SetUp()
+	defer CloseDb(db)
+
+	orders, err := db.Order.GetByCustomerId(1337)
+
+	if err != nil {
+		return false, "testFailsToGetOrderByFakeCustomerId", "Failed to get order by customer id"
+	}
+
+	if len(orders) != 0 {
+		return false, "testFailsToGetOrderByFakeCustomerId", "Recieved wrong number of orders, expected: 0 actual: " + strconv.Itoa(len(orders))
+	}
+
+	return true, "testFailsToGetOrderByFakeCustomerId", "Successfully got no orders for non existant customer"
 }
 
 func createOrder(db *utils.Database, customerId int) (utils.Order, error) {

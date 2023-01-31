@@ -8,7 +8,9 @@ import (
 
 var orderTests = []func() (bool, string, string){
 	tests.TestCreateOrder,
+	tests.TestSucceedsCreatingTwoIdenticalOrders,
 	tests.TestGetOrderByToken,
+	tests.TestFailsToGetOrderWithFakeToken,
 	tests.TestGetOrdersByCustomerId,
 }
 var productTests = []func() (bool, string, string){
@@ -19,6 +21,7 @@ var productTests = []func() (bool, string, string){
 	tests.TestGetProductsByText,
 	tests.TestGetProductsWithCurrentDeals,
 	tests.TestDecreaseStockReducesStockByCorrectQuantity,
+	tests.TestDecreaseStockFailsForFakeProduct,
 }
 
 var accountTests = []func() (bool, string, string){

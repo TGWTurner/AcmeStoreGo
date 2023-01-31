@@ -36,7 +36,7 @@ func (od *OrderDatabaseImpl) GetByToken(orderId string) (utils.Order, error) {
 		}
 	}
 
-	return utils.Order{}, errors.New("Failed to get orders for order Token: " + orderId)
+	return utils.Order{}, errors.New("Order does not exist with orderToken: " + orderId)
 }
 
 func (od *OrderDatabaseImpl) Add(customerId int, order utils.Order) (utils.Order, error) {

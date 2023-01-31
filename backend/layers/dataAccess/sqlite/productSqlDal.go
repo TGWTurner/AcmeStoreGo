@@ -53,7 +53,6 @@ func (pd ProductDatabaseImpl) GetAll() ([]utils.Product, error) {
 
 	if response.Error != nil {
 		return []utils.Product{}, errors.New("Failed to get all products:" + response.Error.Error())
-		panic("Failed to get all products")
 	}
 
 	return ConvertFromDbProducts(products), nil
@@ -130,6 +129,12 @@ func (pd ProductDatabaseImpl) GetWithCurrentDeals(date string) ([]utils.Product,
 }
 
 func (pd ProductDatabaseImpl) DecreaseStock(productQuantities []utils.OrderItem) error {
+	for _, productQuantity := range productQuantities {
+		if product, err := pd.GetByIds(productQuantity.ProductId); len(product) == 0 || err != nil {
+			return errors.New("Failed to get product for id: " + strconv.Itoa(productQuantity.ProductId) + " to update")
+		}
+	}
+
 	for _, item := range productQuantities {
 		product := Product{
 			Id: item.ProductId,

@@ -224,6 +224,33 @@ func TestDecreaseStockReducesStockByCorrectQuantity() (bool, string, string) {
 		"Correctly decreased product stock by expected quantity"
 }
 
+func TestDecreaseStockFailsForFakeProduct() (bool, string, string) {
+	db := SetUp()
+	defer CloseDb(db)
+
+	productId := 1337
+	quantity := 5
+
+	productQuantities := []utils.OrderItem{
+		{
+			ProductId: productId,
+			Quantity:  quantity,
+		},
+	}
+
+	err := db.Product.DecreaseStock(productQuantities)
+
+	if err == nil {
+		return false,
+			"testDecreaseStockFailsForFakeProduct",
+			"Failed to reject fake product id"
+	}
+
+	return true,
+		"testDecreaseStockFailsForFakeProduct",
+		"Successfully rejected fake product id for update"
+}
+
 func assertProductContainedWithinSliceOfProducts(product utils.Product, products []utils.Product) bool {
 	for _, testProduct := range products {
 		if reflect.DeepEqual(testProduct, product) {

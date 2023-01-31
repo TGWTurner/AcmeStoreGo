@@ -3,6 +3,8 @@ package memory
 import (
 	"bjssStoreGo/backend/layers/dataAccess/testData"
 	"bjssStoreGo/backend/utils"
+	"errors"
+	"strconv"
 	"strings"
 )
 
@@ -108,6 +110,12 @@ func (pd *ProductDatabaseImpl) GetWithCurrentDeals(date string) ([]utils.Product
 }
 
 func (pd *ProductDatabaseImpl) DecreaseStock(productQuantities []utils.OrderItem) error {
+	for _, productQuantity := range productQuantities {
+		if product, err := pd.GetByIds(productQuantity.ProductId); len(product) == 0 || err != nil {
+			return errors.New("Product with id: " + strconv.Itoa(productQuantity.ProductId) + " not found")
+		}
+	}
+
 	for _, product := range productQuantities {
 		pd.products[product.ProductId].QuantityRemaining = pd.products[product.ProductId].QuantityRemaining - product.Quantity
 	}
