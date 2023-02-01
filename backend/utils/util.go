@@ -88,6 +88,8 @@ type OrderDatabase interface {
 
 type ProductDatabase interface {
 	Close()
+	GetAll() ([]Product, error)
+	GetById(Id int) (Product, error)
 	GetByIds(Ids ...int) ([]Product, error)
 	GetCategories() ([]ProductCategory, error)
 	GetByCategory(categoryId int) ([]Product, error)

@@ -4,7 +4,7 @@ import "bjssStoreGo/backend/utils"
 
 func NewOrderService(orderDatabase utils.OrderDatabase) *OrderService {
 	return &OrderService{
-		db: orderDatabase,
+		orderDb: orderDatabase,
 	}
 }
 
@@ -25,5 +25,5 @@ func (os OrderService) getOrderByToken(token string) {
 }
 
 type OrderService struct {
-	db utils.OrderDatabase
+	orderDb utils.OrderDatabase
 }

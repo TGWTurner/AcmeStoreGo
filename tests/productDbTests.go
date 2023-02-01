@@ -18,7 +18,7 @@ func TestGetProductGivenId() (bool, string, string) {
 
 	index := 1
 
-	product, err := db.Product.GetByIds(index)
+	product, err := db.Product.GetById(index)
 
 	if err != nil {
 		return false, "testGetProductGivenId", "Failed to get product with id: " + strconv.Itoa(index)
@@ -26,7 +26,7 @@ func TestGetProductGivenId() (bool, string, string) {
 
 	expected := getTestProductById(index)
 
-	if !reflect.DeepEqual(expected, product[0]) {
+	if !reflect.DeepEqual(expected, product) {
 		return false, "testGetProductGivenId", "Actual Product did not match expected"
 	}
 
@@ -199,7 +199,7 @@ func TestDecreaseStockReducesStockByCorrectQuantity() (bool, string, string) {
 
 	db.Product.DecreaseStock(productQuantities)
 
-	product, err := db.Product.GetByIds(productId)
+	product, err := db.Product.GetById(productId)
 
 	if err != nil {
 		return false,
@@ -210,13 +210,13 @@ func TestDecreaseStockReducesStockByCorrectQuantity() (bool, string, string) {
 	expectedProduct := getTestProductById(productId)
 	expectedProduct.QuantityRemaining -= quantity
 
-	if !reflect.DeepEqual(expectedProduct, product[0]) {
+	if !reflect.DeepEqual(expectedProduct, product) {
 		return false,
 			"testDecreaseStockReducesStockByCorrectQuantity",
 			"Failed to decrease product quantity correctly expected: " +
 				strconv.Itoa(expectedProduct.QuantityRemaining) +
 				" actual: " +
-				strconv.Itoa(product[0].QuantityRemaining)
+				strconv.Itoa(product.QuantityRemaining)
 	}
 
 	return true,

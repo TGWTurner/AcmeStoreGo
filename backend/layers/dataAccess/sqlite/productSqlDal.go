@@ -58,13 +58,25 @@ func (pd ProductDatabaseImpl) GetAll() ([]utils.Product, error) {
 	return ConvertFromDbProducts(products), nil
 }
 
-func (pd ProductDatabaseImpl) GetByIds(Ids ...int) ([]utils.Product, error) {
-	var products []Product
+func (pd ProductDatabaseImpl) GetById(id int) (utils.Product, error) {
+	var product Product
 
-	response := pd.db.Find(&products, Ids)
+	response := pd.db.Find(&product, id)
 
 	if response.Error != nil {
-		Ids := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(Ids)), ","), "[]")
+		return utils.Product{}, errors.New("Failed to get product with id: " + strconv.Itoa(id) + " error: " + response.Error.Error())
+	}
+
+	return ConvertFromDbProduct(product), nil
+}
+
+func (pd ProductDatabaseImpl) GetByIds(ids ...int) ([]utils.Product, error) {
+	var products []Product
+
+	response := pd.db.Find(&products, ids)
+
+	if response.Error != nil {
+		Ids := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(ids)), ","), "[]")
 
 		return []utils.Product{}, errors.New("Failed to get products with id's: " + Ids + " error: " + response.Error.Error())
 	}

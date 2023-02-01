@@ -51,6 +51,16 @@ func (pd *ProductDatabaseImpl) GetAll() ([]utils.Product, error) {
 	return pd.products, nil
 }
 
+func (pd *ProductDatabaseImpl) GetById(id int) (utils.Product, error) {
+	for _, product := range pd.products {
+		if id == product.Id {
+			return product, nil
+		}
+	}
+
+	return utils.Product{}, errors.New("Failed to get product with id: " + strconv.Itoa(id))
+}
+
 func (pd *ProductDatabaseImpl) GetByIds(Ids ...int) ([]utils.Product, error) {
 	products := []utils.Product{}
 

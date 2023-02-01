@@ -25,21 +25,19 @@ TODO:
 
 package api
 
-import (
-	"bjssStoreGo/backend/layers/businessLogic"
-	"bjssStoreGo/backend/layers/dataAccess"
-
-	"github.com/gorilla/mux"
-)
-
 func run() {
-	db := dataAccess.InitiateConnection()
+	// db := dataAccess.InitiateConnection()
 
-	accountApi := NewAccountApi(businessLogic.NewAccountService(db.Account))
-	orderApi := NewOrderApi(businessLogic.NewOrderService(db.Order))
-	productApi := NewProductApi(businessLogic.NewProductService(db.Product))
+	// accountApi := NewAccountApi(businessLogic.NewAccountService(db.Account))
+	// orderApi := NewOrderApi(businessLogic.NewOrderService(db.Order))
+	// productApi := NewProductApi(businessLogic.NewProductService(db.Product))
 
-	r := mux.NewRouter()
+	// r := mux.NewRouter()
 
-	r.Handle("/").Methods("GET")
+	// r.Handle("/api/account/sign-in", accountApi.postSignIn).Methods("")
 }
+
+/*
+r.Handle("/faq", staticController.FaqView).Methods("GET")
+r.HandleFunc("/galleries/new", galleriesController.New).Methods("GET")
+*/

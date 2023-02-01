@@ -2,6 +2,7 @@ package api
 
 import (
 	"bjssStoreGo/backend/layers/businessLogic"
+	"net/http"
 )
 
 // TODO: Implement Get signed in user id
@@ -20,7 +21,7 @@ func NewAccountApi(accountService *businessLogic.AccountService) *AccountApi {
 	}
 }
 
-func (a AccountApi) postSignIn() {
+func (a AccountApi) postSignIn(w http.ResponseWriter, r *http.Request) {
 	//TODO: Implement post sign in
 }
 
