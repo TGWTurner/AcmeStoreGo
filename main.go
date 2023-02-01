@@ -22,14 +22,3 @@ func setUp(mode string) {
 	//"sql" or "sql-mem" or ""
 	os.Setenv("DB_CONNECTION", mode)
 }
-
-func PrintTestResult(pass bool, testName string, message string) {
-	fmt.Printf("\tTEST ")
-	if pass {
-		fmt.Print("PASSED")
-	} else {
-		fmt.Print("FAILED")
-	}
-	fmt.Println(" -- " + testName)
-	fmt.Printf("\t\t" + message + "\n")
-}
