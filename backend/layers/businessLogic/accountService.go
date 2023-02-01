@@ -13,12 +13,16 @@ import (
 
 func NewAccountService(accountDb utils.AccountDatabase) *AccountService {
 	return &AccountService{
-		accountDb: accountDb,
+		db: accountDb,
 	}
 }
 
-func (as AccountService) signIn(email string, password string) (utils.Account, error) {
-	account, err := as.accountDb.GetByEmail(email)
+func (as AccountService) Close() {
+	as.db.Close()
+}
+
+func (as AccountService) SignIn(email string, password string) (utils.Account, error) {
+	account, err := as.db.GetByEmail(email)
 
 	if err != nil {
 		return utils.Account{}, errors.New("Failed to get account for email: " + email)
@@ -31,9 +35,9 @@ func (as AccountService) signIn(email string, password string) (utils.Account, e
 	return account, nil
 }
 
-func (as AccountService) signUp(email string, password string, name string, address string, postcode string) (utils.Account, error) {
-	account, err := as.accountDb.Add(utils.Account{
-		PasswordHash: hashPassword(password),
+func (as AccountService) SignUp(email string, password string, name string, address string, postcode string) (utils.Account, error) {
+	account, err := as.db.Add(utils.Account{
+		PasswordHash: as.HashPassword(password),
 		ShippingDetails: utils.ShippingDetails{
 			Name:     name,
 			Email:    email,
@@ -49,12 +53,12 @@ func (as AccountService) signUp(email string, password string, name string, addr
 	return account, nil
 }
 
-func (as AccountService) update(account utils.Account, newPassword ...string) (utils.Account, error) {
+func (as AccountService) Update(account utils.Account, newPassword ...string) (utils.Account, error) {
 	if len(newPassword) > 0 {
-		account.PasswordHash = hashPassword(account.PasswordHash)
+		account.PasswordHash = as.HashPassword(account.PasswordHash)
 	}
 
-	updatedAccount, err := as.accountDb.Update(account)
+	updatedAccount, err := as.db.Update(account)
 
 	if err != nil {
 		return utils.Account{}, errors.New("Failed to update account with accountId: " + strconv.Itoa(account.Id))
@@ -63,8 +67,8 @@ func (as AccountService) update(account utils.Account, newPassword ...string) (u
 	return updatedAccount, nil
 }
 
-func (as AccountService) getById(accountId int) (utils.Account, error) {
-	account, err := as.accountDb.GetById(accountId)
+func (as AccountService) GetById(accountId int) (utils.Account, error) {
+	account, err := as.db.GetById(accountId)
 
 	if err != nil {
 		return utils.Account{}, errors.New("Failed to get account with id: " + strconv.Itoa(accountId))
@@ -74,7 +78,7 @@ func (as AccountService) getById(accountId int) (utils.Account, error) {
 }
 
 type AccountService struct {
-	accountDb utils.AccountDatabase
+	db utils.AccountDatabase
 }
 
 func validatePassword(password string, hashNsalt string) (bool, error) {
@@ -94,7 +98,7 @@ func strongishHash(password string, salt string) string {
 	return string(pbkdf2.Key([]byte(password), []byte(salt), 1000, 64, sha512.New))
 }
 
-func hashPassword(password string) string {
+func (as AccountService) HashPassword(password string) string {
 	randomBytes := make([]byte, 128)
 	_, err := rand.Read(randomBytes)
 

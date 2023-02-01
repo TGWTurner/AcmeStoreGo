@@ -1,21 +1,39 @@
 package main
 
 import (
-	"bjssStoreGo/tests"
+	"bjssStoreGo/blTests"
+	"bjssStoreGo/dbTests"
 	"fmt"
 	"os"
 )
 
 func main() {
+	// runDbTests()
+	runBlTests()
+}
+
+func runBlTests() {
 	setUp("sql")
-	fmt.Println("Sql")
-	tests.RunDbTests()
+	fmt.Println("sql")
+	blTests.RunTests()
 
 	fmt.Println()
 
 	setUp("memory")
 	fmt.Println("Memory")
-	tests.RunDbTests()
+	blTests.RunTests()
+}
+
+func runDbTests() {
+	setUp("sql")
+	fmt.Println("Sql")
+	dbTests.RunTests()
+
+	fmt.Println()
+
+	setUp("memory")
+	fmt.Println("Memory")
+	dbTests.RunTests()
 }
 
 func setUp(mode string) {

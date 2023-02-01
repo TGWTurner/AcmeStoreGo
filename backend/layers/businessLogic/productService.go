@@ -8,14 +8,18 @@ import (
 
 func NewProductService(productDatabase utils.ProductDatabase) *ProductService {
 	return &ProductService{
-		productDb: productDatabase,
+		db: productDatabase,
 	}
+}
+
+func (ps ProductService) Close() {
+	ps.db.Close()
 }
 
 func (ps ProductService) SearchProducts(query map[string]string) ([]utils.Product, error) {
 	if len(query) > 0 {
 		if val, ok := query["dealDate"]; ok {
-			return ps.productDb.GetWithCurrentDeals(val)
+			return ps.db.GetWithCurrentDeals(val)
 		} else if val, ok := query["dealDate"]; ok {
 			categoryId, err := strconv.Atoi(val)
 
@@ -23,17 +27,17 @@ func (ps ProductService) SearchProducts(query map[string]string) ([]utils.Produc
 				return []utils.Product{}, errors.New("Failed to convert categoryId to int")
 			}
 
-			return ps.productDb.GetByCategory(categoryId)
+			return ps.db.GetByCategory(categoryId)
 		} else if val, ok := query["dealDate"]; ok {
-			return ps.productDb.GetByText(val)
+			return ps.db.GetByText(val)
 		}
 	}
 
-	return ps.productDb.GetAll()
+	return ps.db.GetAll()
 }
 
 func (ps ProductService) GetProductcategories() ([]utils.ProductCategory, error) {
-	return ps.productDb.GetCategories()
+	return ps.db.GetCategories()
 }
 
 func (ps ProductService) CheckStock(productQuantities []utils.OrderItem) ([]utils.OrderItem, int, error) {
@@ -56,7 +60,7 @@ func (ps ProductService) calculateProductsLackingStockFromOrderItems(orderItems 
 	var notEnoughStock []utils.OrderItem
 
 	for _, orderItem := range orderItems {
-		product, err := ps.productDb.GetById(orderItem.ProductId)
+		product, err := ps.db.GetById(orderItem.ProductId)
 
 		if err != nil {
 			return []utils.OrderItem{}, err
@@ -80,7 +84,7 @@ func (ps ProductService) calculateTotalFromOrderItems(orderItems []utils.OrderIt
 	var total int
 
 	for _, orderItem := range orderItems {
-		product, err := ps.productDb.GetById(orderItem.ProductId)
+		product, err := ps.db.GetById(orderItem.ProductId)
 
 		if err != nil {
 			return 0, err
@@ -103,9 +107,9 @@ func (ps ProductService) DecreaseStock(productQuantities []utils.OrderItem) erro
 		return errors.New("Trying to decrease stock below zero")
 	}
 
-	return ps.productDb.DecreaseStock(productQuantities)
+	return ps.db.DecreaseStock(productQuantities)
 }
 
 type ProductService struct {
-	productDb utils.ProductDatabase
+	db utils.ProductDatabase
 }

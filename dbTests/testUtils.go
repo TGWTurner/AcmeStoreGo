@@ -18,7 +18,7 @@ func CloseDb(db utils.Database) {
 	db.Product.Close()
 }
 
-func PrintTestResult(pass bool, testName string, message string) {
+func printTestResult(pass bool, testName string, message string) {
 	fmt.Print("TEST ")
 	if pass {
 		fmt.Print("PASSED")
@@ -29,7 +29,7 @@ func PrintTestResult(pass bool, testName string, message string) {
 	fmt.Printf("\t" + message + "\n")
 }
 
-func RunDbTests() {
+func RunTests() {
 	fmt.Println("OrderTests:")
 	successes, outOf := runTestSet(orderDbTests)
 	fmt.Println(successes, "/", outOf)
@@ -54,7 +54,7 @@ func runTestSet(testSet []func() (bool, string, string)) (int, int) {
 			continue
 		}
 
-		PrintTestResult(false, name, message)
+		printTestResult(false, name, message)
 	}
 
 	return successes, len(testSet)

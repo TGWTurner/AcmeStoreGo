@@ -4,26 +4,30 @@ import "bjssStoreGo/backend/utils"
 
 func NewOrderService(orderDatabase utils.OrderDatabase) *OrderService {
 	return &OrderService{
-		orderDb: orderDatabase,
+		db: orderDatabase,
 	}
 }
 
-func (os OrderService) updateBasket(basket []string) {
+func (os OrderService) Close() {
+	os.db.Close()
+}
+
+func (os OrderService) UpdateBasket(basket []string) {
 	//TODO: Implement update basket
 }
 
-func (os OrderService) createOrder(customerId int, orderRequest string) {
+func (os OrderService) CreateOrder(customerId int, orderRequest string) {
 	//TODO: Implement create order
 }
 
-func (os OrderService) getOrdersByCustomerId(customerId int) {
+func (os OrderService) GetOrdersByCustomerId(customerId int) {
 	//TODO: Implement get orders by customer id
 }
 
-func (os OrderService) getOrderByToken(token string) {
+func (os OrderService) GetOrderByToken(token string) {
 	//TODO: Implement get order by token
 }
 
 type OrderService struct {
-	orderDb utils.OrderDatabase
+	db utils.OrderDatabase
 }
