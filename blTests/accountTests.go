@@ -4,6 +4,7 @@ import (
 	"bjssStoreGo/backend/layers/dataAccess/testData"
 	"bjssStoreGo/backend/utils"
 	"strconv"
+	"strings"
 )
 
 func TestCanSignInWithExistingAccount() (bool, string, string) {
@@ -60,16 +61,27 @@ func TestCanSignUpWithNewAccount() (bool, string, string) {
 			Postcode: "PO5 7DE",
 			Address:  "NewAccountAddress",
 		},
-		PasswordHash: as.HashPassword("Password"),
+		PasswordHash: "Password",
 	}
 
-	retAccount, err := as.SignUp(account.Email, "Password", account.Name, account.Address, account.Postcode)
+	retAccount, err := as.SignUp(account.Email, account.PasswordHash, account.Name, account.Address, account.Postcode)
 
-	if err == nil {
+	if err != nil {
 		return false, "testCanSignUpWithNewAccount", "Failed to create new account"
 	}
 
-	if account != retAccount {
+	_, createdSalt, ok := strings.Cut(retAccount.PasswordHash, ":")
+
+	if !ok {
+		return false, "testCanSignUpWithNewAccount", "Failed to get salt from returned password hash"
+	}
+
+	account.PasswordHash = as.StrongishHash(account.PasswordHash, createdSalt) + ":" + createdSalt
+
+	if account.Address != retAccount.Address ||
+		account.Email != retAccount.Email ||
+		account.Name != retAccount.Name ||
+		account.PasswordHash != retAccount.PasswordHash {
 		return false, "testCanSignUpWithNewAccount", "Failed to return correct created account"
 	}
 
@@ -97,17 +109,21 @@ func TestCanUpdateExistingAccount() (bool, string, string) {
 
 	emailAndPass := testData.GetTestAccountCredentials()
 
-	account := utils.Account{
-		ShippingDetails: utils.ShippingDetails{
-			Email:    emailAndPass.Email,
-			Name:     "name",
-			Address:  "address",
-			Postcode: "postcode",
-		},
-		PasswordHash: as.HashPassword(emailAndPass.Password),
+	account, err := as.SignIn(emailAndPass.Email, emailAndPass.Password)
+
+	if err != nil {
+		return false, "testCanUpdateExistingAccount", "Failed to get test account"
 	}
 
 	retAccount, err := as.Update(account, "newPassword")
+
+	_, createdSalt, ok := strings.Cut(retAccount.PasswordHash, ":")
+
+	if !ok {
+		return false, "testCanSignUpWithNewAccount", "Failed to get salt from returned password hash"
+	}
+
+	account.PasswordHash = as.StrongishHash(account.PasswordHash, createdSalt) + ":" + createdSalt
 
 	if err != nil {
 		return false, "testCanUpdateExistingAccount", "Failed to update account"

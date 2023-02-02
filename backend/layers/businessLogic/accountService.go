@@ -4,6 +4,7 @@ import (
 	"bjssStoreGo/backend/utils"
 	"crypto/rand"
 	"crypto/sha512"
+	"encoding/base64"
 	"errors"
 	"strconv"
 	"strings"
@@ -28,7 +29,7 @@ func (as AccountService) SignIn(email string, password string) (utils.Account, e
 		return utils.Account{}, errors.New("Failed to get account for email: " + email)
 	}
 
-	if ok, err := validatePassword(password, account.PasswordHash); err != nil || !ok {
+	if ok, err := as.validatePassword(password, account.PasswordHash); err != nil || !ok {
 		return utils.Account{}, errors.New("Invalid password for account with email: " + email)
 	}
 
@@ -81,33 +82,33 @@ type AccountService struct {
 	db utils.AccountDatabase
 }
 
-func validatePassword(password string, hashNsalt string) (bool, error) {
+func (as AccountService) validatePassword(password string, hashNsalt string) (bool, error) {
 	hash, salt, ok := strings.Cut(hashNsalt, ":")
 
 	if !ok {
 		return false, errors.New("Failed to split has and salt")
 	}
 
-	newHash := strongishHash(password, salt)
+	newHash := as.StrongishHash(password, salt)
 
 	return hash == newHash, nil
 }
 
 // Don't try this at home kids. Use a cloud service for authentication stuff.
-func strongishHash(password string, salt string) string {
-	return string(pbkdf2.Key([]byte(password), []byte(salt), 1000, 64, sha512.New))
+func (as AccountService) StrongishHash(password string, salt string) string {
+	return base64.StdEncoding.EncodeToString(pbkdf2.Key([]byte(password), []byte(salt), 1000, 64, sha512.New))
 }
 
 func (as AccountService) HashPassword(password string) string {
-	randomBytes := make([]byte, 128)
+	randomBytes := make([]byte, 16)
 	_, err := rand.Read(randomBytes)
 
 	if err != nil {
 		panic("Failed to generate random string: " + err.Error())
 	}
 
-	salt := string(randomBytes)
-	hash := strongishHash(password, string(salt))
+	salt := base64.StdEncoding.EncodeToString(randomBytes)
+	hash := as.StrongishHash(password, string(salt))
 
 	return hash + ":" + salt
 }
