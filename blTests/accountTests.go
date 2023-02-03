@@ -1,8 +1,10 @@
 package blTests
 
 import (
+	"bjssStoreGo/backend/layers/businessLogic"
 	"bjssStoreGo/backend/layers/dataAccess/testData"
 	"bjssStoreGo/backend/utils"
+	"errors"
 	"strconv"
 	"strings"
 )
@@ -70,13 +72,11 @@ func TestCanSignUpWithNewAccount() (bool, string, string) {
 		return false, "testCanSignUpWithNewAccount", "Failed to create new account"
 	}
 
-	_, createdSalt, ok := strings.Cut(retAccount.PasswordHash, ":")
+	account.PasswordHash, err = hashPassWithProvidedSalt(as, account.PasswordHash, retAccount.PasswordHash)
 
-	if !ok {
-		return false, "testCanSignUpWithNewAccount", "Failed to get salt from returned password hash"
+	if err != nil {
+		return false, "testCanSignUpWithNewAccount", err.Error()
 	}
-
-	account.PasswordHash = as.StrongishHash(account.PasswordHash, createdSalt) + ":" + createdSalt
 
 	if account.Address != retAccount.Address ||
 		account.Email != retAccount.Email ||
@@ -117,16 +117,14 @@ func TestCanUpdateExistingAccount() (bool, string, string) {
 
 	retAccount, err := as.Update(account, "newPassword")
 
-	_, createdSalt, ok := strings.Cut(retAccount.PasswordHash, ":")
-
-	if !ok {
-		return false, "testCanSignUpWithNewAccount", "Failed to get salt from returned password hash"
-	}
-
-	account.PasswordHash = as.StrongishHash(account.PasswordHash, createdSalt) + ":" + createdSalt
-
 	if err != nil {
 		return false, "testCanUpdateExistingAccount", "Failed to update account"
+	}
+
+	account.PasswordHash, err = hashPassWithProvidedSalt(as, account.PasswordHash, retAccount.PasswordHash)
+
+	if err != nil {
+		return false, "testCanSignUpWithNewAccount", err.Error()
 	}
 
 	if retAccount != account {
@@ -187,4 +185,14 @@ func TestCannotGetAccountWithFakeId() (bool, string, string) {
 	}
 
 	return true, "testCannotGetAccountWithFakeId", "Successfully rejected getting account with false account id"
+}
+
+func hashPassWithProvidedSalt(as businessLogic.AccountService, password string, hashNsalt string) (string, error) {
+	_, createdSalt, ok := strings.Cut(hashNsalt, ":")
+
+	if !ok {
+		return "", errors.New("Failed to get salt from returned password hash")
+	}
+
+	return as.StrongishHash(password, createdSalt) + ":" + createdSalt, nil
 }

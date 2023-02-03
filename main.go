@@ -8,13 +8,15 @@ import (
 )
 
 func main() {
-	// runDbTests()
+	runDbTests()
 	runBlTests()
 }
 
 func runBlTests() {
+	fmt.Println()
+
 	setUp("sql")
-	fmt.Println("sql")
+	fmt.Println("Sql")
 	blTests.RunTests()
 
 	fmt.Println()
@@ -25,6 +27,8 @@ func runBlTests() {
 }
 
 func runDbTests() {
+	fmt.Println()
+
 	setUp("sql")
 	fmt.Println("Sql")
 	dbTests.RunTests()

@@ -7,7 +7,6 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
-	"time"
 
 	"golang.org/x/exp/slices"
 )
@@ -149,7 +148,7 @@ func TestGetProductsWithCurrentDeals() (bool, string, string) {
 	db := SetUp()
 	defer CloseDb(db)
 
-	currentDate := time.Now().Format("2006-01-02")
+	currentDate := utils.GetFormattedDate()
 
 	products, err := db.Product.GetWithCurrentDeals(currentDate)
 

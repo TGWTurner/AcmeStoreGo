@@ -3,6 +3,7 @@ package utils
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"time"
 )
 
 /*
@@ -69,6 +70,10 @@ func UrlSafeUniqueId() string {
 	}
 
 	return base64.RawURLEncoding.EncodeToString(random128bitNumber)
+}
+
+func GetFormattedDate() string {
+	return time.Now().Format("2006-01-02")
 }
 
 type AccountDatabase interface {

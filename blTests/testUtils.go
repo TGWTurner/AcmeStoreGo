@@ -13,6 +13,20 @@ func SetUpAccount() businessLogic.AccountService {
 	return *accountService
 }
 
+func SetUpOrder() businessLogic.OrderService {
+	db := dataAccess.InitiateConnection()
+	orderService := businessLogic.NewOrderService(db.Order)
+
+	return *orderService
+}
+
+func SetUpProduct() businessLogic.ProductService {
+	db := dataAccess.InitiateConnection()
+	productService := businessLogic.NewProductService(db.Product)
+
+	return *productService
+}
+
 func RunTests() {
 	// fmt.Println("OrderTests:")
 	// successes, outOf := runTestSet(orderBlTests)
@@ -22,9 +36,9 @@ func RunTests() {
 	successes, outOf := runTestSet(accountBlTests)
 	fmt.Println(successes, "/", outOf)
 
-	// fmt.Println("ProductTests:")
-	// successes, outOf = runTestSet(productBlTests)
-	// fmt.Println(successes, "/", outOf)
+	fmt.Println("ProductTests:")
+	successes, outOf = runTestSet(productBlTests)
+	fmt.Println(successes, "/", outOf)
 }
 
 func runTestSet(testSet []func() (bool, string, string)) (int, int) {
@@ -68,4 +82,15 @@ var accountBlTests = []func() (bool, string, string){
 }
 var orderBlTests = []func() (bool, string, string){}
 
-var productBlTests = []func() (bool, string, string){}
+var productBlTests = []func() (bool, string, string){
+	TestSearchProductsForDealsReturnsCurrentDeals,
+	TestSearchProductsForCategoryReturnsCorrectProducts,
+	TestSearchProductsForTextReturnsCorrectProducts,
+	TestSearchProductsWithoutQueryReturnsAllProducts,
+	TestGetProductCategoriesReturnsCategories,
+	TestCheckStockReturnsCorrectProductsWithoutEnoughStock,
+	TestCheckStockReturnsNoProductsWhenAllHaveStock,
+	TestCheckStockReturnsCorrectTotal,
+	TestDecreaseStockReducesStockOfProvidedProducts,
+	TestDecreaseStockReturnsErrorWhenProductDoesNotHaveEnoughStock,
+}

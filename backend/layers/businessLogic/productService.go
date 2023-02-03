@@ -20,7 +20,7 @@ func (ps ProductService) SearchProducts(query map[string]string) ([]utils.Produc
 	if len(query) > 0 {
 		if val, ok := query["dealDate"]; ok {
 			return ps.db.GetWithCurrentDeals(val)
-		} else if val, ok := query["dealDate"]; ok {
+		} else if val, ok := query["category"]; ok {
 			categoryId, err := strconv.Atoi(val)
 
 			if err != nil {
@@ -28,7 +28,7 @@ func (ps ProductService) SearchProducts(query map[string]string) ([]utils.Produc
 			}
 
 			return ps.db.GetByCategory(categoryId)
-		} else if val, ok := query["dealDate"]; ok {
+		} else if val, ok := query["search"]; ok {
 			return ps.db.GetByText(val)
 		}
 	}
@@ -54,6 +54,20 @@ func (ps ProductService) CheckStock(productQuantities []utils.OrderItem) ([]util
 	}
 
 	return notEnoughStock, total, err
+}
+
+func (ps ProductService) DecreaseStock(productQuantities []utils.OrderItem) error {
+	notEnoughStock, _, err := ps.CheckStock(productQuantities)
+
+	if err != nil {
+		return err
+	}
+
+	if len(notEnoughStock) > 0 {
+		return errors.New("Trying to decrease stock below zero")
+	}
+
+	return ps.db.DecreaseStock(productQuantities)
 }
 
 func (ps ProductService) calculateProductsLackingStockFromOrderItems(orderItems []utils.OrderItem) ([]utils.OrderItem, error) {
@@ -94,20 +108,6 @@ func (ps ProductService) calculateTotalFromOrderItems(orderItems []utils.OrderIt
 	}
 
 	return total, nil
-}
-
-func (ps ProductService) DecreaseStock(productQuantities []utils.OrderItem) error {
-	notEnoughStock, _, err := ps.CheckStock(productQuantities)
-
-	if err != nil {
-		return err
-	}
-
-	if len(notEnoughStock) > 0 {
-		return errors.New("Trying to decrease stock below zero")
-	}
-
-	return ps.db.DecreaseStock(productQuantities)
 }
 
 type ProductService struct {
