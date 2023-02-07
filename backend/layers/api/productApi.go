@@ -4,7 +4,6 @@ import (
 	bl "bjssStoreGo/backend/layers/businessLogic"
 	"bjssStoreGo/backend/utils"
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
@@ -25,8 +24,6 @@ func (p ProductApi) Search(w http.ResponseWriter, r *http.Request) {
 	} else if params.Get("category") != "" {
 		query["category"] = params.Get("category")
 	}
-
-	fmt.Println(query)
 
 	products, err := p.ps.SearchProducts(query)
 

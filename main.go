@@ -2,6 +2,7 @@ package main
 
 import (
 	"bjssStoreGo/backend/layers/api"
+	"bjssStoreGo/backend/layers/dataAccess"
 	"bjssStoreGo/blTests"
 	"bjssStoreGo/dbTests"
 	"fmt"
@@ -24,11 +25,13 @@ func landingPage() http.Handler {
 func main() {
 	//Run tests:
 	//tests()
-	wiring := api.NewWiring()
-
+	db := dataAccess.InitiateConnection()
 	r := mux.NewRouter()
 
-	wiring.SetUpRoutes(r)
+	wiring := api.NewWiring(db, r)
+
+	wiring.SetUpRoutes()
+	wiring.Run()
 }
 
 func testFunc(w http.ResponseWriter, r *http.Request) {
