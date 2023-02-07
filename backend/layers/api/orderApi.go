@@ -1,6 +1,10 @@
 package api
 
-import "bjssStoreGo/backend/layers/businessLogic"
+import (
+	"bjssStoreGo/backend/layers/businessLogic"
+	"bjssStoreGo/backend/utils"
+	"net/http"
+)
 
 func NewOrderApi(orderService *businessLogic.OrderService) *OrderApi {
 	return &OrderApi{
@@ -8,27 +12,27 @@ func NewOrderApi(orderService *businessLogic.OrderService) *OrderApi {
 	}
 }
 
-func validateItems(items []string /*TODO itemsStruct*/) {
+func validateItems(orderItems []utils.OrderItem) {
 	//TODO validateItems fn
 }
 
-func (o OrderApi) getBasket(req string, res string) {
+func (o OrderApi) GetBasket(w http.ResponseWriter, r *http.Request) {
 	//TODO: Implement get basket
 }
 
-func (o OrderApi) postBasket(req string, res string) {
+func (o OrderApi) PostBasket(w http.ResponseWriter, r *http.Request) {
 	//TODO: Implement post basket
 }
 
-func (o OrderApi) getHistory(req string, res string) {
+func (o OrderApi) GetHistory(w http.ResponseWriter, r *http.Request) {
 	//TODO: Implement get history
 }
 
-func (o OrderApi) getOrder(req string, res string) {
+func (o OrderApi) GetOrder(w http.ResponseWriter, r *http.Request) {
 	//TODO: Implement get order
 }
 
-func (o OrderApi) postCheckout(req string, res string) {
+func (o OrderApi) PostCheckout(w http.ResponseWriter, r *http.Request) {
 	//TODO: Implement post checkout
 }
 

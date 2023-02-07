@@ -1,13 +1,42 @@
 package main
 
 import (
+	"bjssStoreGo/backend/layers/api"
 	"bjssStoreGo/blTests"
 	"bjssStoreGo/dbTests"
 	"fmt"
+	"net/http"
 	"os"
+
+	"github.com/gorilla/mux"
 )
 
+func page(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html")
+	fmt.Fprint(w, "hello page")
+}
+
+func landingPage() http.Handler {
+	h := http.HandlerFunc(page)
+	return h
+}
+
 func main() {
+	//Run tests:
+	//tests()
+	wiring := api.NewWiring()
+
+	r := mux.NewRouter()
+
+	wiring.SetUpRoutes(r)
+}
+
+func testFunc(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html")
+	w.Write([]byte("Got to the endpoint response"))
+}
+
+func tests() {
 	runDbTests()
 	runBlTests()
 }
