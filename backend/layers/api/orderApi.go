@@ -4,11 +4,14 @@ import (
 	"bjssStoreGo/backend/layers/businessLogic"
 	"bjssStoreGo/backend/utils"
 	"net/http"
+
+	"github.com/gorilla/sessions"
 )
 
-func NewOrderApi(orderService *businessLogic.OrderService) *OrderApi {
+func NewOrderApi(orderService *businessLogic.OrderService, s *sessions.CookieStore) *OrderApi {
 	return &OrderApi{
 		os: *orderService,
+		s:  s,
 	}
 }
 
@@ -38,4 +41,5 @@ func (o OrderApi) PostCheckout(w http.ResponseWriter, r *http.Request) {
 
 type OrderApi struct {
 	os businessLogic.OrderService
+	s  *sessions.CookieStore
 }

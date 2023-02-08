@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 )
 
 func page(w http.ResponseWriter, r *http.Request) {
@@ -27,8 +28,9 @@ func main() {
 	//tests()
 	db := dataAccess.InitiateConnection()
 	r := mux.NewRouter()
+	store := sessions.NewCookieStore([]byte("my session encryption secret"))
 
-	wiring := api.NewWiring(db, r)
+	wiring := api.NewWiring(db, r, store)
 
 	wiring.SetUpRoutes()
 	wiring.Run()

@@ -8,19 +8,22 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 )
 
-func NewWiring(db utils.Database, r *mux.Router) *Wiring {
+func NewWiring(db utils.Database, r *mux.Router, s *sessions.CookieStore) *Wiring {
 
 	return &Wiring{
-		accountApi: NewAccountApi(bl.NewAccountService(db.Account)),
-		productApi: NewProductApi(bl.NewProductService(db.Product)),
-		orderApi:   NewOrderApi(bl.NewOrderService(db.Order)),
+		store:      s,
+		router:     r,
+		accountApi: NewAccountApi(bl.NewAccountService(db.Account), s),
+		productApi: NewProductApi(bl.NewProductService(db.Product), s),
+		orderApi:   NewOrderApi(bl.NewOrderService(db.Order), s),
 	}
 }
 
 func (w *Wiring) Run() {
-	http.ListenAndServe(":3000", &w.router)
+	http.ListenAndServe(":3000", w.router)
 }
 
 func (w *Wiring) SetUpRoutes() {
@@ -30,18 +33,16 @@ func (w *Wiring) SetUpRoutes() {
 	product := app.PathPrefix("/product").Subrouter()
 	order := app.PathPrefix("/order").Subrouter()
 
-	accountSignIn := account.PathPrefix("/sign-in").Subrouter()
-	accountSignIn.Use(invalidateSession)
-	accountSignIn.HandleFunc("", w.accountApi.PostSignIn).Methods("POST")
+	postSignIn := http.HandlerFunc(w.accountApi.PostSignIn)
+	account.Handle("/sign-in", w.invalidateSession(postSignIn)).Methods("POST")
 
-	accountSignUp := account.PathPrefix("/sign-up").Subrouter()
-	accountSignUp.Use(invalidateSession)
-	accountSignUp.HandleFunc("", w.accountApi.PostSignUp).Methods("POST")
+	postSignUp := http.HandlerFunc(w.accountApi.PostSignUp)
+	account.Handle("/sign-up", w.invalidateSession(postSignUp)).Methods("POST")
 
-	accountPostGet := account.PathPrefix("").Subrouter()
-	accountPostGet.Use(mustBeSignedIn)
-	accountPostGet.HandleFunc("", w.accountApi.PostAccount).Methods("POST")
-	accountPostGet.HandleFunc("", w.accountApi.GetAccount).Methods("GET")
+	postAccount := http.HandlerFunc(w.accountApi.PostAccount)
+	getAccount := http.HandlerFunc(w.accountApi.GetAccount)
+	account.Handle("", w.mustBeSignedIn(postAccount)).Methods("POST")
+	account.Handle("", w.mustBeSignedIn(getAccount)).Methods("GET")
 
 	product.HandleFunc("/catalogue", w.productApi.Search).Methods("GET")
 	product.HandleFunc("/categories", w.productApi.Categories).Methods("GET")
@@ -51,9 +52,8 @@ func (w *Wiring) SetUpRoutes() {
 	order.HandleFunc("/basket", w.orderApi.GetBasket).Methods("GET")
 	order.HandleFunc("/checkout", w.orderApi.PostCheckout).Methods("POST")
 
-	history := order.PathPrefix("/history").Subrouter()
-	history.Use(mustBeSignedIn)
-	history.HandleFunc("", w.orderApi.GetHistory).Methods("POST")
+	getHistory := http.HandlerFunc(w.orderApi.GetHistory)
+	order.Handle("/history", w.mustBeSignedIn(getHistory)).Methods("POST")
 
 	// We don't use mustBeSignedIn here.
 	// This allows guest customers with an order ID from a 'track my order'
@@ -64,20 +64,29 @@ func (w *Wiring) SetUpRoutes() {
 	w.router.PathPrefix("/").HandlerFunc(w.error404Handler)
 }
 
-func mustBeSignedIn(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		//TODO: GET THE SESSION
-		if "session" != "" {
-			next.ServeHTTP(w, r)
-		} else {
-			http.Error(w, "forbidden", http.StatusUnauthorized)
-		}
+func (w Wiring) mustBeSignedIn(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		fmt.Println("At must be signed in")
+		session, _ := w.store.Get(request, "session-name")
+
+		fmt.Println(session.Values)
+
+		// if _, ok := session.Values["customerId"]; ok {
+		// 	fmt.Println("Is signed in")
+		// 	next.ServeHTTP(writer, request)
+		// } else {
+		// 	fmt.Println("Failed to be signed in")
+		// 	http.Error(writer, "forbidden", http.StatusUnauthorized)
+		// }
+		next.ServeHTTP(writer, request)
 	})
 }
 
-func invalidateSession(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		//INVALIDATE SESSION
+func (w Wiring) invalidateSession(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		fmt.Println("At invalidate session")
+		w.store.MaxAge(-1)
+		next.ServeHTTP(writer, request)
 	})
 }
 
@@ -87,7 +96,7 @@ func (w Wiring) error404Handler(writer http.ResponseWriter, request *http.Reques
 	fmt.Fprint(writer, "<h1>Uh Oh, route not found</h1>")
 	fmt.Fprint(writer, "<h2>Available routes:</h2>")
 	fmt.Fprint(writer, "<ul>")
-	w.printEndpoints(&w.router, writer)
+	w.printEndpoints(w.router, writer)
 	fmt.Fprint(writer, "</ul>")
 }
 
@@ -108,7 +117,8 @@ func (w Wiring) printEndpoints(r *mux.Router, writer http.ResponseWriter) {
 }
 
 type Wiring struct {
-	router     mux.Router
+	store      *sessions.CookieStore
+	router     *mux.Router
 	accountApi *AccountApi
 	productApi *ProductApi
 	orderApi   *OrderApi

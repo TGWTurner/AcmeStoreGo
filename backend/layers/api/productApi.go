@@ -5,11 +5,14 @@ import (
 	"bjssStoreGo/backend/utils"
 	"encoding/json"
 	"net/http"
+
+	"github.com/gorilla/sessions"
 )
 
-func NewProductApi(productService *bl.ProductService) *ProductApi {
+func NewProductApi(productService *bl.ProductService, s *sessions.CookieStore) *ProductApi {
 	return &ProductApi{
 		ps: *productService,
+		s:  s,
 	}
 }
 
@@ -67,4 +70,5 @@ func (p ProductApi) Deals(w http.ResponseWriter, r *http.Request) {
 
 type ProductApi struct {
 	ps bl.ProductService
+	s  *sessions.CookieStore
 }
