@@ -72,16 +72,9 @@ func TestCanSignUpWithNewAccount() (bool, string, string) {
 		return false, "testCanSignUpWithNewAccount", "Failed to create new account"
 	}
 
-	account.PasswordHash, err = hashPassWithProvidedSalt(as, account.PasswordHash, retAccount.PasswordHash)
-
-	if err != nil {
-		return false, "testCanSignUpWithNewAccount", err.Error()
-	}
-
 	if account.Address != retAccount.Address ||
 		account.Email != retAccount.Email ||
-		account.Name != retAccount.Name ||
-		account.PasswordHash != retAccount.PasswordHash {
+		account.Name != retAccount.Name {
 		return false, "testCanSignUpWithNewAccount", "Failed to return correct created account"
 	}
 
@@ -115,16 +108,15 @@ func TestCanUpdateExistingAccount() (bool, string, string) {
 		return false, "testCanUpdateExistingAccount", "Failed to get test account"
 	}
 
-	retAccount, err := as.Update(account, "newPassword")
+	updateAccount := utils.UpdateAccount{
+		Id:              account.Id,
+		ShippingDetails: account.ShippingDetails,
+	}
+
+	retAccount, err := as.Update(updateAccount)
 
 	if err != nil {
 		return false, "testCanUpdateExistingAccount", "Failed to update account"
-	}
-
-	account.PasswordHash, err = hashPassWithProvidedSalt(as, account.PasswordHash, retAccount.PasswordHash)
-
-	if err != nil {
-		return false, "testCanSignUpWithNewAccount", err.Error()
 	}
 
 	if retAccount != account {
@@ -138,14 +130,14 @@ func TestCannotUpdateUnregisteredAccount() (bool, string, string) {
 	as := SetUpAccount()
 	defer as.Close()
 
-	account := utils.Account{
+	account := utils.UpdateAccount{
 		ShippingDetails: utils.ShippingDetails{
 			Email:    "unregisteredEmail@email.com",
 			Name:     "name",
 			Address:  "address",
 			Postcode: "postcode",
 		},
-		PasswordHash: as.HashPassword("ThisIsAPassword"),
+		Password: "ThisIsAPassword",
 	}
 
 	_, err := as.Update(account)

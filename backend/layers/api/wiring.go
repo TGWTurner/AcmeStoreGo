@@ -29,6 +29,8 @@ func (w *Wiring) Run() {
 func (w *Wiring) SetUpRoutes() {
 	app := w.router.PathPrefix("/api").Subrouter()
 
+	app.HandleFunc("/values", w.Values)
+
 	account := app.PathPrefix("/account").Subrouter()
 	product := app.PathPrefix("/product").Subrouter()
 	order := app.PathPrefix("/order").Subrouter()
@@ -64,33 +66,42 @@ func (w *Wiring) SetUpRoutes() {
 	w.router.PathPrefix("/").HandlerFunc(w.error404Handler)
 }
 
-func (w Wiring) mustBeSignedIn(next http.Handler) http.Handler {
+// TEST \/\/\/\/
+func (w *Wiring) Values(writer http.ResponseWriter, request *http.Request) {
+	session, _ := w.store.Get(request, "session-name")
+	fmt.Println()
+	fmt.Println("Current session: ", session.Values)
+	fmt.Println()
+}
+
+//TEST /\/\/\/\
+
+func (w *Wiring) mustBeSignedIn(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		fmt.Println("At must be signed in")
 		session, _ := w.store.Get(request, "session-name")
 
-		fmt.Println(session.Values)
-
-		// if _, ok := session.Values["customerId"]; ok {
-		// 	fmt.Println("Is signed in")
-		// 	next.ServeHTTP(writer, request)
-		// } else {
-		// 	fmt.Println("Failed to be signed in")
-		// 	http.Error(writer, "forbidden", http.StatusUnauthorized)
-		// }
-		next.ServeHTTP(writer, request)
+		if _, ok := session.Values["customerId"]; ok {
+			next.ServeHTTP(writer, request)
+		} else {
+			http.Error(writer, "forbidden", http.StatusUnauthorized)
+		}
 	})
 }
 
-func (w Wiring) invalidateSession(next http.Handler) http.Handler {
+func (w *Wiring) invalidateSession(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		fmt.Println("At invalidate session")
+		fmt.Println("Invalidating session")
+		session, _ := w.store.Get(request, "session-name")
 		w.store.MaxAge(-1)
+		session.Save(request, writer)
+		w.store.MaxAge(86400 * 30)
+		session.Save(request, writer)
+
 		next.ServeHTTP(writer, request)
 	})
 }
 
-func (w Wiring) error404Handler(writer http.ResponseWriter, request *http.Request) {
+func (w *Wiring) error404Handler(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "text/html")
 
 	fmt.Fprint(writer, "<h1>Uh Oh, route not found</h1>")
@@ -100,7 +111,7 @@ func (w Wiring) error404Handler(writer http.ResponseWriter, request *http.Reques
 	fmt.Fprint(writer, "</ul>")
 }
 
-func (w Wiring) printEndpoints(r *mux.Router, writer http.ResponseWriter) {
+func (w *Wiring) printEndpoints(r *mux.Router, writer http.ResponseWriter) {
 	r.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
 		path, err := route.GetPathTemplate()
 		if err != nil {

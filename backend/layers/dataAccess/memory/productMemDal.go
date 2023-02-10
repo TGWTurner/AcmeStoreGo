@@ -127,7 +127,11 @@ func (pd *ProductDatabaseImpl) DecreaseStock(productQuantities []utils.OrderItem
 	}
 
 	for _, product := range productQuantities {
-		pd.products[product.ProductId].QuantityRemaining = pd.products[product.ProductId].QuantityRemaining - product.Quantity
+		for i := range pd.products {
+			if pd.products[i].Id == product.ProductId {
+				pd.products[i].QuantityRemaining -= product.Quantity
+			}
+		}
 	}
 
 	return nil

@@ -25,7 +25,7 @@ func landingPage() http.Handler {
 
 func main() {
 	//Run tests:
-	//tests()
+	// tests()
 	db := dataAccess.InitiateConnection()
 	r := mux.NewRouter()
 	store := sessions.NewCookieStore([]byte("my session encryption secret"))

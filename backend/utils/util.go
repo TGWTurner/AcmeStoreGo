@@ -10,7 +10,6 @@ import (
 Missing:
  - Basket
  - Session
- - AccountApiResponse
 */
 
 type ShippingDetails struct {
@@ -24,6 +23,24 @@ type Account struct {
 	Id           int
 	PasswordHash string
 	ShippingDetails
+}
+
+type AccountApiResponse struct {
+	Id int
+	ShippingDetails
+}
+
+type UpdateAccount struct {
+	Id       int
+	Password string
+	ShippingDetails
+}
+
+func (a *Account) OmitPasswordHash() AccountApiResponse {
+	return AccountApiResponse{
+		Id:              a.Id,
+		ShippingDetails: a.ShippingDetails,
+	}
 }
 
 type Product struct {
@@ -107,4 +124,9 @@ type Database struct {
 	Account AccountDatabase
 	Product ProductDatabase
 	Order   OrderDatabase
+}
+
+type Basket struct {
+	Total int
+	Items []OrderItem
 }

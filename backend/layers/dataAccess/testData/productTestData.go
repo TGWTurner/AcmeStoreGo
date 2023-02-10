@@ -15,7 +15,7 @@ func GetProductTestData() Data {
 	return Data{
 		Products: []utils.Product{
 			{
-				Id:                6,
+				Id:                1,
 				CategoryId:        1,
 				Price:             100,
 				QuantityRemaining: 2,
@@ -23,7 +23,7 @@ func GetProductTestData() Data {
 				LongDescription:   "The dog (Canis familiaris when considered a distinct species or Canis lupus familiaris when considered a subspecies of the wolf) is a domesticated carnivore of the family Canidae...",
 			},
 			{
-				Id:                1,
+				Id:                2,
 				CategoryId:        1,
 				Price:             1000,
 				QuantityRemaining: 1000,
@@ -31,7 +31,7 @@ func GetProductTestData() Data {
 				LongDescription:   "The giraffe (Giraffa) is an African artiodactyl mammal, the tallest living terrestrial animal and the largest ruminant. It is traditionally considered to be one species, Giraffa...",
 			},
 			{
-				Id:                2,
+				Id:                3,
 				CategoryId:        1,
 				Price:             90,
 				QuantityRemaining: 1000,
@@ -39,7 +39,7 @@ func GetProductTestData() Data {
 				LongDescription:   "The koala or, inaccurately, koala bear[a] (Phascolarctos cinereus) is an arboreal herbivorous marsupial native to Australia. It is the only extant representative of the family Phascolarctidae...",
 			},
 			{
-				Id:                3,
+				Id:                4,
 				CategoryId:        2,
 				Price:             1,
 				QuantityRemaining: 2,
@@ -47,7 +47,7 @@ func GetProductTestData() Data {
 				LongDescription:   "The Brazil nut (Bertholletia excelsa) is a South American tree in the family Lecythidaceae, and it is also the name of the trees commercially harvested edible seeds. It is one of the largest...",
 			},
 			{
-				Id:                4,
+				Id:                5,
 				CategoryId:        2,
 				Price:             2,
 				QuantityRemaining: 2,
@@ -55,7 +55,7 @@ func GetProductTestData() Data {
 				LongDescription:   "An apricot is a fruit, or the tree that bears the fruit, of several species in the genus Prunus (stone fruits).",
 			},
 			{
-				Id:                5,
+				Id:                6,
 				CategoryId:        2,
 				Price:             3,
 				QuantityRemaining: 2,

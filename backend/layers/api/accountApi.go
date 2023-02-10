@@ -5,7 +5,6 @@ import (
 	"bjssStoreGo/backend/utils"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/sessions"
@@ -18,8 +17,8 @@ func NewAccountApi(accountService *businessLogic.AccountService, s *sessions.Coo
 	}
 }
 
-func (a AccountApi) getSignedInUserId(r *http.Request) (int, error) {
-	session, _ := a.s.Get(r, "session-name") //TODO: WHAT IS THE SESSION NAME
+func (a *AccountApi) getSignedInUserId(r *http.Request) (int, error) {
+	session, _ := a.s.Get(r, "session-name")
 
 	customerId, ok := session.Values["customerId"]
 
@@ -30,18 +29,14 @@ func (a AccountApi) getSignedInUserId(r *http.Request) (int, error) {
 	return customerId.(int), nil
 }
 
-func (a AccountApi) setSignedInUserId(w http.ResponseWriter, r *http.Request, customerId int) {
-	session, _ := a.s.Get(r, "session-name") //TODO: WHAT IS THE SESSION NAME
-
+func (a *AccountApi) setSignedInUserId(w http.ResponseWriter, r *http.Request, customerId int) {
+	session, _ := a.s.Get(r, "session-name")
 	session.Values["customerId"] = customerId
-
 	session.Save(r, w)
 }
 
-func (a AccountApi) PostSignIn(w http.ResponseWriter, r *http.Request) {
+func (a *AccountApi) PostSignIn(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-
-	fmt.Println("Sign in called")
 
 	var eap struct {
 		Email    string
@@ -57,7 +52,6 @@ func (a AccountApi) PostSignIn(w http.ResponseWriter, r *http.Request) {
 	account, err := a.as.SignIn(eap.Email, eap.Password)
 
 	if err == nil {
-		fmt.Println("Successfully signed in")
 		a.setSignedInUserId(w, r, account.Id)
 	}
 
@@ -65,7 +59,7 @@ func (a AccountApi) PostSignIn(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(account)
 }
 
-func (a AccountApi) PostSignUp(w http.ResponseWriter, r *http.Request) {
+func (a *AccountApi) PostSignUp(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	var acc struct {
@@ -93,59 +87,48 @@ func (a AccountApi) PostSignUp(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(account)
 }
 
-func (a AccountApi) GetAccount(w http.ResponseWriter, r *http.Request) {
+func (a *AccountApi) GetAccount(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	session, _ := a.s.Get(r, "session-name")
+	userId, err := a.getSignedInUserId(r)
 
-	fmt.Println("Current stored values")
-	fmt.Println(session.Values)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
 
-	session.Values["key"] = "value"
-	session.Save(r, w)
+		response := struct {
+			Error string
+			Msg   string
+		}{
+			Error: "forbidden",
+			Msg:   "user is not signed in",
+		}
 
-	fmt.Println("Added key: value")
-	fmt.Println(session.Values)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
 
-	fmt.Println("End of getAccount")
+	account, err := a.as.GetById(userId)
 
-	// userId, err := a.getSignedInUserId(r)
+	if err != nil {
+		//log the error?
+	}
 
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-
-	// 	response := struct {
-	// 		Error string
-	// 		Msg   string
-	// 	}{
-	// 		Error: "forbidden",
-	// 		Msg:   "user is not signed in",
-	// 	}
-
-	// 	json.NewEncoder(w).Encode(response)
-	// 	return
-	// }
-
-	// account, err := a.as.GetById(userId)
-
-	// if err != nil {
-	// 	//log the error?
-	// }
-
-	// w.WriteHeader(http.StatusOK)
-	// json.NewEncoder(w).Encode(account)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(account)
 }
 
-func (a AccountApi) PostAccount(w http.ResponseWriter, r *http.Request) {
+func (a *AccountApi) PostAccount(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	_, err := a.getSignedInUserId(r)
+	userId, err := a.getSignedInUserId(r)
 
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 	}
 
-	var acc utils.Account
+	var acc utils.UpdateAccount
+
+	acc.Id = userId
 
 	err = json.NewDecoder(r.Body).Decode(&acc)
 

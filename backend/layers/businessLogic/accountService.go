@@ -22,21 +22,21 @@ func (as AccountService) Close() {
 	as.db.Close()
 }
 
-func (as AccountService) SignIn(email string, password string) (utils.Account, error) {
+func (as AccountService) SignIn(email string, password string) (utils.AccountApiResponse, error) {
 	account, err := as.db.GetByEmail(email)
 
 	if err != nil {
-		return utils.Account{}, errors.New("Failed to get account for email: " + email)
+		return utils.AccountApiResponse{}, errors.New("invalidEmail")
 	}
 
 	if ok, err := as.validatePassword(password, account.PasswordHash); err != nil || !ok {
-		return utils.Account{}, errors.New("Invalid password for account with email: " + email)
+		return utils.AccountApiResponse{}, errors.New("invalidPassword")
 	}
 
-	return account, nil
+	return account.OmitPasswordHash(), nil
 }
 
-func (as AccountService) SignUp(email string, password string, name string, address string, postcode string) (utils.Account, error) {
+func (as AccountService) SignUp(email string, password string, name string, address string, postcode string) (utils.AccountApiResponse, error) {
 	account, err := as.db.Add(utils.Account{
 		PasswordHash: as.HashPassword(password),
 		ShippingDetails: utils.ShippingDetails{
@@ -48,34 +48,39 @@ func (as AccountService) SignUp(email string, password string, name string, addr
 	})
 
 	if err != nil {
-		return utils.Account{}, errors.New("Failed to sign up user")
+		return utils.AccountApiResponse{}, errors.New("Failed to sign up user")
 	}
 
-	return account, nil
+	return account.OmitPasswordHash(), nil
 }
 
-func (as AccountService) Update(account utils.Account, newPassword ...string) (utils.Account, error) {
-	if len(newPassword) > 0 {
-		account.PasswordHash = as.HashPassword(account.PasswordHash)
+func (as AccountService) Update(account utils.UpdateAccount) (utils.AccountApiResponse, error) {
+	updateAccount := utils.Account{
+		Id:              account.Id,
+		ShippingDetails: account.ShippingDetails,
 	}
 
-	updatedAccount, err := as.db.Update(account)
+	if account.Password != "" {
+		updateAccount.PasswordHash = as.HashPassword(account.Password)
+	}
+
+	updatedAccount, err := as.db.Update(updateAccount)
 
 	if err != nil {
-		return utils.Account{}, errors.New("Failed to update account with accountId: " + strconv.Itoa(account.Id))
+		return utils.AccountApiResponse{}, errors.New("Failed to update account")
 	}
 
-	return updatedAccount, nil
+	return updatedAccount.OmitPasswordHash(), nil
 }
 
-func (as AccountService) GetById(accountId int) (utils.Account, error) {
+func (as AccountService) GetById(accountId int) (utils.AccountApiResponse, error) {
 	account, err := as.db.GetById(accountId)
 
 	if err != nil {
-		return utils.Account{}, errors.New("Failed to get account with id: " + strconv.Itoa(accountId))
+		return utils.AccountApiResponse{}, errors.New("Failed to get account with id: " + strconv.Itoa(accountId))
 	}
 
-	return account, nil
+	return account.OmitPasswordHash(), nil
 }
 
 type AccountService struct {
@@ -86,7 +91,7 @@ func (as AccountService) validatePassword(password string, hashNsalt string) (bo
 	hash, salt, ok := strings.Cut(hashNsalt, ":")
 
 	if !ok {
-		return false, errors.New("Failed to split has and salt")
+		return false, errors.New("Failed to split hash and salt")
 	}
 
 	newHash := as.StrongishHash(password, salt)

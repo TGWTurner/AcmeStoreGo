@@ -16,7 +16,7 @@ func NewProductApi(productService *bl.ProductService, s *sessions.CookieStore) *
 	}
 }
 
-func (p ProductApi) Search(w http.ResponseWriter, r *http.Request) {
+func (p *ProductApi) Search(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	query := map[string]string{}
@@ -38,7 +38,7 @@ func (p ProductApi) Search(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(products)
 }
 
-func (p ProductApi) Categories(w http.ResponseWriter, r *http.Request) {
+func (p *ProductApi) Categories(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	categories, err := p.ps.GetProductcategories()
@@ -51,7 +51,7 @@ func (p ProductApi) Categories(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(categories)
 }
 
-func (p ProductApi) Deals(w http.ResponseWriter, r *http.Request) {
+func (p *ProductApi) Deals(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	query := map[string]string{
