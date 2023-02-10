@@ -2,9 +2,7 @@ package main
 
 import (
 	"bjssStoreGo/backend/layers/api"
-	"bjssStoreGo/backend/layers/dataAccess"
-	"bjssStoreGo/blTests"
-	"bjssStoreGo/dbTests"
+	da "bjssStoreGo/backend/layers/dataAccess"
 	"fmt"
 	"net/http"
 	"os"
@@ -24,9 +22,7 @@ func landingPage() http.Handler {
 }
 
 func main() {
-	//Run tests:
-	// tests()
-	db := dataAccess.InitiateConnection()
+	db := da.InitiateConnection()
 	r := mux.NewRouter()
 	store := sessions.NewCookieStore([]byte("my session encryption secret"))
 
@@ -39,39 +35,6 @@ func main() {
 func testFunc(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	w.Write([]byte("Got to the endpoint response"))
-}
-
-func tests() {
-	runDbTests()
-	runBlTests()
-}
-
-func runBlTests() {
-	fmt.Println()
-
-	setUp("sql")
-	fmt.Println("Sql")
-	blTests.RunTests()
-
-	fmt.Println()
-
-	setUp("memory")
-	fmt.Println("Memory")
-	blTests.RunTests()
-}
-
-func runDbTests() {
-	fmt.Println()
-
-	setUp("sql")
-	fmt.Println("Sql")
-	dbTests.RunTests()
-
-	fmt.Println()
-
-	setUp("memory")
-	fmt.Println("Memory")
-	dbTests.RunTests()
 }
 
 func setUp(mode string) {

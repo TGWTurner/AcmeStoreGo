@@ -8,9 +8,10 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"testing"
 )
 
-func TestSearchProductsForDealsReturnsCurrentDeals() (bool, string, string) {
+func TestSearchProductsForDealsReturnsCurrentDeals(t *testing.T) {
 	ps := SetUpProduct()
 	defer ps.Close()
 
@@ -20,20 +21,16 @@ func TestSearchProductsForDealsReturnsCurrentDeals() (bool, string, string) {
 
 	productsWithDeals, err := ps.SearchProducts(query)
 
-	if err != nil {
-		return false, "testSearchProductsForDealsReturnsCurrentDeals", "Failed to get deals"
-	}
+	AssertNil(t, err)
 
 	expectedProducts := getProductsWithDeals()
 
 	if !assertProductSlicesAreEqual(productsWithDeals, expectedProducts) {
-		return false, "testSearchProductsForDealsReturnsCurrentDeals", "Failed to provide correct deals"
+		t.Errorf("Failed to provide correct deals")
 	}
-
-	return true, "testSearchProductsForDealsReturnsCurrentDeals", "Successfully provided correct deals"
 }
 
-func TestSearchProductsForCategoryReturnsCorrectProducts() (bool, string, string) {
+func TestSearchProductsForCategoryReturnsCorrectProducts(t *testing.T) {
 	ps := SetUpProduct()
 	defer ps.Close()
 
@@ -45,20 +42,16 @@ func TestSearchProductsForCategoryReturnsCorrectProducts() (bool, string, string
 
 	productsFromCategory, err := ps.SearchProducts(query)
 
-	if err != nil {
-		return false, "testSearchProductsForCategoryReturnsCorrectProducts", "Failed to search products"
-	}
+	AssertNil(t, err)
 
 	expectedProducts := getProductsInCategory(categoryId)
 
 	if !assertProductSlicesAreEqual(productsFromCategory, expectedProducts) {
-		return false, "testSearchProductsForCategoryReturnsCorrectProducts", "Failed to return correct products in category"
+		t.Errorf("Failed to return correct products in category")
 	}
-
-	return true, "testSearchProductsForCategoryReturnsCorrectProducts", "Successfully returned products in category"
 }
 
-func TestSearchProductsForTextReturnsCorrectProducts() (bool, string, string) {
+func TestSearchProductsForTextReturnsCorrectProducts(t *testing.T) {
 	ps := SetUpProduct()
 	defer ps.Close()
 
@@ -70,20 +63,16 @@ func TestSearchProductsForTextReturnsCorrectProducts() (bool, string, string) {
 
 	productsFromSearch, err := ps.SearchProducts(query)
 
-	if err != nil {
-		return false, "testSearchProductsForTextReturnsCorrectProducts", "Failed to get products from search term"
-	}
+	AssertNil(t, err)
 
 	expectedProducts := getProductsWithText(searchTerm)
 
 	if !assertProductSlicesAreEqual(productsFromSearch, expectedProducts) {
-		return false, "testSearchProductsForTextReturnsCorrectProducts", "Failed to return correct products for search text"
+		t.Errorf("Failed to return correct products for search text")
 	}
-
-	return true, "testSearchProductsForTextReturnsCorrectProducts", "Successfully returned correct products for search term"
 }
 
-func TestSearchProductsWithoutQueryReturnsAllProducts() (bool, string, string) {
+func TestSearchProductsWithoutQueryReturnsAllProducts(t *testing.T) {
 	ps := SetUpProduct()
 	defer ps.Close()
 
@@ -91,39 +80,31 @@ func TestSearchProductsWithoutQueryReturnsAllProducts() (bool, string, string) {
 
 	productsFromSearch, err := ps.SearchProducts(query)
 
-	if err != nil {
-		return false, "testSearchProductsWithoutQueryReturnsAllProducts", "Failed to search for products"
-	}
+	AssertNil(t, err)
 
 	expectedProducts := testData.GetProductTestData().Products
 
 	if !assertProductSlicesAreEqual(productsFromSearch, expectedProducts) {
-		return false, "testSearchProductsWithoutQueryReturnsAllProducts", "Failed to return all products"
+		t.Errorf("Failed to return all products")
 	}
-
-	return true, "testSearchProductsWithoutQueryReturnsAllProducts", "Successfully returned all products "
 }
 
-func TestGetProductCategoriesReturnsCategories() (bool, string, string) {
+func TestGetProductCategoriesReturnsCategories(t *testing.T) {
 	ps := SetUpProduct()
 	defer ps.Close()
 
 	categories, err := ps.GetProductcategories()
 
-	if err != nil {
-		return false, "testGetProductCategoriesReturnsCategories", "Failed to get product categories"
-	}
+	AssertNil(t, err)
 
 	expectedCategories := testData.GetProductTestData().Categories
 
 	if !reflect.DeepEqual(categories, expectedCategories) {
-		return false, "testGetProductCategoriesReturnsCategories", "Failed to return correct categories"
+		t.Errorf("Failed to return correct categories")
 	}
-
-	return true, "testGetProductCategoriesReturnsCategories", "Successfully returned expected categories"
 }
 
-func TestCheckStockReturnsCorrectProductsWithoutEnoughStock() (bool, string, string) {
+func TestCheckStockReturnsCorrectProductsWithoutEnoughStock(t *testing.T) {
 	ps := SetUpProduct()
 	defer ps.Close()
 
@@ -132,7 +113,7 @@ func TestCheckStockReturnsCorrectProductsWithoutEnoughStock() (bool, string, str
 	orderItems := []utils.OrderItem{
 		{
 			ProductId: 1,
-			Quantity:  5,
+			Quantity:  1,
 		},
 		{
 			ProductId: productWithoutEnoughStock.Id,
@@ -149,25 +130,21 @@ func TestCheckStockReturnsCorrectProductsWithoutEnoughStock() (bool, string, str
 
 	notEnoughStock, _, err := ps.CheckStock(orderItems)
 
-	if err != nil {
-		return false, "testCheckStockReturnsCorrectProductsWithoutEnoughStock", "Failed to check stock of products"
-	}
+	AssertNil(t, err)
 
 	if !reflect.DeepEqual(notEnoughStock, expectedOrderItems) {
-		return false, "testCheckStockReturnsCorrectProductsWithoutEnoughStock", "Failed to return expected product as without enough stock"
+		t.Errorf("Failed to return expected product as without enough stock")
 	}
-
-	return true, "testCheckStockReturnsCorrectProductsWithoutEnoughStock", "Successfully returned correct product as without enough stock"
 }
 
-func TestCheckStockReturnsNoProductsWhenAllHaveStock() (bool, string, string) {
+func TestCheckStockReturnsNoProductsWhenAllHaveStock(t *testing.T) {
 	ps := SetUpProduct()
 	defer ps.Close()
 
 	orderItems := []utils.OrderItem{
 		{
 			ProductId: 1,
-			Quantity:  5,
+			Quantity:  1,
 		},
 		{
 			ProductId: 5,
@@ -177,18 +154,14 @@ func TestCheckStockReturnsNoProductsWhenAllHaveStock() (bool, string, string) {
 
 	notEnoughStock, _, err := ps.CheckStock(orderItems)
 
-	if err != nil {
-		return false, "testCheckStockReturnsNoProductsWhenAllHaveStock", "Failed to check stock of products"
-	}
+	AssertNil(t, err)
 
 	if len(notEnoughStock) != 0 {
-		return false, "testCheckStockReturnsNoProductsWhenAllHaveStock", "Failed to return no products without enough stock"
+		t.Errorf("Failed to return no products without enough stock")
 	}
-
-	return true, "testCheckStockReturnsNoProductsWhenAllHaveStock", "Successfully returned no products without enough stock"
 }
 
-func TestCheckStockReturnsCorrectTotal() (bool, string, string) {
+func TestCheckStockReturnsCorrectTotal(t *testing.T) {
 	ps := SetUpProduct()
 	defer ps.Close()
 
@@ -205,27 +178,23 @@ func TestCheckStockReturnsCorrectTotal() (bool, string, string) {
 
 	_, total, err := ps.CheckStock(orderItems)
 
-	if err != nil {
-		return false, "testCheckStockReturnsCorrectTotal", "Failed to check stock of products"
-	}
+	AssertNil(t, err)
 
 	expectedTotal := calculateTotalFromOrderItems(orderItems)
 
 	if total != expectedTotal {
-		return false, "testCheckStockReturnsCorrectTotal", "Failed to return no products without enough stock"
+		t.Errorf("Expected total: %d, got: %d", expectedTotal, total)
 	}
-
-	return true, "testCheckStockReturnsCorrectTotal", "Successfully returned no products without enough stock"
 }
 
-func TestDecreaseStockReducesStockOfProvidedProducts() (bool, string, string) {
+func TestDecreaseStockReducesStockOfProvidedProducts(t *testing.T) {
 	ps := SetUpProduct()
 	defer ps.Close()
 
 	orderItems := []utils.OrderItem{
 		{
 			ProductId: 1,
-			Quantity:  5,
+			Quantity:  1,
 		},
 		{
 			ProductId: 5,
@@ -243,16 +212,12 @@ func TestDecreaseStockReducesStockOfProvidedProducts() (bool, string, string) {
 
 	err := ps.DecreaseStock(orderItems)
 
-	if err != nil {
-		return false, "testDecreaseStockReducesStockOfProvidedProducts", "Failed to decrease stock of products"
-	}
+	AssertNil(t, err)
 
 	for _, item := range orderItems {
 		alteredProduct, err := getPsProductFromId(ps, item.ProductId)
 
-		if err != nil {
-			return false, "testDecreaseStockReducesStockOfProvidedProducts", "Failed to get product from db"
-		}
+		AssertNil(t, err)
 
 		for _, product := range products {
 			if product.Id != alteredProduct.Id {
@@ -260,15 +225,13 @@ func TestDecreaseStockReducesStockOfProvidedProducts() (bool, string, string) {
 			}
 
 			if product.QuantityRemaining != alteredProduct.QuantityRemaining {
-				return false, "testDecreaseStockReducesStockOfProvidedProducts", "Failed to change stock level to correct value"
+				t.Errorf("Failed to change stock level to correct value")
 			}
 		}
 	}
-
-	return true, "testDecreaseStockReducesStockOfProvidedProducts", "Successfully altered correct products remaining quantity"
 }
 
-func TestDecreaseStockReturnsErrorWhenProductDoesNotHaveEnoughStock() (bool, string, string) {
+func TestDecreaseStockReturnsErrorWhenProductDoesNotHaveEnoughStock(t *testing.T) {
 	ps := SetUpProduct()
 	defer ps.Close()
 
@@ -286,10 +249,8 @@ func TestDecreaseStockReturnsErrorWhenProductDoesNotHaveEnoughStock() (bool, str
 	err := ps.DecreaseStock(orderItems)
 
 	if err == nil {
-		return false, "testDecreaseStockReturnsErrorWhenProductDoesNotHaveEnoughStock", "Failed to return error when products did not have enough stock"
+		t.Errorf("Failed to return error when products did not have enough stock")
 	}
-
-	return true, "testDecreaseStockReturnsErrorWhenProductDoesNotHaveEnoughStock", "Successfully returned error when attempting to reduce stock for products without sufficient stock"
 }
 
 func getPsProductFromId(ps businessLogic.ProductService, productId int) (utils.Product, error) {
