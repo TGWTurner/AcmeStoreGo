@@ -1,7 +1,7 @@
 package api
 
 import (
-	"bjssStoreGo/backend/layers/businessLogic"
+	bl "bjssStoreGo/backend/layers/businessLogic"
 	"bjssStoreGo/backend/utils"
 	"errors"
 	"net/http"
@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/sessions"
 )
 
-func NewOrderApi(orderService *businessLogic.OrderService, s *sessions.CookieStore) *OrderApi {
+func NewOrderApi(orderService *bl.OrderService, s *sessions.CookieStore) *OrderApi {
 	return &OrderApi{
 		os: *orderService,
 		s:  s,
@@ -47,6 +47,6 @@ func (o *OrderApi) PostCheckout(w http.ResponseWriter, r *http.Request) {
 }
 
 type OrderApi struct {
-	os businessLogic.OrderService
+	os bl.OrderService
 	s  *sessions.CookieStore
 }

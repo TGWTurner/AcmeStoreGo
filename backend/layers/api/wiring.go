@@ -12,13 +12,16 @@ import (
 )
 
 func NewWiring(db utils.Database, r *mux.Router, s *sessions.CookieStore) *Wiring {
+	as := bl.NewAccountService(db.Account)
+	ps := bl.NewProductService(db.Product)
+	os := bl.NewOrderService(db.Order, *ps)
 
 	return &Wiring{
 		store:      s,
 		router:     r,
-		accountApi: NewAccountApi(bl.NewAccountService(db.Account), s),
-		productApi: NewProductApi(bl.NewProductService(db.Product), s),
-		orderApi:   NewOrderApi(bl.NewOrderService(db.Order), s),
+		accountApi: NewAccountApi(as, s),
+		productApi: NewProductApi(ps, s),
+		orderApi:   NewOrderApi(os, s),
 	}
 }
 

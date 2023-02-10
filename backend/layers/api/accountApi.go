@@ -1,7 +1,7 @@
 package api
 
 import (
-	"bjssStoreGo/backend/layers/businessLogic"
+	bl "bjssStoreGo/backend/layers/businessLogic"
 	"bjssStoreGo/backend/utils"
 	"encoding/json"
 	"errors"
@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/sessions"
 )
 
-func NewAccountApi(accountService *businessLogic.AccountService, s *sessions.CookieStore) *AccountApi {
+func NewAccountApi(accountService *bl.AccountService, s *sessions.CookieStore) *AccountApi {
 	return &AccountApi{
 		as: *accountService,
 		s:  s,
@@ -147,6 +147,6 @@ func (a *AccountApi) PostAccount(w http.ResponseWriter, r *http.Request) {
 }
 
 type AccountApi struct {
-	as businessLogic.AccountService
+	as bl.AccountService
 	s  *sessions.CookieStore
 }

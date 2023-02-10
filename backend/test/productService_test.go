@@ -1,8 +1,8 @@
 package test
 
 import (
-	"bjssStoreGo/backend/layers/businessLogic"
-	"bjssStoreGo/backend/layers/dataAccess"
+	bl "bjssStoreGo/backend/layers/businessLogic"
+	da "bjssStoreGo/backend/layers/dataAccess"
 	"bjssStoreGo/backend/layers/dataAccess/testData"
 	"bjssStoreGo/backend/utils"
 	"errors"
@@ -12,9 +12,9 @@ import (
 	"testing"
 )
 
-func setUpProduct() businessLogic.ProductService {
-	db := dataAccess.InitiateConnection()
-	return *businessLogic.NewProductService(db.Product)
+func setUpProduct() bl.ProductService {
+	db := da.InitiateConnection()
+	return *bl.NewProductService(db.Product)
 }
 
 func TestGetsAll(t *testing.T) {
@@ -160,21 +160,7 @@ func TestDecreasesStock(t *testing.T) {
 		{ProductId: 3, Quantity: 2},
 	}
 
-	// ============
-	// allProducts, _ := ps.SearchProducts(map[string]string{})
-
-	// for _, product := range allProducts {
-	// 	fmt.Println(product.Id, ":", product.ShortDescription, " : ", product.QuantityRemaining)
-	// }
-
 	ps.DecreaseStock(orderItems)
-
-	// allProducts, _ = ps.SearchProducts(map[string]string{})
-
-	// for _, product := range allProducts {
-	// 	fmt.Println(product.Id, ":", product.ShortDescription, " : ", product.QuantityRemaining)
-	// }
-	// ============
 
 	if product, err := getPsProductFromId(ps, 1); err != nil || product.QuantityRemaining != 1 {
 		t.Errorf("Expected quantity of %d, got %d for product with id %d", 1, product.QuantityRemaining, product.Id)
@@ -279,7 +265,7 @@ func getProductsWithDeals(date string) []utils.Product {
 	return currentDealProducts
 }
 
-func getPsProductFromId(ps businessLogic.ProductService, productId int) (utils.Product, error) {
+func getPsProductFromId(ps bl.ProductService, productId int) (utils.Product, error) {
 	allProducts, err := ps.SearchProducts(map[string]string{})
 
 	if err != nil {

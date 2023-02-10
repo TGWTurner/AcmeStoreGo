@@ -15,7 +15,8 @@ func SetUpAccount() businessLogic.AccountService {
 
 func SetUpOrder() businessLogic.OrderService {
 	db := dataAccess.InitiateConnection()
-	orderService := businessLogic.NewOrderService(db.Order)
+	ps := SetUpProduct()
+	orderService := businessLogic.NewOrderService(db.Order, ps)
 
 	return *orderService
 }

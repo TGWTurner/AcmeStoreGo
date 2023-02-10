@@ -1,8 +1,8 @@
 package test
 
 import (
-	"bjssStoreGo/backend/layers/businessLogic"
-	"bjssStoreGo/backend/layers/dataAccess"
+	bl "bjssStoreGo/backend/layers/businessLogic"
+	da "bjssStoreGo/backend/layers/dataAccess"
 	"bjssStoreGo/backend/utils"
 	"testing"
 )
@@ -21,12 +21,12 @@ var signUpData = struct {
 	password: "s3cret",
 }
 
-func setUpAccount() businessLogic.AccountService {
-	db := dataAccess.InitiateConnection()
-	return *businessLogic.NewAccountService(db.Account)
+func setUpAccount() bl.AccountService {
+	db := da.InitiateConnection()
+	return *bl.NewAccountService(db.Account)
 }
 
-func createAccount(t *testing.T, as businessLogic.AccountService) utils.AccountApiResponse {
+func createAccount(t *testing.T, as bl.AccountService) utils.AccountApiResponse {
 	acc, err := as.SignUp(signUpData.email, signUpData.password, signUpData.name, signUpData.address, signUpData.postcode)
 
 	AssertNil(t, err)
