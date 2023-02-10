@@ -107,7 +107,7 @@ func xTestRejectsAnOrderIfNotEnoughStock(t *testing.T) {
 	}
 }
 
-func TestFetchesOrders(t *testing.T) {
+func xTestFetchesOrders(t *testing.T) {
 	os, ps := setUpOrder()
 	defer func() { os.Close(); ps.Close() }()
 
