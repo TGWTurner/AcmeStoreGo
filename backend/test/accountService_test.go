@@ -117,36 +117,36 @@ func TestUpdatesAnAccountIncludingPasswordAndCanSignIn(t *testing.T) {
 
 func AssertAccountDataMatching(t *testing.T, actual, expected utils.AccountApiResponse) {
 	if expected.Address != actual.Address {
-		t.Errorf("Got address: %s, wanted address: %s", expected.Address, actual.Address)
+		t.Errorf("Expected address: %s, got address: %s", expected.Address, actual.Address)
 	}
 
 	if expected.Email != actual.Email {
-		t.Errorf("Got email: %s, wanted email: %s", expected.Email, actual.Email)
+		t.Errorf("Expected email: %s, got email: %s", expected.Email, actual.Email)
 	}
 
 	if expected.Name != actual.Name {
-		t.Errorf("Got name: %s, wanted name: %s", expected.Name, actual.Name)
+		t.Errorf("Expected name: %s, got name: %s", expected.Name, actual.Name)
 	}
 
 	if expected.Postcode != actual.Postcode {
-		t.Errorf("Got postcode: %s, wanted postcode: %s", expected.Postcode, actual.Postcode)
+		t.Errorf("Expected postcode: %s, got postcode: %s", expected.Postcode, actual.Postcode)
 	}
 }
 
 func AssertAccountDataMatchesSignUp(t *testing.T, account utils.AccountApiResponse) {
 	if account.Address != signUpData.address {
-		t.Errorf("Got address: %s, wanted address: %s", account.Address, signUpData.address)
+		t.Errorf("Expected address: %s, got address: %s", signUpData.address, account.Address)
 	}
 
 	if account.Email != signUpData.email {
-		t.Errorf("Got email: %s, wanted email: %s", account.Email, signUpData.email)
+		t.Errorf("Expected email: %s, got email: %s", signUpData.email, account.Email)
 	}
 
 	if account.Name != signUpData.name {
-		t.Errorf("Got name: %s, wanted name: %s", account.Name, signUpData.name)
+		t.Errorf("Expected name: %s, got name: %s", signUpData.name, account.Name)
 	}
 
 	if account.Postcode != signUpData.postcode {
-		t.Errorf("Got postcode: %s, wanted postcode: %s", account.Postcode, signUpData.postcode)
+		t.Errorf("Expected postcode: %s, got postcode: %s", signUpData.postcode, account.Postcode)
 	}
 }
