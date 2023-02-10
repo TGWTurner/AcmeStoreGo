@@ -3,15 +3,14 @@ package dbTests
 import (
 	"bjssStoreGo/backend/layers/dataAccess/testData"
 	"bjssStoreGo/backend/utils"
-	"fmt"
 	"reflect"
-	"strconv"
 	"strings"
+	"testing"
 
 	"golang.org/x/exp/slices"
 )
 
-func TestGetProductGivenId() (bool, string, string) {
+func TestGetProductGivenId(t *testing.T) {
 	db := SetUp()
 	defer CloseDb(db)
 
@@ -19,67 +18,54 @@ func TestGetProductGivenId() (bool, string, string) {
 
 	product, err := db.Product.GetById(index)
 
-	if err != nil {
-		return false, "testGetProductGivenId", "Failed to get product with id: " + strconv.Itoa(index)
-	}
+	AssertNil(t, err)
 
 	expected := getTestProductById(index)
 
 	if !reflect.DeepEqual(expected, product) {
-		return false, "testGetProductGivenId", "Actual Product did not match expected"
+		t.Errorf("Expected product: %v, got product: %v", expected, product)
 	}
-
-	return true, "testGetProductGivenId", "Received correct product for index:" + strconv.Itoa(index)
 }
 
-func TestGetProductsGivenIds() (bool, string, string) {
+func TestGetProductsGivenIds(t *testing.T) {
 	db := SetUp()
 	defer CloseDb(db)
 
 	indexes := []int{1, 2, 3}
-	strIndexes := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(indexes)), ","), "[]")
 	products, err := db.Product.GetByIds(indexes...)
 
-	if err != nil {
-		return false, "testGetProductsGivenIds", "Failed to get products by id's: " + strIndexes
-	}
+	AssertNil(t, err)
 
 	for i, index := range indexes {
 		expected := getTestProductById(index)
 		if !reflect.DeepEqual(expected, products[i]) {
-			return false, "testGetProductsGivenIds", "Actual Product did not match expected"
+			t.Errorf("Expected product: %v, got product: %v", expected, products[i])
 		}
 	}
-
-	return true, "testGetProductsGivenIds", "Got correct products for ids: " + strIndexes
 }
 
-func TestGetCategoriesReturnsCorrectCategories() (bool, string, string) {
+func TestGetCategoriesReturnsCorrectCategories(t *testing.T) {
 	db := SetUp()
 	defer CloseDb(db)
 
 	categories, err := db.Product.GetCategories()
 
-	if err != nil {
-		return false, "testGetCategoriesReturnsCorrectCategories", "Failed to get categories"
-	}
+	AssertNil(t, err)
 
 	expectedCategories := testData.GetProductTestData().Categories
 
 	if len(categories) != len(expectedCategories) {
-		return false, "testGetCategoriesReturnsCorrectCategories", "Received incorrect number of categories"
+		t.Errorf("Expected categories length: %d, got: %d", len(expectedCategories), len(categories))
 	}
 
 	for _, category := range categories {
 		if ok, err := assertCategoryHasExpectedName(category); !ok {
-			return false, "testGetCategoriesReturnsCorrectCategories", err
+			t.Errorf("Expected error: nil, got error: %s", err)
 		}
 	}
-
-	return true, "testGetCategoriesReturnsCorrectCategories", "Recieved expected categories"
 }
 
-func TestGetProductsByCategoryProvidesCorrectProducts() (bool, string, string) {
+func TestGetProductsByCategoryProvidesCorrectProducts(t *testing.T) {
 	db := SetUp()
 	defer CloseDb(db)
 
@@ -87,37 +73,22 @@ func TestGetProductsByCategoryProvidesCorrectProducts() (bool, string, string) {
 
 	products, err := db.Product.GetByCategory(categoryId)
 
-	if err != nil {
-		return false,
-			"testGetProductsByCategoryProvidesCorrectProducts",
-			"Failed too get categories"
-	}
+	AssertNil(t, err)
 
 	expectedProducts := getTestProductsByCategory(categoryId)
 
 	if len(expectedProducts) != len(products) {
-		return true,
-			"testGetProductsByCategoryProvidesCorrectProducts",
-			"Returned different number of products than expected, expected: " +
-				strconv.Itoa(len(expectedProducts)) +
-				" actual: " +
-				strconv.Itoa(len(products))
+		t.Errorf("Expected products length: %d, got: %d", len(expectedProducts), len(products))
 	}
 
 	for _, product := range products {
 		if !assertProductContainedWithinSliceOfProducts(product, expectedProducts) {
-			return false,
-				"testGetProductsByCategoryProvidesCorrectProducts",
-				"Returned product not contained within expected products"
+			t.Errorf("Product %v not expected", product)
 		}
 	}
-
-	return true,
-		"testGetProductsByCategoryProvidesCorrectProducts",
-		"Recieved correct products for category: " + strconv.Itoa(categoryId)
 }
 
-func TestGetProductsByText() (bool, string, string) {
+func TestGetProductsByText(t *testing.T) {
 	db := SetUp()
 	defer CloseDb(db)
 
@@ -125,26 +96,22 @@ func TestGetProductsByText() (bool, string, string) {
 
 	products, err := db.Product.GetByText(searchText)
 
-	if err != nil {
-		return false, "testGetProductsByText", "Failed to get products with search term: " + searchText
-	}
+	AssertNil(t, err)
 
 	expectedProducts := getTestProductsByText(searchText)
 
 	if len(products) != len(expectedProducts) {
-		return false, "testGetProductsByText", "Returned wrong number of products when searched for term: " + searchText
+		t.Errorf("Expected products length: %d, got: %d", len(expectedProducts), len(products))
 	}
 
 	for _, product := range products {
 		if !assertProductContainedWithinSliceOfProducts(product, expectedProducts) {
-			return false, "testGetProductsByText", "Product returned did not match test data"
+			t.Errorf("Product %v not expected", product)
 		}
 	}
-
-	return true, "testGetProductByText", "Returned correct products when searched for term: " + searchText
 }
 
-func TestGetProductsWithCurrentDeals() (bool, string, string) {
+func TestGetProductsWithCurrentDeals(t *testing.T) {
 	db := SetUp()
 	defer CloseDb(db)
 
@@ -152,37 +119,22 @@ func TestGetProductsWithCurrentDeals() (bool, string, string) {
 
 	products, err := db.Product.GetWithCurrentDeals(currentDate)
 
-	if err != nil {
-		return false,
-			"testGetProductsWithCurrentDeals",
-			"Failed to get products with current deals"
-	}
+	AssertNil(t, err)
 
 	expectedProducts := getTestProductsWithCurrentDeals(currentDate)
 
 	if len(expectedProducts) != len(products) {
-		return false,
-			"testGetProductsWithCurrentDeals",
-			"Returned wrong number of products with deals expected: " +
-				strconv.Itoa(len(expectedProducts)) +
-				" actual: " +
-				strconv.Itoa(len(products))
+		t.Errorf("Expected products length: %d, got: %d", len(expectedProducts), len(products))
 	}
 
 	for _, product := range products {
 		if !assertProductContainedWithinSliceOfProducts(product, expectedProducts) {
-			return false,
-				"testGetProductsWithCurrentDeals",
-				"Returned Product was not contained within expected"
+			t.Errorf("Product %v not expected", product)
 		}
 	}
-
-	return true,
-		"testGetProductsWithCurrentDeals",
-		"Returned products matched deals"
 }
 
-func TestDecreaseStockReducesStockByCorrectQuantity() (bool, string, string) {
+func TestDecreaseStockReducesStockByCorrectQuantity(t *testing.T) {
 	db := SetUp()
 	defer CloseDb(db)
 
@@ -200,30 +152,17 @@ func TestDecreaseStockReducesStockByCorrectQuantity() (bool, string, string) {
 
 	product, err := db.Product.GetById(productId)
 
-	if err != nil {
-		return false,
-			"testDecreaseStockReducesStockByCorrectQuantity",
-			"Failed to get products with id: " + strconv.Itoa(productId)
-	}
+	AssertNil(t, err)
 
 	expectedProduct := getTestProductById(productId)
 	expectedProduct.QuantityRemaining -= quantity
 
 	if !reflect.DeepEqual(expectedProduct, product) {
-		return false,
-			"testDecreaseStockReducesStockByCorrectQuantity",
-			"Failed to decrease product quantity correctly expected: " +
-				strconv.Itoa(expectedProduct.QuantityRemaining) +
-				" actual: " +
-				strconv.Itoa(product.QuantityRemaining)
+		t.Errorf("Expected product: %v, got: %v", expectedProduct, product)
 	}
-
-	return true,
-		"testDecreaseStockReducesStockByCorrectQuantity",
-		"Correctly decreased product stock by expected quantity"
 }
 
-func TestDecreaseStockFailsForFakeProduct() (bool, string, string) {
+func TestDecreaseStockFailsForFakeProduct(t *testing.T) {
 	db := SetUp()
 	defer CloseDb(db)
 
@@ -240,14 +179,8 @@ func TestDecreaseStockFailsForFakeProduct() (bool, string, string) {
 	err := db.Product.DecreaseStock(productQuantities)
 
 	if err == nil {
-		return false,
-			"testDecreaseStockFailsForFakeProduct",
-			"Failed to reject fake product id"
+		t.Errorf("Expected error: nil, got error: %s", err)
 	}
-
-	return true,
-		"testDecreaseStockFailsForFakeProduct",
-		"Successfully rejected fake product id for update"
 }
 
 func assertProductContainedWithinSliceOfProducts(product utils.Product, products []utils.Product) bool {
