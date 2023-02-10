@@ -130,3 +130,8 @@ type Basket struct {
 	Total int
 	Items []OrderItem
 }
+
+type ApiErrorResponse struct {
+	Error string
+	Msg   string
+}

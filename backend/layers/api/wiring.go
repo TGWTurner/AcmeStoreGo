@@ -3,6 +3,7 @@ package api
 import (
 	bl "bjssStoreGo/backend/layers/businessLogic"
 	"bjssStoreGo/backend/utils"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -27,7 +28,6 @@ func NewWiring(db utils.Database, r *mux.Router, s *sessions.CookieStore) *Wirin
 
 func (w *Wiring) AsyncListen(port string) {
 	http.ListenAndServe(port, w.router)
-
 }
 
 func (w *Wiring) SetUpRoutes() {
@@ -68,6 +68,8 @@ func (w *Wiring) SetUpRoutes() {
 	order.HandleFunc("/{id}", w.orderApi.GetOrder).Methods("GET")
 
 	w.router.PathPrefix("/").HandlerFunc(w.error404Handler)
+
+	fmt.Println("Paths created")
 }
 
 // TEST \/\/\/\/
@@ -87,18 +89,28 @@ func (w *Wiring) mustBeSignedIn(next http.Handler) http.Handler {
 		if _, ok := session.Values["customerId"]; ok {
 			next.ServeHTTP(writer, request)
 		} else {
-			http.Error(writer, "forbidden", http.StatusUnauthorized)
+			response := struct {
+				Error string
+				Msg   string
+			}{
+				Error: "forbidden",
+				Msg:   "user is not signed in",
+			}
+
+			json.NewEncoder(writer).Encode(response)
+			writer.WriteHeader(http.StatusUnauthorized)
 		}
 	})
 }
 
 func (w *Wiring) invalidateSession(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		fmt.Println("Invalidating session")
 		session, _ := w.store.Get(request, "session-name")
-		w.store.MaxAge(-1)
-		session.Save(request, writer)
-		w.store.MaxAge(86400 * 30)
+
+		for i := range session.Values {
+			delete(session.Values, i)
+		}
+
 		session.Save(request, writer)
 
 		next.ServeHTTP(writer, request)

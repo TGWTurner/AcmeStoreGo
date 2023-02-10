@@ -51,9 +51,17 @@ func (a *AccountApi) PostSignIn(w http.ResponseWriter, r *http.Request) {
 
 	account, err := a.as.SignIn(eap.Email, eap.Password)
 
-	if err == nil {
-		a.setSignedInUserId(w, r, account.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+
+		json.NewEncoder(w).Encode(utils.ApiErrorResponse{
+			Error: "forbidden",
+			Msg:   "Invalid credentials",
+		})
+		return
 	}
+
+	a.setSignedInUserId(w, r, account.Id)
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(account)
@@ -73,12 +81,20 @@ func (a *AccountApi) PostSignUp(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&acc)
 
 	if err != nil {
-		//log the error?
+		json.NewEncoder(w).Encode(utils.ApiErrorResponse{
+			Error: "",
+			Msg:   "Malformed request or account already exists",
+		})
+		w.WriteHeader(http.StatusBadRequest)
 	}
 
 	account, err := a.as.SignUp(acc.Email, acc.Password, acc.Name, acc.Address, acc.Postcode)
 
 	if err != nil {
+		json.NewEncoder(w).Encode(utils.ApiErrorResponse{
+			Error: "",
+			Msg:   "Malformed request or account already exists",
+		})
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -95,22 +111,17 @@ func (a *AccountApi) GetAccount(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 
-		response := struct {
-			Error string
-			Msg   string
-		}{
+		json.NewEncoder(w).Encode(utils.ApiErrorResponse{
 			Error: "forbidden",
 			Msg:   "user is not signed in",
-		}
-
-		json.NewEncoder(w).Encode(response)
+		})
 		return
 	}
 
 	account, err := a.as.GetById(userId)
 
 	if err != nil {
-		//log the error?
+		panic(err)
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -133,13 +144,19 @@ func (a *AccountApi) PostAccount(w http.ResponseWriter, r *http.Request) {
 	err = json.NewDecoder(r.Body).Decode(&acc)
 
 	if err != nil {
-		//log the error?
+		w.WriteHeader(http.StatusUnauthorized)
+
+		json.NewEncoder(w).Encode(utils.ApiErrorResponse{
+			Error: "forbidden",
+			Msg:   "user is not signed in",
+		})
+		return
 	}
 
 	account, err := a.as.Update(acc)
 
 	if err != nil {
-		//log the error?
+		panic(err)
 	}
 
 	w.WriteHeader(http.StatusOK)

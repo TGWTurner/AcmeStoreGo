@@ -22,6 +22,8 @@ func landingPage() http.Handler {
 }
 
 func main() {
+	setUp("sql")
+
 	db := da.InitiateConnection()
 	r := mux.NewRouter()
 	store := sessions.NewCookieStore([]byte("my session encryption secret"))
@@ -29,7 +31,7 @@ func main() {
 	wiring := api.NewWiring(db, r, store)
 
 	wiring.SetUpRoutes()
-	wiring.AsyncListen("4001")
+	wiring.AsyncListen(":4001")
 }
 
 func testFunc(w http.ResponseWriter, r *http.Request) {

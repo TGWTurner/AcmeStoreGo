@@ -31,7 +31,7 @@ func (p *ProductApi) Search(w http.ResponseWriter, r *http.Request) {
 	products, err := p.ps.SearchProducts(query)
 
 	if err != nil {
-		//log the error?
+		panic(err)
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -44,7 +44,7 @@ func (p *ProductApi) Categories(w http.ResponseWriter, r *http.Request) {
 	categories, err := p.ps.GetProductcategories()
 
 	if err != nil {
-		//log the error?
+		panic(err)
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -61,7 +61,7 @@ func (p *ProductApi) Deals(w http.ResponseWriter, r *http.Request) {
 	products, err := p.ps.SearchProducts(query)
 
 	if err != nil {
-		//log the error?
+		panic(err)
 	}
 
 	w.WriteHeader(http.StatusOK)
