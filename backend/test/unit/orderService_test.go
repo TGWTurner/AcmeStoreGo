@@ -1,8 +1,9 @@
-package test
+package unit
 
 import (
 	bl "bjssStoreGo/backend/layers/businessLogic"
 	da "bjssStoreGo/backend/layers/dataAccess"
+	"bjssStoreGo/backend/test"
 	"bjssStoreGo/backend/utils"
 	"reflect"
 	"testing"
@@ -39,7 +40,7 @@ func xTestUpdatesBasket(t *testing.T) {
 
 	basket, err := os.UpdateBasket(orderItems)
 
-	AssertNil(t, err)
+	test.AssertNil(t, err)
 
 	expected := getTotalFromOrderItems(t, ps, orderItems)
 
@@ -55,7 +56,7 @@ func xTestCreatesAnOrder(t *testing.T) {
 	request := makeTestOrderRequest
 	response, err := os.CreateOrder(1, request.shippingDetails, request.items)
 
-	AssertNil(t, err)
+	test.AssertNil(t, err)
 
 	if 1 <= len(response.Id) {
 		t.Errorf("Expected response id to be > 1, got %d", len(response.Id))
@@ -121,16 +122,16 @@ func xTestFetchesOrders(t *testing.T) {
 	request3.items = []utils.OrderItem{{ProductId: 4, Quantity: 1}}
 
 	response1, err := os.CreateOrder(1, request1.shippingDetails, request1.items)
-	AssertNil(t, err)
+	test.AssertNil(t, err)
 
 	response2, err := os.CreateOrder(2, request2.shippingDetails, request2.items)
-	AssertNil(t, err)
+	test.AssertNil(t, err)
 
 	response3, err := os.CreateOrder(1, request3.shippingDetails, request3.items)
-	AssertNil(t, err)
+	test.AssertNil(t, err)
 
 	orders, err := os.GetOrdersByCustomerId(1)
-	AssertNil(t, err)
+	test.AssertNil(t, err)
 
 	if 2 != len(orders) {
 		t.Errorf("Expected 2 orders, got")
@@ -159,7 +160,7 @@ func xTestFetchesOrders(t *testing.T) {
 	}
 
 	byToken, err := os.GetOrderByToken(response2.Id)
-	AssertNil(t, err)
+	test.AssertNil(t, err)
 
 	if !reflect.DeepEqual(response2, byToken) {
 		t.Errorf("Expected order by token to match response, it did not")
@@ -181,7 +182,7 @@ func getTotalFromOrderItems(t *testing.T, ps bl.ProductService, orderItems []uti
 	total := 0
 	allProducts, err := ps.SearchProducts(map[string]string{})
 
-	AssertNil(t, err)
+	test.AssertNil(t, err)
 
 	for _, orderItem := range orderItems {
 		for _, product := range allProducts {

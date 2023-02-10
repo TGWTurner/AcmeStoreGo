@@ -33,7 +33,7 @@ func main() {
 	wiring := api.NewWiring(db, r, store)
 
 	wiring.SetUpRoutes()
-	wiring.Run()
+	wiring.AsyncListen("4001")
 }
 
 func testFunc(w http.ResponseWriter, r *http.Request) {

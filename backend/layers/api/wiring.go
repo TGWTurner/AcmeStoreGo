@@ -25,8 +25,8 @@ func NewWiring(db utils.Database, r *mux.Router, s *sessions.CookieStore) *Wirin
 	}
 }
 
-func (w *Wiring) Run() {
-	http.ListenAndServe(":3000", w.router)
+func (w *Wiring) AsyncListen(port string) {
+	http.ListenAndServe(port, w.router)
 }
 
 func (w *Wiring) SetUpRoutes() {

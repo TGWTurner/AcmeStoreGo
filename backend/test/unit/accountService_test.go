@@ -1,8 +1,9 @@
-package test
+package unit
 
 import (
 	bl "bjssStoreGo/backend/layers/businessLogic"
 	da "bjssStoreGo/backend/layers/dataAccess"
+	"bjssStoreGo/backend/test"
 	"bjssStoreGo/backend/utils"
 	"testing"
 )
@@ -29,7 +30,7 @@ func setUpAccount() bl.AccountService {
 func createAccount(t *testing.T, as bl.AccountService) utils.AccountApiResponse {
 	acc, err := as.SignUp(signUpData.email, signUpData.password, signUpData.name, signUpData.address, signUpData.postcode)
 
-	AssertNil(t, err)
+	test.AssertNil(t, err)
 
 	return acc
 }
@@ -40,7 +41,7 @@ func TestSignsUpOk(t *testing.T) {
 
 	account, err := as.SignUp(signUpData.email, signUpData.password, signUpData.name, signUpData.address, signUpData.postcode)
 
-	AssertNil(t, err)
+	test.AssertNil(t, err)
 
 	if account.Id == 0 {
 		t.Errorf("Account Id was undefined")
@@ -57,7 +58,7 @@ func TestSignsInOk(t *testing.T) {
 
 	account, err := as.SignIn(signUpData.email, signUpData.password)
 
-	AssertNil(t, err)
+	test.AssertNil(t, err)
 
 	AssertAccountDataMatchesSignUp(t, account)
 }
@@ -70,11 +71,11 @@ func TestFailsSignIn(t *testing.T) {
 
 	_, err := as.SignIn(signUpData.email, "not password")
 
-	AssertErrorString(t, err, "invalidPassword")
+	test.AssertErrorString(t, err, "invalidPassword")
 
 	_, err = as.SignIn("invalid@example.com", signUpData.password)
 
-	AssertErrorString(t, err, "invalidEmail")
+	test.AssertErrorString(t, err, "invalidEmail")
 }
 
 func TestFetchesAnAccount(t *testing.T) {
@@ -84,7 +85,7 @@ func TestFetchesAnAccount(t *testing.T) {
 	account := createAccount(t, as)
 	fetched, err := as.GetById(account.Id)
 
-	AssertNil(t, err)
+	test.AssertNil(t, err)
 
 	AssertAccountDataMatching(t, fetched, account)
 }
@@ -106,13 +107,13 @@ func TestUpdatesAnAccountIncludingPasswordAndCanSignIn(t *testing.T) {
 
 	updated, err := as.Update(updateAccount)
 
-	AssertNil(t, err)
+	test.AssertNil(t, err)
 
 	AssertAccountDataMatching(t, account, updated)
 
 	_, err = as.SignIn(updateAccount.Email, updateAccount.Password)
 
-	AssertNil(t, err)
+	test.AssertNil(t, err)
 }
 
 func AssertAccountDataMatching(t *testing.T, actual, expected utils.AccountApiResponse) {

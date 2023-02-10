@@ -1,9 +1,10 @@
-package test
+package unit
 
 import (
 	bl "bjssStoreGo/backend/layers/businessLogic"
 	da "bjssStoreGo/backend/layers/dataAccess"
 	"bjssStoreGo/backend/layers/dataAccess/testData"
+	"bjssStoreGo/backend/test"
 	"bjssStoreGo/backend/utils"
 	"errors"
 	"reflect"
@@ -23,7 +24,7 @@ func TestGetsAll(t *testing.T) {
 
 	products, err := ps.SearchProducts(map[string]string{})
 
-	AssertNil(t, err)
+	test.AssertNil(t, err)
 
 	AssertProductSetsMatch(t, products, testData.GetProductTestData().Products)
 }
@@ -35,7 +36,7 @@ func TestFindsByCategory(t *testing.T) {
 	query := map[string]string{"category": "1"}
 	products, err := ps.SearchProducts(query)
 
-	AssertNil(t, err)
+	test.AssertNil(t, err)
 
 	expected := getProductsInCategory(1)
 
@@ -49,7 +50,7 @@ func TestFindsByText(t *testing.T) {
 	query := map[string]string{"search": "Apricot"}
 	products, err := ps.SearchProducts(query)
 
-	AssertNil(t, err)
+	test.AssertNil(t, err)
 
 	expected := getProductsWithText("Apricot")
 
@@ -58,7 +59,7 @@ func TestFindsByText(t *testing.T) {
 	query = map[string]string{"search": "fruit"}
 	products, err = ps.SearchProducts(query)
 
-	AssertNil(t, err)
+	test.AssertNil(t, err)
 
 	expected = getProductsWithText("fruit")
 
@@ -72,7 +73,7 @@ func TestGetsInDateDeals(t *testing.T) {
 	query := map[string]string{"dealDate": utils.GetFormattedDate()}
 	products, err := ps.SearchProducts(query)
 
-	AssertNil(t, err)
+	test.AssertNil(t, err)
 
 	expected := getProductsWithDeals(utils.GetFormattedDate())
 
@@ -86,7 +87,7 @@ func TestGetsNoDealsIfNoneInDate(t *testing.T) {
 	query := map[string]string{"dealDate": "2000-02-21"}
 	products, err := ps.SearchProducts(query)
 
-	AssertNil(t, err)
+	test.AssertNil(t, err)
 
 	expected := getProductsWithDeals("2000-02-21")
 
@@ -99,7 +100,7 @@ func TestGetsCategories(t *testing.T) {
 
 	categories, err := ps.GetProductcategories()
 
-	AssertNil(t, err)
+	test.AssertNil(t, err)
 
 	expected := testData.GetProductTestData().Categories
 
@@ -134,7 +135,7 @@ func TestCalcsTotalsAndStockShortages(t *testing.T) {
 
 	notEnoughStock, total, err := ps.CheckStock(orderItems)
 
-	AssertNil(t, err)
+	test.AssertNil(t, err)
 
 	expectedTotal := 198
 
