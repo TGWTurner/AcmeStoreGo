@@ -17,6 +17,10 @@ func NewAccountApi(accountService *bl.AccountService, s *sessions.CookieStore) *
 	}
 }
 
+func (a *AccountApi) Close() {
+	a.as.Close()
+}
+
 func (a *AccountApi) getSignedInUserId(r *http.Request) (int, error) {
 	session, _ := a.s.Get(r, "session-name")
 

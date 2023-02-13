@@ -16,6 +16,10 @@ func NewProductApi(productService *bl.ProductService, s *sessions.CookieStore) *
 	}
 }
 
+func (p *ProductApi) Close() {
+	p.ps.Close()
+}
+
 func (p *ProductApi) Search(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 

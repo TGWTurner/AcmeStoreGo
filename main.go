@@ -5,6 +5,7 @@ import (
 	da "bjssStoreGo/backend/layers/dataAccess"
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"os"
 
 	"github.com/gorilla/mux"
@@ -31,7 +32,28 @@ func main() {
 	wiring := api.NewWiring(db, r, store)
 
 	wiring.SetUpRoutes()
-	wiring.AsyncListen(":4001")
+	// wiring.AsyncListen(":4001")
+	testApiRequest(wiring)
+}
+
+func testApiRequest(wiring *api.Wiring) {
+	req, err := http.NewRequest("GET", "http://localhost:4001/api/product/catalogue", nil)
+
+	if err != nil {
+		fmt.Println("err: ", err)
+		return
+	}
+
+	response := executeRequest(req, wiring)
+
+	fmt.Println(response.Code)
+}
+
+func executeRequest(req *http.Request, wiring *api.Wiring) *httptest.ResponseRecorder {
+	rr := httptest.NewRecorder()
+	wiring.Router.ServeHTTP(rr, req)
+
+	return rr
 }
 
 func testFunc(w http.ResponseWriter, r *http.Request) {

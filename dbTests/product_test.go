@@ -2,12 +2,10 @@ package dbTests
 
 import (
 	"bjssStoreGo/backend/layers/dataAccess/testData"
+	"bjssStoreGo/backend/test"
 	"bjssStoreGo/backend/utils"
 	"reflect"
-	"strings"
 	"testing"
-
-	"golang.org/x/exp/slices"
 )
 
 func TestGetProductGivenId(t *testing.T) {
@@ -20,7 +18,7 @@ func TestGetProductGivenId(t *testing.T) {
 
 	AssertNil(t, err)
 
-	expected := getTestProductById(index)
+	expected := test.GetTestProductById(index)
 
 	if !reflect.DeepEqual(expected, product) {
 		t.Errorf("Expected product: %v, got product: %v", expected, product)
@@ -37,7 +35,7 @@ func TestGetProductsGivenIds(t *testing.T) {
 	AssertNil(t, err)
 
 	for i, index := range indexes {
-		expected := getTestProductById(index)
+		expected := test.GetTestProductById(index)
 		if !reflect.DeepEqual(expected, products[i]) {
 			t.Errorf("Expected product: %v, got product: %v", expected, products[i])
 		}
@@ -75,7 +73,7 @@ func TestGetProductsByCategoryProvidesCorrectProducts(t *testing.T) {
 
 	AssertNil(t, err)
 
-	expectedProducts := getTestProductsByCategory(categoryId)
+	expectedProducts := test.GetTestProductsByCategory(categoryId)
 
 	if len(expectedProducts) != len(products) {
 		t.Errorf("Expected products length: %d, got: %d", len(expectedProducts), len(products))
@@ -98,7 +96,7 @@ func TestGetProductsByText(t *testing.T) {
 
 	AssertNil(t, err)
 
-	expectedProducts := getTestProductsByText(searchText)
+	expectedProducts := test.GetTestProductsByText(searchText)
 
 	if len(products) != len(expectedProducts) {
 		t.Errorf("Expected products length: %d, got: %d", len(expectedProducts), len(products))
@@ -121,7 +119,7 @@ func TestGetProductsWithCurrentDeals(t *testing.T) {
 
 	AssertNil(t, err)
 
-	expectedProducts := getTestProductsWithCurrentDeals(currentDate)
+	expectedProducts := test.GetTestProductsWithCurrentDeals(currentDate)
 
 	if len(expectedProducts) != len(products) {
 		t.Errorf("Expected products length: %d, got: %d", len(expectedProducts), len(products))
@@ -154,7 +152,7 @@ func TestDecreaseStockReducesStockByCorrectQuantity(t *testing.T) {
 
 	AssertNil(t, err)
 
-	expectedProduct := getTestProductById(productId)
+	expectedProduct := test.GetTestProductById(productId)
 	expectedProduct.QuantityRemaining -= quantity
 
 	if !reflect.DeepEqual(expectedProduct, product) {
@@ -203,53 +201,4 @@ func assertCategoryHasExpectedName(category utils.ProductCategory) (bool, string
 	}
 
 	return false, "Category of name " + category.Name + " not expected"
-}
-
-func getTestProductById(id int) utils.Product {
-	expectedProducts := testData.GetProductTestData().Products
-	idx := slices.IndexFunc(
-		expectedProducts,
-		func(p utils.Product) bool { return p.Id == id },
-	)
-
-	return expectedProducts[idx]
-}
-
-func getTestProductsByText(text string) []utils.Product {
-	expectedProducts := testData.GetProductTestData().Products
-	resProducts := []utils.Product{}
-
-	for _, product := range expectedProducts {
-		if strings.Contains(product.ShortDescription, text) || strings.Contains(product.LongDescription, text) {
-			resProducts = append(resProducts, product)
-		}
-	}
-
-	return resProducts
-}
-
-func getTestProductsByCategory(categoryId int) []utils.Product {
-	expectedProducts := testData.GetProductTestData().Products
-	resProducts := []utils.Product{}
-
-	for _, product := range expectedProducts {
-		if categoryId == product.CategoryId {
-			resProducts = append(resProducts, product)
-		}
-	}
-
-	return resProducts
-}
-
-func getTestProductsWithCurrentDeals(currentDate string) []utils.Product {
-	deals := testData.GetProductTestData().Deals
-	products := []utils.Product{}
-
-	for _, deal := range deals {
-		if deal.StartDate < currentDate && deal.EndDate > currentDate {
-			products = append(products, getTestProductById(deal.ProductId))
-		}
-	}
-
-	return products
 }

@@ -16,6 +16,10 @@ func NewOrderApi(orderService *bl.OrderService, s *sessions.CookieStore) *OrderA
 	}
 }
 
+func (o *OrderApi) Close() {
+	o.os.Close()
+}
+
 func (o *OrderApi) validateItems(orderItems []utils.OrderItem) error {
 	for _, orderItem := range orderItems {
 		if orderItem.ProductId == 0 || orderItem.Quantity == 0 {

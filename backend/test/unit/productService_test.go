@@ -26,7 +26,7 @@ func TestGetsAll(t *testing.T) {
 
 	test.AssertNil(t, err)
 
-	AssertProductSetsMatch(t, products, testData.GetProductTestData().Products)
+	test.AssertProductSetsMatch(t, products, testData.GetProductTestData().Products)
 }
 
 func TestFindsByCategory(t *testing.T) {
@@ -40,7 +40,7 @@ func TestFindsByCategory(t *testing.T) {
 
 	expected := getProductsInCategory(1)
 
-	AssertProductSetsMatch(t, products, expected)
+	test.AssertProductSetsMatch(t, products, expected)
 }
 
 func TestFindsByText(t *testing.T) {
@@ -54,7 +54,7 @@ func TestFindsByText(t *testing.T) {
 
 	expected := getProductsWithText("Apricot")
 
-	AssertProductSetsMatch(t, products, expected)
+	test.AssertProductSetsMatch(t, products, expected)
 
 	query = map[string]string{"search": "fruit"}
 	products, err = ps.SearchProducts(query)
@@ -63,7 +63,7 @@ func TestFindsByText(t *testing.T) {
 
 	expected = getProductsWithText("fruit")
 
-	AssertProductSetsMatch(t, products, expected)
+	test.AssertProductSetsMatch(t, products, expected)
 }
 
 func TestGetsInDateDeals(t *testing.T) {
@@ -77,7 +77,7 @@ func TestGetsInDateDeals(t *testing.T) {
 
 	expected := getProductsWithDeals(utils.GetFormattedDate())
 
-	AssertProductSetsMatch(t, products, expected)
+	test.AssertProductSetsMatch(t, products, expected)
 }
 
 func TestGetsNoDealsIfNoneInDate(t *testing.T) {
@@ -91,7 +91,7 @@ func TestGetsNoDealsIfNoneInDate(t *testing.T) {
 
 	expected := getProductsWithDeals("2000-02-21")
 
-	AssertProductSetsMatch(t, products, expected)
+	test.AssertProductSetsMatch(t, products, expected)
 }
 
 func TestGetsCategories(t *testing.T) {
@@ -104,23 +104,7 @@ func TestGetsCategories(t *testing.T) {
 
 	expected := testData.GetProductTestData().Categories
 
-	if len(categories) != len(expected) {
-		t.Errorf("Expected %d categories, got %d categories", len(expected), len(categories))
-	}
-
-	for _, category := range categories {
-		found := false
-		for _, expectedCategory := range expected {
-			if reflect.DeepEqual(expectedCategory, category) {
-				found = true
-				break
-			}
-		}
-
-		if found != true {
-			t.Errorf("Returned category not found in expected products")
-		}
-	}
+	test.AssertCategorySetsMatch(t, categories, expected)
 }
 
 func TestCalcsTotalsAndStockShortages(t *testing.T) {
@@ -188,25 +172,6 @@ func TestDoesNotDecreaseStockBelow0(t *testing.T) {
 
 	if err == nil {
 		t.Errorf("Expected error got none")
-	}
-}
-
-func AssertProductSetsMatch(t *testing.T, actual []utils.Product, expected []utils.Product) {
-	if len(actual) != len(expected) {
-		t.Errorf("Expected %d products, got %d products", len(expected), len(actual))
-	}
-
-	for _, actualProduct := range actual {
-		found := false
-		for _, expectedProduct := range expected {
-			if reflect.DeepEqual(actualProduct, expectedProduct) {
-				found = true
-				break
-			}
-		}
-		if found == false {
-			t.Errorf("Returned product not found in expected products")
-		}
 	}
 }
 

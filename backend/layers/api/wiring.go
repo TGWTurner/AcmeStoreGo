@@ -18,8 +18,8 @@ func NewWiring(db utils.Database, r *mux.Router, s *sessions.CookieStore) *Wirin
 	os := bl.NewOrderService(db.Order, *ps)
 
 	return &Wiring{
+		Router:     r,
 		store:      s,
-		router:     r,
 		accountApi: NewAccountApi(as, s),
 		productApi: NewProductApi(ps, s),
 		orderApi:   NewOrderApi(os, s),
@@ -27,11 +27,11 @@ func NewWiring(db utils.Database, r *mux.Router, s *sessions.CookieStore) *Wirin
 }
 
 func (w *Wiring) AsyncListen(port string) {
-	http.ListenAndServe(port, w.router)
+	http.ListenAndServe(port, w.Router)
 }
 
 func (w *Wiring) SetUpRoutes() {
-	app := w.router.PathPrefix("/api").Subrouter()
+	app := w.Router.PathPrefix("/api").Subrouter()
 
 	app.HandleFunc("/values", w.Values)
 
@@ -67,7 +67,7 @@ func (w *Wiring) SetUpRoutes() {
 	// What properties does order ID need to be secure. OWASP Top 10 #3 and #5
 	order.HandleFunc("/{id}", w.orderApi.GetOrder).Methods("GET")
 
-	w.router.PathPrefix("/").HandlerFunc(w.error404Handler)
+	w.Router.PathPrefix("/").HandlerFunc(w.error404Handler)
 
 	fmt.Println("Paths created")
 }
@@ -81,6 +81,11 @@ func (w *Wiring) Values(writer http.ResponseWriter, request *http.Request) {
 }
 
 //TEST /\/\/\/\
+
+func (w *Wiring) Close() {
+	w.productApi.Close()
+	w.orderApi.Close()
+}
 
 func (w *Wiring) mustBeSignedIn(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
@@ -123,7 +128,7 @@ func (w *Wiring) error404Handler(writer http.ResponseWriter, request *http.Reque
 	fmt.Fprint(writer, "<h1>Uh Oh, route not found</h1>")
 	fmt.Fprint(writer, "<h2>Available routes:</h2>")
 	fmt.Fprint(writer, "<ul>")
-	w.printEndpoints(w.router, writer)
+	w.printEndpoints(w.Router, writer)
 	fmt.Fprint(writer, "</ul>")
 }
 
@@ -144,8 +149,8 @@ func (w *Wiring) printEndpoints(r *mux.Router, writer http.ResponseWriter) {
 }
 
 type Wiring struct {
+	Router     *mux.Router
 	store      *sessions.CookieStore
-	router     *mux.Router
 	accountApi *AccountApi
 	productApi *ProductApi
 	orderApi   *OrderApi
