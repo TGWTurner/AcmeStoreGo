@@ -68,8 +68,6 @@ func (w *Wiring) SetUpRoutes() {
 	order.HandleFunc("/{id}", w.orderApi.GetOrder).Methods("GET")
 
 	w.Router.PathPrefix("/").HandlerFunc(w.error404Handler)
-
-	fmt.Println("Paths created")
 }
 
 // TEST \/\/\/\/
@@ -102,8 +100,9 @@ func (w *Wiring) mustBeSignedIn(next http.Handler) http.Handler {
 				Msg:   "user is not signed in",
 			}
 
-			json.NewEncoder(writer).Encode(response)
+			writer.Header().Set("Content-Type", "application/json")
 			writer.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(writer).Encode(response)
 		}
 	})
 }

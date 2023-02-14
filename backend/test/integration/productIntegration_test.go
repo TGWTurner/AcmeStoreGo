@@ -1,33 +1,16 @@
 package integration
 
 import (
-	"bjssStoreGo/backend/layers/api"
-	da "bjssStoreGo/backend/layers/dataAccess"
 	td "bjssStoreGo/backend/layers/dataAccess/testData"
 	"bjssStoreGo/backend/test"
 	"bjssStoreGo/backend/utils"
 	"encoding/json"
 	"strconv"
 	"testing"
-
-	"github.com/gorilla/mux"
-	"github.com/gorilla/sessions"
 )
 
-func SetUp() *api.Wiring {
-	db := da.InitiateConnection()
-	r := mux.NewRouter()
-	store := sessions.NewCookieStore([]byte("my session encryption secret"))
-
-	wiring := api.NewWiring(db, r, store)
-
-	wiring.SetUpRoutes()
-
-	return wiring
-}
-
 func TestListsProducts(t *testing.T) {
-	w := SetUp()
+	w := test.SetUpApi()
 	defer w.Close()
 
 	method := "GET"
@@ -54,7 +37,7 @@ func TestListsProducts(t *testing.T) {
 }
 
 func TestListsDeals(t *testing.T) {
-	w := SetUp()
+	w := test.SetUpApi()
 	defer w.Close()
 
 	method := "GET"
@@ -82,7 +65,7 @@ func TestListsDeals(t *testing.T) {
 }
 
 func TestGetsCategories(t *testing.T) {
-	w := SetUp()
+	w := test.SetUpApi()
 	defer w.Close()
 
 	method := "GET"
@@ -109,7 +92,7 @@ func TestGetsCategories(t *testing.T) {
 }
 
 func TestListsProductsInASingleCategory(t *testing.T) {
-	w := SetUp()
+	w := test.SetUpApi()
 	defer w.Close()
 
 	categoryId := 1
