@@ -1,67 +1,52 @@
 package integration
 
 import (
-	"bjssStoreGo/backend/layers/api"
 	td "bjssStoreGo/backend/layers/dataAccess/testData"
 	"bjssStoreGo/backend/test"
 	"bjssStoreGo/backend/utils"
 	"encoding/json"
-	"fmt"
 	"reflect"
 	"testing"
 )
 
 func TestNotSignedInByDefault(t *testing.T) {
 	w := test.SetUpApi()
+	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
-	test.AssertNotSignedIn(t, w)
+	test.AssertNotSignedIn(t, apiRequester)
 }
 
 func TestSignsInUsingPrePopulatedTestAccount(t *testing.T) {
 	w := test.SetUpApi()
+	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
 	body, err := json.Marshal(td.GetTestAccountCredentials())
 
 	test.AssertNil(t, err)
 
-	response := test.ApiRequest(
-		t,
-		w,
-		"POST",
-		"/api/account/sign-in",
-		body,
-	)
-
-	fmt.Println("================")
-	fmt.Println(response)
-	fmt.Println("================")
+	response := apiRequester.Post("/api/account/sign-in", body)
 
 	test.AssertResponseCode(t, 200, response.Code)
 
-	test.AssertSignedIn(t, w)
+	test.AssertSignedIn(t, apiRequester)
 }
 
 func TestSignInReturnsTheRightAccount(t *testing.T) {
 	w := test.SetUpApi()
+	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
 	body, err := json.Marshal(td.GetTestAccountCredentials())
 
 	test.AssertNil(t, err)
 
-	response := test.ApiRequest(
-		t,
-		w,
-		"POST",
-		"/api/account/sign-in",
-		body,
-	)
+	response := apiRequester.Post("/api/account/sign-in", body)
 
 	test.AssertResponseCode(t, 200, response.Code)
 
-	var actual []utils.AccountApiResponse
+	var actual utils.AccountApiResponse
 	err = json.NewDecoder(response.Body).Decode(&actual)
 
 	test.AssertNil(t, err)
@@ -75,6 +60,7 @@ func TestSignInReturnsTheRightAccount(t *testing.T) {
 
 func TestSignUp(t *testing.T) {
 	w := test.SetUpApi()
+	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
 	newUser := makeTestUser("signup-basic@example.com")
@@ -83,24 +69,19 @@ func TestSignUp(t *testing.T) {
 
 	test.AssertNil(t, err)
 
-	response := test.ApiRequest(
-		t,
-		w,
-		"POST",
-		"/api/account/sign-up",
-		body,
-	)
+	response := apiRequester.Post("/api/account/sign-up", body)
 
 	test.AssertResponseCode(t, 200, response.Code)
 }
 
 func TestSignupReturnsTheNewlyCreatedAccount(t *testing.T) {
 	w := test.SetUpApi()
+	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
 	newUser := makeTestUser("signup-return@example.com")
 
-	account := signUp(t, w, newUser)
+	account := signUp(t, apiRequester, newUser)
 
 	if account.Id == 0 {
 		t.Errorf("Expected non 0 account id")
@@ -108,7 +89,15 @@ func TestSignupReturnsTheNewlyCreatedAccount(t *testing.T) {
 
 	account.Id = 0
 
-	expected := newUser.OmitPasswordHash()
+	expected := utils.AccountApiResponse{
+		Id: 0,
+		ShippingDetails: utils.ShippingDetails{
+			Email:    newUser.Email,
+			Name:     newUser.Name,
+			Address:  newUser.Address,
+			Postcode: newUser.Postcode,
+		},
+	}
 
 	if !reflect.DeepEqual(expected, account) {
 		t.Errorf("Expected account %v, got account %v", expected, account)
@@ -117,52 +106,48 @@ func TestSignupReturnsTheNewlyCreatedAccount(t *testing.T) {
 
 func TestIsSignedInAfterSignUp(t *testing.T) {
 	w := test.SetUpApi()
+	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
 	newUser := makeTestUser("signup-return@example.com")
 
-	signUp(t, w, newUser)
+	signUp(t, apiRequester, newUser)
 
-	test.AssertSignedIn(t, w)
+	test.AssertSignedIn(t, apiRequester)
 }
 
 func TestCanSignInWithANewlyCreatedUser(t *testing.T) {
 	w := test.SetUpApi()
+	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
 	newUser := makeTestUser("signup-issignedin@example.com")
 
-	signUp(t, w, newUser)
+	signUp(t, apiRequester, newUser)
 
-	w2 := test.SetUpApi()
-	defer w2.Close()
+	apiRequester2 := test.NewApiRequester(w)
 
 	credentials := struct {
 		Email    string
 		Password string
 	}{
-		Email:    newUser.Email,
-		Password: newUser.PasswordHash,
+		Email:    "signup-issignedin@example.com",
+		Password: "secret",
 	}
 
 	body, err := json.Marshal(credentials)
 
 	test.AssertNil(t, err)
 
-	response := test.ApiRequest(
-		t,
-		w2,
-		"GET",
-		"/api/account/sign-in",
-		body,
-	)
+	response := apiRequester2.Post("/api/account/sign-in", body)
 
 	test.AssertResponseCode(t, 200, response.Code)
-	test.AssertSignedIn(t, w2)
+	test.AssertSignedIn(t, apiRequester2)
 }
 
 func TestInvalidCredentialsRejected(t *testing.T) {
 	w := test.SetUpApi()
+	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
 	invalidCredentials := struct {
@@ -177,36 +162,25 @@ func TestInvalidCredentialsRejected(t *testing.T) {
 
 	test.AssertNil(t, err)
 
-	response := test.ApiRequest(
-		t,
-		w,
-		"GET",
-		"/api/account/sign-in",
-		body,
-	)
+	response := apiRequester.Post("/api/account/sign-in", body)
 
 	test.AssertResponseCode(t, 401, response.Code)
 
-	test.AssertSignedIn(t, w)
+	test.AssertNotSignedIn(t, apiRequester)
 }
 
 func TestRetrievesAnAccount(t *testing.T) {
 	w := test.SetUpApi()
+	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
-	original := signInPrePopulatedUser(t, w)
+	original := signInPrePopulatedUser(t, apiRequester)
 
-	response := test.ApiRequest(
-		t,
-		w,
-		"GET",
-		"/api/account",
-		nil,
-	)
+	response := apiRequester.Get("/api/account")
 
 	test.AssertResponseCode(t, 200, response.Code)
 
-	var actual []utils.AccountApiResponse
+	var actual utils.AccountApiResponse
 	err := json.NewDecoder(response.Body).Decode(&actual)
 
 	test.AssertNil(t, err)
@@ -218,9 +192,10 @@ func TestRetrievesAnAccount(t *testing.T) {
 
 func TestUpdatesAccount(t *testing.T) {
 	w := test.SetUpApi()
+	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
-	initial := signUp(t, w, makeTestUser("updateaccount@example.com"))
+	initial := signUp(t, apiRequester, makeTestUser("updateaccount@example.com"))
 
 	toUpdate := utils.UpdateAccount{
 		Id:              initial.Id,
@@ -232,47 +207,46 @@ func TestUpdatesAccount(t *testing.T) {
 
 	test.AssertNil(t, err)
 
-	modified := test.ApiRequest(
-		t,
-		w,
-		"POST",
-		"/api/account",
-		body,
-	)
+	response := apiRequester.Post("/api/account", body)
 
-	test.AssertResponseCode(t, 200, modified.Code)
+	test.AssertResponseCode(t, 200, response.Code)
+
+	var expected utils.AccountApiResponse
+	err = json.NewDecoder(response.Body).Decode(&expected)
+
+	test.AssertNil(t, err)
 
 	initial.Name = "changed"
 
-	if !reflect.DeepEqual(initial, modified) {
-		t.Errorf("Expected returned account: %v, got account: %v", initial, modified)
+	if !reflect.DeepEqual(initial, expected) {
+		t.Errorf("Expected returned account: %v, got account: %v", initial, response)
 	}
 
-	fetched := test.ApiRequest(
-		t,
-		w,
-		"GET",
-		"/api/account",
-		nil,
-	)
+	fetched := apiRequester.Get("/api/account")
 
 	test.AssertResponseCode(t, 200, fetched.Code)
 
-	if !reflect.DeepEqual(fetched.Body, modified.Body) {
-		t.Errorf("Expected response body: %v, got: %v", modified.Body, fetched.Body)
+	var actual utils.AccountApiResponse
+	err = json.NewDecoder(fetched.Body).Decode(&actual)
+
+	test.AssertNil(t, err)
+
+	if !reflect.DeepEqual(expected, actual) {
+		t.Errorf("Expected response account: %v, got: %v", expected, actual)
 	}
 }
 
 func TestHandlesPasswordChange(t *testing.T) {
 	w := test.SetUpApi()
+	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
 	newUser := makeTestUser("passwordchange@example.com")
-	signUp(t, w, newUser)
+	returnedUser := signUp(t, apiRequester, newUser)
 
 	toUpdate := utils.UpdateAccount{
-		Id:              newUser.Id,
-		ShippingDetails: newUser.ShippingDetails,
+		Id:              returnedUser.Id,
+		ShippingDetails: returnedUser.ShippingDetails,
 		Password:        "changed-password",
 	}
 
@@ -280,13 +254,7 @@ func TestHandlesPasswordChange(t *testing.T) {
 
 	test.AssertNil(t, err)
 
-	modified := test.ApiRequest(
-		t,
-		w,
-		"POST",
-		"/api/account",
-		body,
-	)
+	modified := apiRequester.Post("/api/account", body)
 
 	test.AssertResponseCode(t, 200, modified.Code)
 
@@ -294,22 +262,15 @@ func TestHandlesPasswordChange(t *testing.T) {
 	oldCredentials := struct {
 		Email    string
 		Password string
-	}{Email: newUser.Email, Password: newUser.PasswordHash}
+	}{Email: newUser.Email, Password: newUser.Password}
 
-	w2 := test.SetUpApi()
-	defer w2.Close()
+	apiRequester2 := test.NewApiRequester(w)
 
 	body, err = json.Marshal(oldCredentials)
 
 	test.AssertNil(t, err)
 
-	invalid := test.ApiRequest(
-		t,
-		w2,
-		"POST",
-		"/api/account/sign-in",
-		body,
-	)
+	invalid := apiRequester2.Post("/api/account/sign-in", body)
 
 	test.AssertResponseCode(t, 401, invalid.Code)
 
@@ -326,42 +287,28 @@ func TestHandlesPasswordChange(t *testing.T) {
 
 	test.AssertNil(t, err)
 
-	ok := test.ApiRequest(
-		t,
-		w2,
-		"POST",
-		"/api/account/sign-in",
-		body,
-	)
+	ok := apiRequester2.Post("/api/account/sign-in", body)
 
 	test.AssertResponseCode(t, 200, ok.Code)
 }
 
-func signInPrePopulatedUser(t *testing.T, w *api.Wiring, index ...int) utils.AccountApiResponse {
+func signInPrePopulatedUser(t *testing.T, ar *test.ApiRequester, index ...int) utils.AccountApiResponse {
 	var credentials struct {
 		Email    string
 		Password string
 	}
 
 	if len(index) == 0 {
-		credentials = td.GetTestAccountCredentials(0)
+		credentials = td.GetTestAccountCredentials(1)
 	} else {
 		credentials = td.GetTestAccountCredentials(index[0])
 	}
 
-	method := "POST"
-	path := "/api/accont/sign-in"
 	body, err := json.Marshal(credentials)
 
 	test.AssertNil(t, err)
 
-	response := test.ApiRequest(
-		t,
-		w,
-		method,
-		path,
-		body,
-	)
+	response := ar.Post("/api/account/sign-in", body)
 
 	var newAccount utils.AccountApiResponse
 	err = json.NewDecoder(response.Body).Decode(&newAccount)
@@ -371,32 +318,32 @@ func signInPrePopulatedUser(t *testing.T, w *api.Wiring, index ...int) utils.Acc
 	return newAccount
 }
 
-func makeTestUser(email string) utils.Account {
-	return utils.Account{
-		ShippingDetails: utils.ShippingDetails{
-			Email:    email,
-			Name:     "a",
-			Address:  "b",
-			Postcode: "abc123",
-		},
-		PasswordHash: "secret",
+type account struct {
+	Email    string
+	Name     string
+	Address  string
+	Postcode string
+	Password string
+}
+
+func makeTestUser(email string) account {
+	return account{
+		Email:    email,
+		Name:     "a",
+		Address:  "b",
+		Postcode: "abc123",
+		Password: "secret",
 	}
 }
 
-func signUp(t *testing.T, w *api.Wiring, newUser utils.Account) utils.AccountApiResponse {
-	method := "GET"
-	path := "/api/account/sign-up"
+func signUp(t *testing.T, ar *test.ApiRequester, newUser account) utils.AccountApiResponse {
 	body, err := json.Marshal(newUser)
+
+	//wants password not password hash
 
 	test.AssertNil(t, err)
 
-	response := test.ApiRequest(
-		t,
-		w,
-		method,
-		path,
-		body,
-	)
+	response := ar.Post("/api/account/sign-up", body)
 
 	test.AssertResponseCode(t, 200, response.Code)
 

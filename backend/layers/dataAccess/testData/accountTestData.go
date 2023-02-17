@@ -2,6 +2,7 @@ package testData
 
 import (
 	"bjssStoreGo/backend/utils"
+	"strconv"
 )
 
 func GetAccountTestData() []utils.Account {
@@ -31,17 +32,17 @@ func GetAccountTestData() []utils.Account {
 	}
 }
 
-func GetTestAccountCredentials(indexes ...int) struct {
+func GetTestAccountCredentials(ids ...int) struct {
 	Email    string
 	Password string
 } {
-	index := 0
+	id := 1
 
-	if indexes != nil {
-		index = indexes[0]
+	if ids != nil {
+		id = ids[0]
 	}
 
-	testAccount := GetAccountTestData()[index]
+	testAccount := getTestAccountFromId(id)
 
 	return struct {
 		Email    string
@@ -50,4 +51,15 @@ func GetTestAccountCredentials(indexes ...int) struct {
 		Email:    testAccount.Email,
 		Password: "I am an insecure password",
 	}
+}
+
+func getTestAccountFromId(id int) utils.Account {
+	allAccounts := GetAccountTestData()
+
+	for _, account := range allAccounts {
+		if account.Id == id {
+			return account
+		}
+	}
+	panic("Account with id " + strconv.Itoa(id) + " not found")
 }

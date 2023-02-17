@@ -19,7 +19,7 @@ func NewWiring(db utils.Database, r *mux.Router, s *sessions.CookieStore) *Wirin
 
 	return &Wiring{
 		Router:     r,
-		store:      s,
+		Store:      s,
 		accountApi: NewAccountApi(as, s),
 		productApi: NewProductApi(ps, s),
 		orderApi:   NewOrderApi(os, s),
@@ -33,7 +33,7 @@ func (w *Wiring) AsyncListen(port string) {
 func (w *Wiring) SetUpRoutes() {
 	app := w.Router.PathPrefix("/api").Subrouter()
 
-	app.HandleFunc("/values", w.Values)
+	app.HandleFunc("/values", w.Values).Methods("GET")
 
 	account := app.PathPrefix("/account").Subrouter()
 	product := app.PathPrefix("/product").Subrouter()
@@ -72,7 +72,7 @@ func (w *Wiring) SetUpRoutes() {
 
 // TEST \/\/\/\/
 func (w *Wiring) Values(writer http.ResponseWriter, request *http.Request) {
-	session, _ := w.store.Get(request, "session-name")
+	session, _ := w.Store.Get(request, "session-name")
 	fmt.Println()
 	fmt.Println("Current session: ", session.Values)
 	fmt.Println()
@@ -87,7 +87,7 @@ func (w *Wiring) Close() {
 
 func (w *Wiring) mustBeSignedIn(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		session, _ := w.store.Get(request, "session-name")
+		session, _ := w.Store.Get(request, "session-name")
 
 		if _, ok := session.Values["customerId"]; ok {
 			next.ServeHTTP(writer, request)
@@ -109,13 +109,18 @@ func (w *Wiring) mustBeSignedIn(next http.Handler) http.Handler {
 
 func (w *Wiring) invalidateSession(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		session, _ := w.store.Get(request, "session-name")
+		session, _ := w.Store.Get(request, "session-name")
+
+		if session.IsNew {
+			next.ServeHTTP(writer, request)
+			return
+		}
 
 		for i := range session.Values {
 			delete(session.Values, i)
 		}
 
-		session.Save(request, writer)
+		// session.Save(request, writer)
 
 		next.ServeHTTP(writer, request)
 	})
@@ -149,7 +154,7 @@ func (w *Wiring) printEndpoints(r *mux.Router, writer http.ResponseWriter) {
 
 type Wiring struct {
 	Router     *mux.Router
-	store      *sessions.CookieStore
+	Store      *sessions.CookieStore
 	accountApi *AccountApi
 	productApi *ProductApi
 	orderApi   *OrderApi

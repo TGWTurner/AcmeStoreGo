@@ -5,10 +5,6 @@ import (
 	da "bjssStoreGo/backend/layers/dataAccess"
 	"bjssStoreGo/backend/layers/dataAccess/testData"
 	"bjssStoreGo/backend/utils"
-	"bytes"
-	"fmt"
-	"net/http"
-	"net/http/httptest"
 	"reflect"
 	"strings"
 	"testing"
@@ -42,32 +38,13 @@ func AssertNil(t *testing.T, err error) {
 	}
 }
 
-func ApiRequest(t *testing.T, wiring *api.Wiring, method string, path string, body []byte) *httptest.ResponseRecorder {
-	requestBody := bytes.NewBuffer(body)
-
-	req, err := http.NewRequest(method, path, requestBody)
-
-	if err != nil {
-		t.Errorf("Expected error: nil, got error: %s", err)
-	}
-
-	return executeRequest(req, wiring)
-}
-
-func executeRequest(req *http.Request, wiring *api.Wiring) *httptest.ResponseRecorder {
-	rr := httptest.NewRecorder()
-	wiring.Router.ServeHTTP(rr, req)
-
-	return rr
-}
-
 func AssertResponseCode(t *testing.T, expected, actual int) {
 	if expected != actual {
 		t.Errorf("Expected response code: %d, got response code: %d", expected, actual)
 	}
 }
 
-func AssertProductSetsMatch(t *testing.T, actual, expected []utils.Product) {
+func AssertProductSetsMatch(t *testing.T, expected, actual []utils.Product) {
 	if len(actual) != len(expected) {
 		t.Errorf("Expected %d products, got %d products", len(expected), len(actual))
 	}
@@ -75,7 +52,7 @@ func AssertProductSetsMatch(t *testing.T, actual, expected []utils.Product) {
 	for _, actualProduct := range actual {
 		found := false
 		for _, expectedProduct := range expected {
-			if reflect.DeepEqual(actualProduct, expectedProduct) {
+			if reflect.DeepEqual(expectedProduct, actualProduct) {
 				found = true
 				break
 			}
@@ -86,7 +63,7 @@ func AssertProductSetsMatch(t *testing.T, actual, expected []utils.Product) {
 	}
 }
 
-func AssertCategorySetsMatch(t *testing.T, actual, expected []utils.ProductCategory) {
+func AssertCategorySetsMatch(t *testing.T, expected, actual []utils.ProductCategory) {
 	if len(actual) != len(expected) {
 		t.Errorf("Expected %d categories, got %d categories", len(expected), len(actual))
 	}
@@ -106,36 +83,14 @@ func AssertCategorySetsMatch(t *testing.T, actual, expected []utils.ProductCateg
 	}
 }
 
-func AssertSignedIn(t *testing.T, w *api.Wiring) {
-	method := "GET"
-	path := "/api/account"
-
-	response := ApiRequest(
-		t,
-		w,
-		method,
-		path,
-		nil,
-	)
-
-	fmt.Println("================")
-	fmt.Println(response)
-	fmt.Println("================")
+func AssertSignedIn(t *testing.T, ar *ApiRequester) {
+	response := ar.Get("/api/account")
 
 	AssertResponseCode(t, 200, response.Code)
 }
 
-func AssertNotSignedIn(t *testing.T, w *api.Wiring) {
-	method := "GET"
-	path := "/api/account"
-
-	response := ApiRequest(
-		t,
-		w,
-		method,
-		path,
-		nil,
-	)
+func AssertNotSignedIn(t *testing.T, ar *ApiRequester) {
+	response := ar.Get("/api/account")
 
 	AssertResponseCode(t, 401, response.Code)
 }

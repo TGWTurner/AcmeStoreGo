@@ -11,20 +11,12 @@ import (
 
 func TestListsProducts(t *testing.T) {
 	w := test.SetUpApi()
+	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
-	method := "GET"
-	path := "/api/product/catalogue"
+	response := apiRequester.Get("/api/product/catalogue")
 
-	response := test.ApiRequest(
-		t,
-		w,
-		method,
-		path,
-		nil,
-	)
-
-	test.AssertResponseCode(t, response.Code, 200)
+	test.AssertResponseCode(t, 200, response.Code)
 
 	expected := td.GetProductTestData().Products
 	var actual []utils.Product
@@ -33,25 +25,17 @@ func TestListsProducts(t *testing.T) {
 
 	test.AssertNil(t, err)
 
-	test.AssertProductSetsMatch(t, actual, expected)
+	test.AssertProductSetsMatch(t, expected, actual)
 }
 
 func TestListsDeals(t *testing.T) {
 	w := test.SetUpApi()
+	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
-	method := "GET"
-	path := "/api/product/deals"
+	response := apiRequester.Get("/api/product/deals")
 
-	response := test.ApiRequest(
-		t,
-		w,
-		method,
-		path,
-		nil,
-	)
-
-	test.AssertResponseCode(t, response.Code, 200)
+	test.AssertResponseCode(t, 200, response.Code)
 
 	currentDate := utils.GetFormattedDate()
 	expected := test.GetTestProductsWithCurrentDeals(currentDate)
@@ -61,25 +45,17 @@ func TestListsDeals(t *testing.T) {
 
 	test.AssertNil(t, err)
 
-	test.AssertProductSetsMatch(t, actual, expected)
+	test.AssertProductSetsMatch(t, expected, actual)
 }
 
 func TestGetsCategories(t *testing.T) {
 	w := test.SetUpApi()
+	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
-	method := "GET"
-	path := "/api/product/categories"
+	response := apiRequester.Get("/api/product/categories")
 
-	response := test.ApiRequest(
-		t,
-		w,
-		method,
-		path,
-		nil,
-	)
-
-	test.AssertResponseCode(t, response.Code, 200)
+	test.AssertResponseCode(t, 200, response.Code)
 
 	var actual []utils.ProductCategory
 	err := json.NewDecoder(response.Body).Decode(&actual)
@@ -88,27 +64,19 @@ func TestGetsCategories(t *testing.T) {
 
 	expected := td.GetProductTestData().Categories
 
-	test.AssertCategorySetsMatch(t, actual, expected)
+	test.AssertCategorySetsMatch(t, expected, actual)
 }
 
 func TestListsProductsInASingleCategory(t *testing.T) {
 	w := test.SetUpApi()
+	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
 	categoryId := 1
 
-	method := "GET"
-	path := "/api/product/catalogue?category=" + strconv.Itoa(categoryId)
+	response := apiRequester.Get("/api/product/catalogue?category=" + strconv.Itoa(categoryId))
 
-	response := test.ApiRequest(
-		t,
-		w,
-		method,
-		path,
-		nil,
-	)
-
-	test.AssertResponseCode(t, response.Code, 200)
+	test.AssertResponseCode(t, 200, response.Code)
 
 	var actual []utils.Product
 	err := json.NewDecoder(response.Body).Decode(&actual)
@@ -117,5 +85,26 @@ func TestListsProductsInASingleCategory(t *testing.T) {
 
 	expected := test.GetTestProductsByCategory(categoryId)
 
-	test.AssertProductSetsMatch(t, actual, expected)
+	test.AssertProductSetsMatch(t, expected, actual)
+}
+
+func TestListsProductsWithSearchTerm(t *testing.T) {
+	w := test.SetUpApi()
+	apiRequester := test.NewApiRequester(w)
+	defer w.Close()
+
+	searchTerm := "Apricot"
+
+	response := apiRequester.Get("/api/product/catalogue?search=" + searchTerm)
+
+	test.AssertResponseCode(t, 200, response.Code)
+
+	var actual []utils.Product
+	err := json.NewDecoder(response.Body).Decode(&actual)
+
+	test.AssertNil(t, err)
+
+	expected := test.GetTestProductsByText(searchTerm)
+
+	test.AssertProductSetsMatch(t, expected, actual)
 }

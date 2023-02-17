@@ -103,6 +103,8 @@ func (a *AccountApi) PostSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	a.setSignedInUserId(w, r, account.Id)
+
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(account)
 }
