@@ -120,8 +120,6 @@ func (w *Wiring) invalidateSession(next http.Handler) http.Handler {
 			delete(session.Values, i)
 		}
 
-		// session.Save(request, writer)
-
 		next.ServeHTTP(writer, request)
 	})
 }
