@@ -51,18 +51,14 @@ func (a *AccountApi) PostSignIn(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&eap)
 
 	if err != nil {
-		//log the error?
+		Error(w, r, http.StatusInternalServerError, "error", err.Error())
+		return
 	}
 
 	account, err := a.as.SignIn(eap.Email, eap.Password)
 
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-
-		json.NewEncoder(w).Encode(utils.ApiErrorResponse{
-			Error: "forbidden",
-			Msg:   "Invalid credentials",
-		})
+		Error(w, r, http.StatusInternalServerError, "forbidden", "Invalid credentials")
 		return
 	}
 
@@ -86,21 +82,14 @@ func (a *AccountApi) PostSignUp(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&acc)
 
 	if err != nil {
-		json.NewEncoder(w).Encode(utils.ApiErrorResponse{
-			Error: "",
-			Msg:   "Malformed request or account already exists",
-		})
-		w.WriteHeader(http.StatusBadRequest)
+		Error(w, r, http.StatusBadRequest, "error", "Malformed request or account already exists")
+		return
 	}
 
 	account, err := a.as.SignUp(acc.Email, acc.Password, acc.Name, acc.Address, acc.Postcode)
 
 	if err != nil {
-		json.NewEncoder(w).Encode(utils.ApiErrorResponse{
-			Error: "",
-			Msg:   "Malformed request or account already exists",
-		})
-		w.WriteHeader(http.StatusBadRequest)
+		Error(w, r, http.StatusBadRequest, "error", "Malformed request or account already exists")
 		return
 	}
 
@@ -116,19 +105,15 @@ func (a *AccountApi) GetAccount(w http.ResponseWriter, r *http.Request) {
 	userId, err := a.getSignedInUserId(r)
 
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-
-		json.NewEncoder(w).Encode(utils.ApiErrorResponse{
-			Error: "forbidden",
-			Msg:   "user is not signed in",
-		})
+		Error(w, r, http.StatusUnauthorized, "error", "User is not signed in")
 		return
 	}
 
 	account, err := a.as.GetById(userId)
 
 	if err != nil {
-		panic(err)
+		Error(w, r, http.StatusInternalServerError, "error", err.Error())
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -151,19 +136,15 @@ func (a *AccountApi) PostAccount(w http.ResponseWriter, r *http.Request) {
 	err = json.NewDecoder(r.Body).Decode(&acc)
 
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-
-		json.NewEncoder(w).Encode(utils.ApiErrorResponse{
-			Error: "forbidden",
-			Msg:   "user is not signed in",
-		})
+		Error(w, r, http.StatusUnauthorized, "error", "user is not signed in")
 		return
 	}
 
 	account, err := a.as.Update(acc)
 
 	if err != nil {
-		panic(err)
+		Error(w, r, http.StatusInternalServerError, "error", err.Error())
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
