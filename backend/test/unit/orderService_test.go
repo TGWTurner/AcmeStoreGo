@@ -38,9 +38,12 @@ func xTestUpdatesBasket(t *testing.T) {
 
 	orderItems := makeTestOrderRequest.items
 
-	basket, err := os.UpdateBasket(orderItems)
+	currentBasket := utils.Basket{
+		Total: 0,
+		Items: []utils.OrderItem{},
+	}
 
-	test.AssertNil(t, err)
+	basket := os.UpdateBasket(orderItems, currentBasket)
 
 	expected := getTotalFromOrderItems(t, ps, orderItems)
 

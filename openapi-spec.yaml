@@ -1,0 +1,344 @@
+openapi: 3.0.0
+info:
+  title: BJSS Store
+  description: Simple store for teaching and learning
+  version: 1.0.0
+
+servers:
+  - url: /
+
+paths:
+  /api/product/catalogue:
+    get:
+      summary: Query or get all Products
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Text to search for
+        - in: query
+          name: category
+          schema:
+            type: number
+          description: A Category Id to filter Products on
+      responses:
+        '200':
+          description: A JSON array of Products
+          content:
+            application/json:
+              schema: 
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+  /api/product/deals:
+    get:
+      summary: Get deals that are valid for today
+      responses:
+        '200':
+          description: A JSON array of Products
+          content:
+            application/json:
+              schema: 
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+  /api/product/categories:
+    get:
+      summary: Get a list of product Categories
+      responses:
+        '200':
+          description: A JSON array of Categories
+          content:
+            application/json:
+              schema: 
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+
+  /api/order/basket:
+    get:
+      summary: Gets the user's Basket
+      description: The same session cookie that created the basket is needed
+      responses:
+        '200':
+          description: A Basket
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Basket'
+    post:
+      summary: Creates or updates the user's Basket
+      description: Sets a session cookie which is needed to later get the basket
+      requestBody:
+        description: A Basket
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/BasketRequest'    
+      responses:
+        '200':
+          description: A Basket
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Basket'
+  /api/order/history:
+    get:
+      summary: Gets the user's Order history
+      security:
+        - sessionCookieAuthorisation: []      
+      responses:
+        '200':
+          description: A Basket
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Basket'
+  /api/order/checkout:
+    post:
+      summary: Creates a new order
+      description: Checks the stock levels and paymentToken. If Ok creates a new order. 
+        If not gives an error and the products there is not enough stock for.
+        Sets a session cookie which can be used later to tie this order to a signed in user.
+        Does not require a signed in user so guests can check out
+      requestBody:
+        description: An order
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/OrderRequest'  
+      responses:
+        '200':
+          description: The newly created order
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/OrderOk'
+        '400':
+          description: An error. If the request was well formed this will be payment or stock
+            level error. If stock level error, the quantityRemaining is returned for products
+            with not enough stock.
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/OrderError'
+  /api/order/{token}:
+    get:
+      summary: Fetches an order given a token
+      description: Does not require a signed in user so that we can implement getting an
+        order via a link in an email, etc.  
+      parameters:
+        - in: path
+          name: token
+          schema:
+            type: string
+          required: true
+          description: Order token. Currently same as order.id
+      responses:
+        '200':
+          description: The newly created order
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/OrderOk'
+        '404':
+          description: No such order
+
+  /api/account/sign-in:
+    post:
+      summary: Signs in
+      description: Signs in, deletes any existing session, creates a new one for this user.
+      requestBody:
+        content:
+          application/json:
+            schema: 
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: The user's account
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Account'
+        '401':
+          description: Invalid credentials
+  /api/account/sign-up:
+    post:
+      summary: Registers a new user
+      description: Signs up, deletes any existing session, creates a new one for this user.
+        Will give an error if the user already exists. 
+      requestBody:
+        content:
+          application/json:
+            schema: 
+              allOf:
+                - $ref: '#/components/schemas/ShippingDetails'
+                - type: object
+                  properties:
+                    password: 
+                      type: string
+      responses:
+        '200':
+          description: The user's account
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Account'
+        '400':
+          description: Malformed request or account already exists
+  /api/account:
+    get:
+      summary: Gets the user's Account
+      security:
+        - sessionCookieAuthorisation: []
+      responses:
+        '200':
+          description: The user's account
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Account'
+        '401':
+          description: User is not signed in      
+    post:
+      summary: Updates the users account
+      requestBody:
+        content:
+          application/json:
+            schema: 
+              allOf:
+                - $ref: '#/components/schemas/ShippingDetails'
+                - type: object
+                  properties:
+                    password: 
+                      type: string
+      responses:
+        '200':
+          description: The user's account
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Account'
+        '401':
+          description: User is not signed in    
+components:
+  securitySchemes:
+    sessionCookieAuthorisation:
+      type: apiKey
+      in: cookie
+      name: connect.sid  # cookie name
+  schemas:
+    ShippingDetails:
+      type: object
+      properties:
+        email: 
+          type: string
+        name: 
+          type: string
+        address: 
+          type: string
+        postcode: 
+          type: string
+    Account:
+      allOf: 
+        - type: object
+          properties:
+            id:
+              type: string
+        - $ref: '#/components/schemas/ShippingDetails'
+      
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        quantityRemaining:
+          type: integer
+        categoryId:
+          type: integer
+        price:
+          type: integer
+        shortDescription: 
+          type: string
+        longDescription:
+          type: string
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        name: 
+          type: string
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+        total: 
+          type: integer
+        updatedDate: 
+          type: string
+          format: date-time
+        shippingDetails: 
+          $ref: '#/components/schemas/ShippingDetails'
+        items: 
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+    OrderItem:
+      type: object
+      properties:
+        productId:
+          type: integer
+        quantity: 
+          type: integer
+    OrderRequest:
+      type: object
+      properties:
+        paymentToken: 
+          type: string 
+        shippingDetails: 
+          $ref: '#/components/schemas/ShippingDetails'
+        items: 
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+    OrderError:
+      type: object
+      properties:
+        error:
+          type: string
+        items:
+          type: array
+          items: 
+            type: object
+            properties:
+              productId:
+                type: number
+              quantityRemaining:
+                type: number
+    OrderOk:
+      $ref: '#/components/schemas/Order'
+    BasketRequest:
+      type: object
+      properties:
+        items: 
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+    Basket:
+      type: object
+      properties:
+        total:
+          type: integer
+        items: 
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+

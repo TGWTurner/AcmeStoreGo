@@ -3,6 +3,7 @@ package businessLogic
 import (
 	"bjssStoreGo/backend/utils"
 	"errors"
+	"fmt"
 	"strconv"
 )
 
@@ -64,10 +65,15 @@ func (ps ProductService) DecreaseStock(productQuantities []utils.OrderItem) erro
 	}
 
 	if len(notEnoughStock) > 0 {
-		return errors.New("Trying to decrease stock below zero")
+		msg := fmt.Sprintf("Trying to decrease stock of %v below zero", notEnoughStock)
+		return errors.New(msg)
 	}
 
 	return ps.db.DecreaseStock(productQuantities)
+}
+
+func (ps ProductService) GetById(productId int) (utils.Product, error) {
+	return ps.db.GetById(productId)
 }
 
 func (ps ProductService) calculateProductsLackingStockFromOrderItems(orderItems []utils.OrderItem) ([]utils.OrderItem, error) {

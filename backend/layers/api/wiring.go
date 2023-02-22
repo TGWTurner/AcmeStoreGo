@@ -59,7 +59,7 @@ func (w *Wiring) SetUpRoutes() {
 	order.HandleFunc("/checkout", w.orderApi.PostCheckout).Methods("POST")
 
 	getHistory := http.HandlerFunc(w.orderApi.GetHistory)
-	order.Handle("/history", w.mustBeSignedIn(getHistory)).Methods("POST")
+	order.Handle("/history", w.mustBeSignedIn(getHistory)).Methods("GET")
 
 	// We don't use mustBeSignedIn here.
 	// This allows guest customers with an order ID from a 'track my order'

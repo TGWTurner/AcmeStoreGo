@@ -36,6 +36,7 @@ func (a *AccountApi) getSignedInUserId(r *http.Request) (int, error) {
 func (a *AccountApi) setSignedInUserId(w http.ResponseWriter, r *http.Request, customerId int) {
 	session, _ := a.s.Get(r, "session-name")
 	session.Values["customerId"] = customerId
+
 	session.Save(r, w)
 }
 

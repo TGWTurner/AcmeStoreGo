@@ -3,8 +3,11 @@ package main
 import (
 	"bjssStoreGo/backend/layers/api"
 	da "bjssStoreGo/backend/layers/dataAccess"
+	"bjssStoreGo/backend/utils"
 	"fmt"
 	"os"
+
+	"encoding/gob"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
@@ -30,4 +33,7 @@ func main() {
 func setUp(mode string) {
 	//"sql" or "sql-mem" or ""
 	os.Setenv("DB_CONNECTION", mode)
+
+	//register basket to be used with session
+	gob.Register(utils.Basket{})
 }
