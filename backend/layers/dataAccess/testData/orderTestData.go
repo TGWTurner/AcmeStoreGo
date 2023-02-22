@@ -9,7 +9,7 @@ func GetOrderTestData() []utils.Order {
 	return []utils.Order{
 		{
 			Id:          utils.UrlSafeUniqueId(),
-			Total:       1,
+			Total:       1004,
 			UpdatedDate: time.Now().String(),
 			CustomerId:  1,
 			ShippingDetails: utils.ShippingDetails{
@@ -31,7 +31,7 @@ func GetOrderTestData() []utils.Order {
 		},
 		{
 			Id:          utils.UrlSafeUniqueId(),
-			Total:       1,
+			Total:       7,
 			UpdatedDate: time.Now().String(),
 			CustomerId:  1,
 			ShippingDetails: utils.ShippingDetails{
@@ -53,7 +53,7 @@ func GetOrderTestData() []utils.Order {
 		},
 		{
 			Id:          utils.UrlSafeUniqueId(),
-			Total:       1,
+			Total:       612,
 			UpdatedDate: time.Now().String(),
 			CustomerId:  1,
 			ShippingDetails: utils.ShippingDetails{

@@ -75,7 +75,24 @@ func (o *OrderApi) PostBasket(w http.ResponseWriter, r *http.Request) {
 }
 
 func (o *OrderApi) GetHistory(w http.ResponseWriter, r *http.Request) {
-	//TODO: Implement get history
+	w.Header().Set("Content-Type", "application/json")
+
+	customerId := GetSignedInUserId(r, o.s)
+
+	if customerId == 0 {
+		Error(w, r, http.StatusUnauthorized, "error", "User is not signed in")
+		return
+	}
+
+	orderHistory, err := o.os.GetOrdersByCustomerId(customerId)
+
+	if err != nil {
+		Error(w, r, http.StatusInternalServerError, "error", err.Error())
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(orderHistory)
 }
 
 func (o *OrderApi) GetOrder(w http.ResponseWriter, r *http.Request) {
@@ -116,10 +133,14 @@ func (o *OrderApi) PostCheckout(w http.ResponseWriter, r *http.Request) {
 		Error(w, r, http.StatusInternalServerError, "error", err.Error())
 	}
 
-	session, _ := o.s.Get(r, "session-name")
-	customerId := session.Values["customerId"]
+	customerId := GetSignedInUserId(r, o.s)
 
-	newOrder, err := o.os.CreateOrder(customerId.(int), order.ShippingDetails, order.Items)
+	if customerId == 0 {
+		Error(w, r, http.StatusUnauthorized, "error", "User is not signed in")
+		return
+	}
+
+	newOrder, err := o.os.CreateOrder(customerId, order.ShippingDetails, order.Items)
 
 	if err != nil {
 		Error(w, r, http.StatusInternalServerError, "error", err.Error())

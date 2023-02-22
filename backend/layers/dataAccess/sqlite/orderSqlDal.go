@@ -15,10 +15,26 @@ func NewOrderDatabase(db *gorm.DB) *OrderDatabaseImpl {
 		db: db,
 	}
 
-	testOrders := ConvertToDbOrders(testData.GetOrderTestData())
+	testOrders := testData.GetOrderTestData()
 
-	if res := db.Create(&testOrders); res.Error != nil {
-		panic("Failed to create test orders")
+	for _, testOrder := range testOrders {
+		dbOrder := ConvertToDbOrder(testOrder)
+
+		res := od.db.Create(&dbOrder)
+
+		if res.Error != nil {
+			panic("Failed to create test orders")
+		}
+
+		dbItems := ConvertToDbOrderItems(dbOrder.Pk, testOrder)
+
+		for _, orderItem := range dbItems {
+			response := od.db.Create(&orderItem)
+
+			if response.Error != nil {
+				panic(errors.New("Failed to create test orderItems"))
+			}
+		}
 	}
 
 	return &od

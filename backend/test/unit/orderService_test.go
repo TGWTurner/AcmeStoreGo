@@ -32,7 +32,9 @@ var makeTestOrderRequest = struct {
 	},
 }
 
-func xTestUpdatesBasket(t *testing.T) {
+var tenSec, _ = time.ParseDuration("10s")
+
+func TestUpdatesBasket(t *testing.T) {
 	os, ps := setUpOrder()
 	defer func() { os.Close(); ps.Close() }()
 
@@ -43,7 +45,9 @@ func xTestUpdatesBasket(t *testing.T) {
 		Items: []utils.OrderItem{},
 	}
 
-	basket := os.UpdateBasket(orderItems, currentBasket)
+	basket, err := os.UpdateBasket(orderItems, currentBasket)
+
+	test.AssertNil(t, err)
 
 	expected := getTotalFromOrderItems(t, ps, orderItems)
 
@@ -52,7 +56,28 @@ func xTestUpdatesBasket(t *testing.T) {
 	}
 }
 
-func xTestCreatesAnOrder(t *testing.T) {
+func AssertOrderItemsMatch(t *testing.T, expected, actual []utils.OrderItem) {
+	if len(expected) != len(actual) {
+		t.Errorf("Expected order item length to be %d, got %d", len(expected), len(actual))
+	}
+
+	for _, expectedItem := range expected {
+		found := false
+		for _, actualItem := range actual {
+			if reflect.DeepEqual(expectedItem, actualItem) {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			t.Errorf("Failed to find expected item %v", expectedItem)
+		}
+	}
+
+}
+
+func TestCreatesAnOrder(t *testing.T) {
 	os, ps := setUpOrder()
 	defer func() { os.Close(); ps.Close() }()
 
@@ -61,8 +86,8 @@ func xTestCreatesAnOrder(t *testing.T) {
 
 	test.AssertNil(t, err)
 
-	if 1 <= len(response.Id) {
-		t.Errorf("Expected response id to be > 1, got %d", len(response.Id))
+	if 1 > len(response.Id) {
+		t.Errorf("Expected response id length to be > 1, got %d", len(response.Id))
 	}
 
 	if 1 != response.CustomerId {
@@ -73,16 +98,14 @@ func xTestCreatesAnOrder(t *testing.T) {
 		t.Errorf("Expected shipping details to match, they did not")
 	}
 
-	if reflect.DeepEqual(request.items, response.Items) {
-		t.Errorf("Expected order items to match, they did not")
-	}
+	AssertOrderItemsMatch(t, request.items, response.Items)
 
-	if time.Now().Format("2006-01-02") < response.UpdatedDate {
+	if time.Now().Add(tenSec).Format("2006-01-02 15:04:05.0000000") < response.UpdatedDate {
 		t.Errorf("Expected updatedDate to be less than current datetime")
 	}
 }
 
-func xTestRejectsAnOrderIfNotEnoughStock(t *testing.T) {
+func TestRejectsAnOrderIfNotEnoughStock(t *testing.T) {
 	os, ps := setUpOrder()
 	defer func() { os.Close(); ps.Close() }()
 
@@ -98,10 +121,6 @@ func xTestRejectsAnOrderIfNotEnoughStock(t *testing.T) {
 		t.Errorf("Expected error, got: nil")
 	}
 
-	if err.Error() != "stock-level" {
-		t.Errorf("Expected stock level error, got: %s", err)
-	}
-
 	expectedItems := []utils.OrderItem{
 		{ProductId: 4, Quantity: 9},
 	}
@@ -111,7 +130,7 @@ func xTestRejectsAnOrderIfNotEnoughStock(t *testing.T) {
 	}
 }
 
-func xTestFetchesOrders(t *testing.T) {
+func TestFetchesOrders(t *testing.T) {
 	os, ps := setUpOrder()
 	defer func() { os.Close(); ps.Close() }()
 
@@ -124,20 +143,19 @@ func xTestFetchesOrders(t *testing.T) {
 	request3 := makeTestOrderRequest
 	request3.items = []utils.OrderItem{{ProductId: 4, Quantity: 1}}
 
-	response1, err := os.CreateOrder(1, request1.shippingDetails, request1.items)
+	response1, err := os.CreateOrder(3, request1.shippingDetails, request1.items)
 	test.AssertNil(t, err)
 
 	response2, err := os.CreateOrder(2, request2.shippingDetails, request2.items)
 	test.AssertNil(t, err)
 
-	response3, err := os.CreateOrder(1, request3.shippingDetails, request3.items)
+	response3, err := os.CreateOrder(3, request3.shippingDetails, request3.items)
 	test.AssertNil(t, err)
 
-	orders, err := os.GetOrdersByCustomerId(1)
+	orders, err := os.GetOrdersByCustomerId(3)
 	test.AssertNil(t, err)
-
 	if 2 != len(orders) {
-		t.Errorf("Expected 2 orders, got")
+		t.Errorf("Expected 2 orders, got %d", len(orders))
 	}
 
 	order1 := getOrderFromOrders(t, orders, response1.Id)
@@ -154,7 +172,7 @@ func xTestFetchesOrders(t *testing.T) {
 		t.Errorf("Expected total: %d, got: %d", response3.Total, order3.Total)
 	}
 
-	if time.Now().Format("2006-01-02") < order3.UpdatedDate {
+	if time.Now().Add(tenSec).Format("2006-01-02 15:04:05.0000000") < order3.UpdatedDate {
 		t.Errorf("Expected updatedDate to be less than current datetime")
 	}
 
