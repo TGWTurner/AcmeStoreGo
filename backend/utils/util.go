@@ -19,11 +19,6 @@ type Account struct {
 	ShippingDetails
 }
 
-type AccountDetails struct {
-	Password string
-	ShippingDetails
-}
-
 type AccountApiResponse struct {
 	Id int
 	ShippingDetails
@@ -60,12 +55,6 @@ type ProductDeal struct {
 	ProductId int
 	StartDate string
 	EndDate   string
-}
-
-type OrderRequest struct {
-	PaymentToken    string
-	ShippingDetails ShippingDetails
-	Items           []OrderItem
 }
 
 type OrderItem struct {

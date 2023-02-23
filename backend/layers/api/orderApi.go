@@ -94,6 +94,7 @@ func (o *OrderApi) PostBasket(w http.ResponseWriter, r *http.Request) {
 // @Summary Gets the user's Order history
 // @ID GetHistory
 // @Produce json
+// @Param Cookie header string false "token"
 // @Success 200 {object} utils.Basket "A Basket"
 // @Router /api/order/history [get]
 func (o *OrderApi) GetHistory(w http.ResponseWriter, r *http.Request) {

@@ -42,6 +42,11 @@ type OrderRequest struct {
 	Items           []utils.OrderItem
 }
 
+type AccountDetails struct {
+	Password string
+	utils.ShippingDetails
+}
+
 type ApiErrorResponse struct {
 	Error string
 	Msg   string
