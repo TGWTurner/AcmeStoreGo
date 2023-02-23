@@ -13,13 +13,16 @@ import (
 	"testing"
 )
 
-func setUpProduct() bl.ProductService {
+func setUpProduct(t *testing.T) bl.ProductService {
+	//"sql" or "sql-mem" or ""
+	t.Setenv("DB_CONNECTION", "sql-mem")
+
 	db := da.InitiateConnection()
 	return *bl.NewProductService(db.Product)
 }
 
 func TestGetsAll(t *testing.T) {
-	ps := setUpProduct()
+	ps := setUpProduct(t)
 	defer ps.Close()
 
 	products, err := ps.SearchProducts(map[string]string{})
@@ -30,7 +33,7 @@ func TestGetsAll(t *testing.T) {
 }
 
 func TestFindsByCategory(t *testing.T) {
-	ps := setUpProduct()
+	ps := setUpProduct(t)
 	defer ps.Close()
 
 	query := map[string]string{"category": "1"}
@@ -44,7 +47,7 @@ func TestFindsByCategory(t *testing.T) {
 }
 
 func TestFindsByText(t *testing.T) {
-	ps := setUpProduct()
+	ps := setUpProduct(t)
 	defer ps.Close()
 
 	query := map[string]string{"search": "Apricot"}
@@ -67,7 +70,7 @@ func TestFindsByText(t *testing.T) {
 }
 
 func TestGetsInDateDeals(t *testing.T) {
-	ps := setUpProduct()
+	ps := setUpProduct(t)
 	defer ps.Close()
 
 	query := map[string]string{"dealDate": utils.GetFormattedDate()}
@@ -81,7 +84,7 @@ func TestGetsInDateDeals(t *testing.T) {
 }
 
 func TestGetsNoDealsIfNoneInDate(t *testing.T) {
-	ps := setUpProduct()
+	ps := setUpProduct(t)
 	defer ps.Close()
 
 	query := map[string]string{"dealDate": "2000-02-21"}
@@ -95,7 +98,7 @@ func TestGetsNoDealsIfNoneInDate(t *testing.T) {
 }
 
 func TestGetsCategories(t *testing.T) {
-	ps := setUpProduct()
+	ps := setUpProduct(t)
 	defer ps.Close()
 
 	categories, err := ps.GetProductcategories()
@@ -108,7 +111,7 @@ func TestGetsCategories(t *testing.T) {
 }
 
 func TestCalcsTotalsAndStockShortages(t *testing.T) {
-	ps := setUpProduct()
+	ps := setUpProduct(t)
 	defer ps.Close()
 
 	orderItems := []utils.OrderItem{
@@ -137,7 +140,7 @@ func TestCalcsTotalsAndStockShortages(t *testing.T) {
 }
 
 func TestDecreasesStock(t *testing.T) {
-	ps := setUpProduct()
+	ps := setUpProduct(t)
 	defer ps.Close()
 
 	orderItems := []utils.OrderItem{
@@ -161,7 +164,7 @@ func TestDecreasesStock(t *testing.T) {
 }
 
 func TestDoesNotDecreaseStockBelow0(t *testing.T) {
-	ps := setUpProduct()
+	ps := setUpProduct(t)
 	defer ps.Close()
 
 	orderItems := []utils.OrderItem{

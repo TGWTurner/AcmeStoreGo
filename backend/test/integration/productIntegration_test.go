@@ -10,7 +10,7 @@ import (
 )
 
 func TestListsProducts(t *testing.T) {
-	w := test.SetUpApi()
+	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
@@ -29,7 +29,7 @@ func TestListsProducts(t *testing.T) {
 }
 
 func TestListsDeals(t *testing.T) {
-	w := test.SetUpApi()
+	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
@@ -49,7 +49,7 @@ func TestListsDeals(t *testing.T) {
 }
 
 func TestGetsCategories(t *testing.T) {
-	w := test.SetUpApi()
+	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
@@ -68,7 +68,7 @@ func TestGetsCategories(t *testing.T) {
 }
 
 func TestListsProductsInASingleCategory(t *testing.T) {
-	w := test.SetUpApi()
+	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
@@ -89,7 +89,7 @@ func TestListsProductsInASingleCategory(t *testing.T) {
 }
 
 func TestListsProductsWithSearchTerm(t *testing.T) {
-	w := test.SetUpApi()
+	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 

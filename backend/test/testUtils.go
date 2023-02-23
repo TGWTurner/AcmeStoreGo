@@ -15,7 +15,10 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-func SetUpApi() *api.Wiring {
+func SetUpApi(t *testing.T) *api.Wiring {
+	//"sql" or "sql-mem" or ""
+	t.Setenv("DB_CONNECTION", "sql-mem")
+
 	db := da.InitiateConnection()
 	r := mux.NewRouter()
 	store := sessions.NewCookieStore([]byte("my session encryption secret"))

@@ -11,7 +11,7 @@ import (
 )
 
 func TestCreatesAnOrder(t *testing.T) {
-	w := test.SetUpApi()
+	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
@@ -32,7 +32,7 @@ func TestCreatesAnOrder(t *testing.T) {
 }
 
 func TestFetchACreatedOrder(t *testing.T) {
-	w := test.SetUpApi()
+	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
@@ -67,7 +67,7 @@ func TestFetchACreatedOrder(t *testing.T) {
 }
 
 func TestGetsAnEmptyBasket(t *testing.T) {
-	w := test.SetUpApi()
+	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
@@ -81,7 +81,7 @@ func TestGetsAnEmptyBasket(t *testing.T) {
 }
 
 func TestUpdatesABasket(t *testing.T) {
-	w := test.SetUpApi()
+	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
@@ -122,7 +122,7 @@ func TestUpdatesABasket(t *testing.T) {
 
 // NOTE - The this relies on sign-in working. We can only list our own orders.
 func TestListsOrderHistory(t *testing.T) {
-	w := test.SetUpApi()
+	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
@@ -161,7 +161,7 @@ func TestListsOrderHistory(t *testing.T) {
 
 // NOTE - this test assumes Sign In works
 func TestListsOnlyOrderHistoryForSignedInUser(t *testing.T) {
-	w := test.SetUpApi()
+	w := test.SetUpApi(t)
 	defer w.Close()
 
 	user1 := test.NewApiRequester(w)
@@ -219,9 +219,6 @@ func sendOrderRequest(t *testing.T, requester *test.ApiRequester, order api.Orde
 	test.AssertNil(t, err)
 	order1Response := requester.Post("/api/order/checkout", orderBody)
 	test.AssertResponseCode(t, 200, order1Response.Code)
-
-	fmt.Println("Response")
-	fmt.Println(order1Response.Code, order1Response.Body)
 
 	var orderObject utils.Order
 	err = json.NewDecoder(order1Response.Body).Decode(&orderObject)

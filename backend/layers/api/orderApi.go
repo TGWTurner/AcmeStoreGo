@@ -55,6 +55,8 @@ func (o *OrderApi) GetBasket(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(basket)
 }
 
+//TODO remove Total from post
+
 // PostBasket godoc
 // @Summary Creates or updates the user's Basket
 // @Description Sets a session cookie which is needed to later get the basket

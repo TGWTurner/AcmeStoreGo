@@ -22,7 +22,10 @@ var signUpData = struct {
 	password: "s3cret",
 }
 
-func setUpAccount() bl.AccountService {
+func setUpAccount(t *testing.T) bl.AccountService {
+	//"sql" or "sql-mem" or ""
+	t.Setenv("DB_CONNECTION", "sql-mem")
+
 	db := da.InitiateConnection()
 	return *bl.NewAccountService(db.Account)
 }
@@ -36,7 +39,7 @@ func createAccount(t *testing.T, as bl.AccountService) utils.AccountApiResponse 
 }
 
 func TestSignsUpOk(t *testing.T) {
-	as := setUpAccount()
+	as := setUpAccount(t)
 	defer as.Close()
 
 	account, err := as.SignUp(signUpData.email, signUpData.password, signUpData.name, signUpData.address, signUpData.postcode)
@@ -51,7 +54,7 @@ func TestSignsUpOk(t *testing.T) {
 }
 
 func TestSignsInOk(t *testing.T) {
-	as := setUpAccount()
+	as := setUpAccount(t)
 	defer as.Close()
 
 	createAccount(t, as)
@@ -64,7 +67,7 @@ func TestSignsInOk(t *testing.T) {
 }
 
 func TestFailsSignIn(t *testing.T) {
-	as := setUpAccount()
+	as := setUpAccount(t)
 	defer as.Close()
 
 	createAccount(t, as)
@@ -79,19 +82,19 @@ func TestFailsSignIn(t *testing.T) {
 }
 
 func TestFetchesAnAccount(t *testing.T) {
-	as := setUpAccount()
+	as := setUpAccount(t)
 	defer as.Close()
 
 	account := createAccount(t, as)
-	fetched, err := as.GetById(account.Id)
+	actual, err := as.GetById(account.Id)
 
 	test.AssertNil(t, err)
 
-	AssertAccountDataMatching(t, fetched, account)
+	AssertAccountDataMatching(t, account, actual)
 }
 
 func TestUpdatesAnAccountIncludingPasswordAndCanSignIn(t *testing.T) {
-	as := setUpAccount()
+	as := setUpAccount(t)
 	defer as.Close()
 
 	account := createAccount(t, as)
@@ -99,24 +102,23 @@ func TestUpdatesAnAccountIncludingPasswordAndCanSignIn(t *testing.T) {
 	account.Name = "b"
 
 	updateAccount := utils.UpdateAccount{
+		Id:              account.Id,
 		ShippingDetails: account.ShippingDetails,
 		Password:        "newpass",
 	}
 
-	updateAccount.Id = 1
-
-	updated, err := as.Update(updateAccount)
+	actual, err := as.Update(updateAccount)
 
 	test.AssertNil(t, err)
 
-	AssertAccountDataMatching(t, account, updated)
+	AssertAccountDataMatching(t, account, actual)
 
 	_, err = as.SignIn(updateAccount.Email, updateAccount.Password)
 
 	test.AssertNil(t, err)
 }
 
-func AssertAccountDataMatching(t *testing.T, actual, expected utils.AccountApiResponse) {
+func AssertAccountDataMatching(t *testing.T, expected, actual utils.AccountApiResponse) {
 	if expected.Address != actual.Address {
 		t.Errorf("Expected address: %s, got address: %s", expected.Address, actual.Address)
 	}

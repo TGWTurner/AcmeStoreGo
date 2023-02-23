@@ -10,7 +10,10 @@ import (
 	"time"
 )
 
-func setUpOrder() (bl.OrderService, bl.ProductService) {
+func setUpOrder(t *testing.T) (bl.OrderService, bl.ProductService) {
+	//"sql" or "sql-mem" or ""
+	t.Setenv("DB_CONNECTION", "sql-mem")
+
 	db := da.InitiateConnection()
 	ps := bl.NewProductService(db.Product)
 	return *bl.NewOrderService(db.Order, *ps), *ps
@@ -35,7 +38,7 @@ var makeTestOrderRequest = struct {
 var tenSec, _ = time.ParseDuration("10s")
 
 func TestUpdatesBasket(t *testing.T) {
-	os, ps := setUpOrder()
+	os, ps := setUpOrder(t)
 	defer func() { os.Close(); ps.Close() }()
 
 	orderItems := makeTestOrderRequest.items
@@ -57,7 +60,7 @@ func TestUpdatesBasket(t *testing.T) {
 }
 
 func TestCreatesAnOrder(t *testing.T) {
-	os, ps := setUpOrder()
+	os, ps := setUpOrder(t)
 	defer func() { os.Close(); ps.Close() }()
 
 	request := makeTestOrderRequest
@@ -85,7 +88,7 @@ func TestCreatesAnOrder(t *testing.T) {
 }
 
 func TestRejectsAnOrderIfNotEnoughStock(t *testing.T) {
-	os, ps := setUpOrder()
+	os, ps := setUpOrder(t)
 	defer func() { os.Close(); ps.Close() }()
 
 	request := makeTestOrderRequest
@@ -110,7 +113,7 @@ func TestRejectsAnOrderIfNotEnoughStock(t *testing.T) {
 }
 
 func TestFetchesOrders(t *testing.T) {
-	os, ps := setUpOrder()
+	os, ps := setUpOrder(t)
 	defer func() { os.Close(); ps.Close() }()
 
 	request1 := makeTestOrderRequest

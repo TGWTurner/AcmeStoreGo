@@ -22,7 +22,7 @@ func AssertNotSignedIn(t *testing.T, ar *test.ApiRequester) {
 }
 
 func TestNotSignedInByDefault(t *testing.T) {
-	w := test.SetUpApi()
+	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
@@ -30,7 +30,7 @@ func TestNotSignedInByDefault(t *testing.T) {
 }
 
 func TestSignsInUsingPrePopulatedTestAccount(t *testing.T) {
-	w := test.SetUpApi()
+	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
@@ -46,7 +46,7 @@ func TestSignsInUsingPrePopulatedTestAccount(t *testing.T) {
 }
 
 func TestSignInReturnsTheRightAccount(t *testing.T) {
-	w := test.SetUpApi()
+	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
@@ -71,7 +71,7 @@ func TestSignInReturnsTheRightAccount(t *testing.T) {
 }
 
 func TestSignUp(t *testing.T) {
-	w := test.SetUpApi()
+	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
@@ -87,7 +87,7 @@ func TestSignUp(t *testing.T) {
 }
 
 func TestSignupReturnsTheNewlyCreatedAccount(t *testing.T) {
-	w := test.SetUpApi()
+	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
@@ -117,7 +117,7 @@ func TestSignupReturnsTheNewlyCreatedAccount(t *testing.T) {
 }
 
 func TestIsSignedInAfterSignUp(t *testing.T) {
-	w := test.SetUpApi()
+	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
@@ -129,7 +129,7 @@ func TestIsSignedInAfterSignUp(t *testing.T) {
 }
 
 func TestCanSignInWithANewlyCreatedUser(t *testing.T) {
-	w := test.SetUpApi()
+	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
@@ -158,7 +158,7 @@ func TestCanSignInWithANewlyCreatedUser(t *testing.T) {
 }
 
 func TestInvalidCredentialsRejected(t *testing.T) {
-	w := test.SetUpApi()
+	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
@@ -182,7 +182,7 @@ func TestInvalidCredentialsRejected(t *testing.T) {
 }
 
 func TestRetrievesAnAccount(t *testing.T) {
-	w := test.SetUpApi()
+	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
@@ -203,7 +203,7 @@ func TestRetrievesAnAccount(t *testing.T) {
 }
 
 func TestUpdatesAccount(t *testing.T) {
-	w := test.SetUpApi()
+	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
@@ -249,7 +249,7 @@ func TestUpdatesAccount(t *testing.T) {
 }
 
 func TestHandlesPasswordChange(t *testing.T) {
-	w := test.SetUpApi()
+	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
 
@@ -291,9 +291,6 @@ func TestHandlesPasswordChange(t *testing.T) {
 		Email    string
 		Password string
 	}{Email: newUser.Email, Password: "changed-password"}
-
-	w3 := test.SetUpApi()
-	defer w3.Close()
 
 	body, err = json.Marshal(updatedCredentials)
 
