@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strings"
 
+	_ "bjssStoreGo/docs"
+
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	httpSwagger "github.com/swaggo/http-swagger"
