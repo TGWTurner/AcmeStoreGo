@@ -6,12 +6,6 @@ import (
 	"time"
 )
 
-/*
-Missing:
- - Basket
- - Session
-*/
-
 type ShippingDetails struct {
 	Email    string
 	Name     string
@@ -140,9 +134,4 @@ type Database struct {
 type Basket struct {
 	Total int
 	Items []OrderItem
-}
-
-type ApiErrorResponse struct {
-	Error string
-	Msg   string
 }

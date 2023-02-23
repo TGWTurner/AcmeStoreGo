@@ -1,6 +1,7 @@
 package integration
 
 import (
+	"bjssStoreGo/backend/layers/api"
 	"bjssStoreGo/backend/test"
 	"bjssStoreGo/backend/utils"
 	"encoding/json"
@@ -213,7 +214,7 @@ func assertOrderSetDoesNotIncludeOrder(t *testing.T, orderSet []utils.Order, exp
 	}
 }
 
-func sendOrderRequest(t *testing.T, requester *test.ApiRequester, order utils.OrderRequest) utils.Order {
+func sendOrderRequest(t *testing.T, requester *test.ApiRequester, order api.OrderRequest) utils.Order {
 	orderBody, err := json.Marshal(order)
 	test.AssertNil(t, err)
 	order1Response := requester.Post("/api/order/checkout", orderBody)
@@ -229,8 +230,8 @@ func sendOrderRequest(t *testing.T, requester *test.ApiRequester, order utils.Or
 	return orderObject
 }
 
-func makeOrderRequest() utils.OrderRequest {
-	return utils.OrderRequest{
+func makeOrderRequest() api.OrderRequest {
+	return api.OrderRequest{
 		PaymentToken: "someTokenToCheckWithPaymentGateway",
 		ShippingDetails: utils.ShippingDetails{
 			Email:    "a@example.com",

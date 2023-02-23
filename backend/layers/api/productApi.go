@@ -24,8 +24,8 @@ func (p *ProductApi) Close() {
 // @Summary Query or get all Products
 // @ID Search
 // @Produce json
-// @Param search path int false "Text to search for"
-// @Param caregory path int false "A Category Id to filter Products on"
+// @Param search query string false "Text to search for"
+// @Param caregory query int false "A Category Id to filter Products on"
 // @Success 200 {object} []utils.Product "A JSON array of Products"
 // @Router /api/product/catalogue [get]
 func (p *ProductApi) Search(w http.ResponseWriter, r *http.Request) {
@@ -77,7 +77,7 @@ func (p *ProductApi) Categories(w http.ResponseWriter, r *http.Request) {
 // @ID Deals
 // @Produce json
 // @Success 200 {object} []utils.Product "A JSON array of Products"
-// @Router /api/product/deals [post]
+// @Router /api/product/deals [get]
 func (p *ProductApi) Deals(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 

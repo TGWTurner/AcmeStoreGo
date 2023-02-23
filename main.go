@@ -31,7 +31,7 @@ func main() {
 	wiring.SetUpRoutes()
 	//SET UP <<<<<<<<<<<<<<<
 
-	fmt.Println("Starting...")
+	fmt.Println("server listening on port 4001, try http://localhost:4001/api-docs/")
 	wiring.AsyncListen(":4001")
 }
 

@@ -254,7 +254,7 @@ paths:
       parameters:
       - description: A Basket
         in: body
-        name: user
+        name: Basket
         required: true
         schema:
           $ref: '#/definitions/utils.Basket'
@@ -312,11 +312,11 @@ paths:
       operationId: Search
       parameters:
       - description: Text to search for
-        in: path
+        in: query
         name: search
-        type: integer
+        type: string
       - description: A Category Id to filter Products on
-        in: path
+        in: query
         name: caregory
         type: integer
       produces:
@@ -345,7 +345,7 @@ paths:
             type: array
       summary: Get a list of product Categories
   /api/product/deals:
-    post:
+    get:
       operationId: Deals
       produces:
       - application/json

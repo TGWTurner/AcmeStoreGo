@@ -61,7 +61,7 @@ func (o *OrderApi) GetBasket(w http.ResponseWriter, r *http.Request) {
 // @ID PostBasket
 // @Accept json
 // @Produce json
-// @Param user body utils.Basket true "A Basket"
+// @Param Basket body utils.Basket true "A Basket"
 // @Success 200 {object} utils.Basket "A Basket"
 // @Router /api/order/basket [post]
 func (o *OrderApi) PostBasket(w http.ResponseWriter, r *http.Request) {
@@ -123,9 +123,9 @@ func (o *OrderApi) GetHistory(w http.ResponseWriter, r *http.Request) {
 // @ID GetOrder
 // @Accept json
 // @Produce json
-// @Param Cookie header string false "token"
-// @Success 200 {object} utils.Order "A Basket"
-// @Failure 404 {object} utils.ApiErrorResponse "No such order"
+// @Param Token header string true "Order token. Currently same as order.id"
+// @Success 200 {object} OrderApiResponse "The newly created order"
+// @Failure 404 {object} ApiErrorResponse "No such order"
 // @Router /api/order/{token} [get]
 func (o *OrderApi) GetOrder(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -144,8 +144,10 @@ func (o *OrderApi) GetOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	response := convertOrderToOrderApiResponse(order)
+
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(order)
+	json.NewEncoder(w).Encode(response)
 }
 
 // PostCheckout godoc
@@ -154,14 +156,14 @@ func (o *OrderApi) GetOrder(w http.ResponseWriter, r *http.Request) {
 // @ID PostCheckout
 // @Accept json
 // @Produce json
-// @Param order body utils.Order true "An order"
-// @Success 200 {object} utils.Order "A Basket"
-// @Failure 400 {object} utils.ApiErrorResponse "An error. If the request was well formed this will be payment or stock level error. If stock level error, the quantityRemaining is returned for products with not enough stock."
+// @Param order body OrderRequest true "An order"
+// @Success 200 {object} OrderApiResponse "The newly created order"
+// @Failure 400 {object} ApiErrorResponse "An error. If the request was well formed this will be payment or stock level error. If stock level error, the quantityRemaining is returned for products with not enough stock."
 // @Router /api/order/checkout [post]
 func (o *OrderApi) PostCheckout(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	var order utils.OrderRequest
+	var order OrderRequest
 
 	err := json.NewDecoder(r.Body).Decode(&order)
 
@@ -178,8 +180,20 @@ func (o *OrderApi) PostCheckout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	response := convertOrderToOrderApiResponse(newOrder)
+
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(newOrder)
+	json.NewEncoder(w).Encode(response)
+}
+
+func convertOrderToOrderApiResponse(order utils.Order) OrderApiResponse {
+	return OrderApiResponse{
+		Id:              order.Id,
+		Total:           order.Total,
+		UpdatedDate:     order.UpdatedDate,
+		ShippingDetails: order.ShippingDetails,
+		Items:           order.Items,
+	}
 }
 
 type OrderApi struct {

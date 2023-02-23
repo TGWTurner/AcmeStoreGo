@@ -53,7 +53,7 @@ type UserDetails struct {
 // @Produce json
 // @Param user body UserDetails true "account information"
 // @Success 200 {object} utils.AccountApiResponse "The user's account"
-// @Failure 401 {object} utils.ApiErrorResponse "Invalid credentials"
+// @Failure 401 {object} ApiErrorResponse "Invalid credentials"
 // @Router /api/account/sign-in [post]
 func (a *AccountApi) PostSignIn(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -88,7 +88,7 @@ func (a *AccountApi) PostSignIn(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param user body utils.AccountDetails true "account information"
 // @Success 200 {object} utils.AccountApiResponse "The user's account"
-// @Failure 400 {object} utils.ApiErrorResponse "Malformed request or account already exists"
+// @Failure 400 {object} ApiErrorResponse "Malformed request or account already exists"
 // @Router /api/account/sign-up [post]
 func (a *AccountApi) PostSignUp(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -123,7 +123,7 @@ func (a *AccountApi) PostSignUp(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param Cookie header string false "token"
 // @Success 200 {object} utils.AccountApiResponse "The user's account"
-// @Failure 401 {object} utils.ApiErrorResponse "User is not signed in"
+// @Failure 401 {object} ApiErrorResponse "User is not signed in"
 // @Router /api/account [get]
 func (a *AccountApi) GetAccount(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -154,7 +154,7 @@ func (a *AccountApi) GetAccount(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param user body utils.AccountDetails true "account information"
 // @Success 200 {object} utils.AccountApiResponse "The user's account"
-// @Failure 401 {object} utils.ApiErrorResponse "User is not signed in"
+// @Failure 401 {object} ApiErrorResponse "User is not signed in"
 // @Router /api/account [post]
 func (a *AccountApi) PostAccount(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -178,7 +178,7 @@ func (a *AccountApi) PostAccount(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 
-		json.NewEncoder(w).Encode(utils.ApiErrorResponse{
+		json.NewEncoder(w).Encode(ApiErrorResponse{
 			Error: "forbidden",
 			Msg:   "user is not signed in",
 		})

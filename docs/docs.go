@@ -190,7 +190,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "A Basket",
-                        "name": "user",
+                        "name": "Basket",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -307,16 +307,16 @@ const docTemplate = `{
                 "operationId": "Search",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "Text to search for",
                         "name": "search",
-                        "in": "path"
+                        "in": "query"
                     },
                     {
                         "type": "integer",
                         "description": "A Category Id to filter Products on",
                         "name": "caregory",
-                        "in": "path"
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -354,7 +354,7 @@ const docTemplate = `{
             }
         },
         "/api/product/deals": {
-            "post": {
+            "get": {
                 "produces": [
                     "application/json"
                 ],
