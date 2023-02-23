@@ -40,6 +40,11 @@ func (a *AccountApi) setSignedInUserId(w http.ResponseWriter, r *http.Request, c
 	session.Save(r, w)
 }
 
+type UserDetails struct {
+	Email    string
+	Password string
+}
+
 // PostSignIn godoc
 // @Summary Signs in
 // @Description Signs in, deletes any existing session, creates a new one for this user.
@@ -53,19 +58,16 @@ func (a *AccountApi) setSignedInUserId(w http.ResponseWriter, r *http.Request, c
 func (a *AccountApi) PostSignIn(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	var eap struct {
-		Email    string
-		Password string
-	}
+	var userDetails UserDetails
 
-	err := json.NewDecoder(r.Body).Decode(&eap)
+	err := json.NewDecoder(r.Body).Decode(&userDetails)
 
 	if err != nil {
 		Error(w, r, http.StatusInternalServerError, "error", err.Error())
 		return
 	}
 
-	account, err := a.as.SignIn(eap.Email, eap.Password)
+	account, err := a.as.SignIn(userDetails.Email, userDetails.Password)
 
 	if err != nil {
 		Error(w, r, http.StatusInternalServerError, "forbidden", "Invalid credentials")
