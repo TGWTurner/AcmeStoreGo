@@ -25,6 +25,11 @@ type Account struct {
 	ShippingDetails
 }
 
+type AccountDetails struct {
+	Password string
+	ShippingDetails
+}
+
 type AccountApiResponse struct {
 	Id int
 	ShippingDetails

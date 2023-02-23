@@ -93,13 +93,7 @@ func (a *AccountApi) PostSignIn(w http.ResponseWriter, r *http.Request) {
 func (a *AccountApi) PostSignUp(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	var acc struct {
-		Email    string
-		Name     string
-		Address  string
-		Postcode string
-		Password string
-	}
+	var acc utils.AccountDetails
 
 	err := json.NewDecoder(r.Body).Decode(&acc)
 
@@ -171,22 +165,30 @@ func (a *AccountApi) PostAccount(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 	}
 
-	var acc utils.UpdateAccount
-
-	acc.Id = userId
+	var acc utils.AccountDetails
 
 	err = json.NewDecoder(r.Body).Decode(&acc)
 
+	updateAccount := utils.UpdateAccount{
+		Id:              userId,
+		Password:        acc.Password,
+		ShippingDetails: acc.ShippingDetails,
+	}
+
 	if err != nil {
-		Error(w, r, http.StatusUnauthorized, "error", "user is not signed in")
+		w.WriteHeader(http.StatusUnauthorized)
+
+		json.NewEncoder(w).Encode(utils.ApiErrorResponse{
+			Error: "forbidden",
+			Msg:   "user is not signed in",
+		})
 		return
 	}
 
-	account, err := a.as.Update(acc)
+	account, err := a.as.Update(updateAccount)
 
 	if err != nil {
-		Error(w, r, http.StatusInternalServerError, "error", err.Error())
-		return
+		panic(err)
 	}
 
 	w.WriteHeader(http.StatusOK)

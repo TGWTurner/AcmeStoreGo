@@ -1,0 +1,360 @@
+basePath: /
+definitions:
+  api.UserDetails:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  utils.AccountApiResponse:
+    properties:
+      address:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      postcode:
+        type: string
+    type: object
+  utils.AccountDetails:
+    properties:
+      address:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      postcode:
+        type: string
+    type: object
+  utils.ApiErrorResponse:
+    properties:
+      error:
+        type: string
+      msg:
+        type: string
+    type: object
+  utils.Basket:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/utils.OrderItem'
+        type: array
+      total:
+        type: integer
+    type: object
+  utils.Order:
+    properties:
+      customerId:
+        type: integer
+      id:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/utils.OrderItem'
+        type: array
+      shippingDetails:
+        $ref: '#/definitions/utils.ShippingDetails'
+      total:
+        type: integer
+      updatedDate:
+        type: string
+    type: object
+  utils.OrderItem:
+    properties:
+      productId:
+        type: integer
+      quantity:
+        type: integer
+    type: object
+  utils.Product:
+    properties:
+      categoryId:
+        type: integer
+      id:
+        type: integer
+      longDescription:
+        type: string
+      price:
+        type: integer
+      quantityRemaining:
+        type: integer
+      shortDescription:
+        type: string
+    type: object
+  utils.ProductCategory:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  utils.ShippingDetails:
+    properties:
+      address:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      postcode:
+        type: string
+    type: object
+host: localhost:4001
+info:
+  contact: {}
+  description: Simple store for teaching and learning
+  title: BJSS Store
+  version: "1.0"
+paths:
+  /api/account:
+    get:
+      consumes:
+      - application/json
+      operationId: GetAccount
+      parameters:
+      - description: token
+        in: header
+        name: Cookie
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The user's account
+          schema:
+            $ref: '#/definitions/utils.AccountApiResponse'
+        "401":
+          description: User is not signed in
+          schema:
+            $ref: '#/definitions/utils.ApiErrorResponse'
+      summary: Gets the user's Account
+    post:
+      consumes:
+      - application/json
+      operationId: PostAccount
+      parameters:
+      - description: account information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/utils.AccountDetails'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The user's account
+          schema:
+            $ref: '#/definitions/utils.AccountApiResponse'
+        "401":
+          description: User is not signed in
+          schema:
+            $ref: '#/definitions/utils.ApiErrorResponse'
+      summary: Updates the users account
+  /api/account/sign-in:
+    post:
+      consumes:
+      - application/json
+      description: Signs in, deletes any existing session, creates a new one for this
+        user.
+      operationId: PostSignIn
+      parameters:
+      - description: account information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/api.UserDetails'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The user's account
+          schema:
+            $ref: '#/definitions/utils.AccountApiResponse'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/utils.ApiErrorResponse'
+      summary: Signs in
+  /api/account/sign-up:
+    post:
+      consumes:
+      - application/json
+      description: Signs up, deletes any existing session, creates a new one for this
+        user. Will give an error if the user already exists.
+      operationId: PostSignUp
+      parameters:
+      - description: account information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/utils.AccountDetails'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The user's account
+          schema:
+            $ref: '#/definitions/utils.AccountApiResponse'
+        "400":
+          description: Malformed request or account already exists
+          schema:
+            $ref: '#/definitions/utils.ApiErrorResponse'
+      summary: Registers a new user
+  /api/order/{token}:
+    get:
+      consumes:
+      - application/json
+      description: Does not require a signed in user so that we can implement getting
+        an order via a link in an email, etc.
+      operationId: GetOrder
+      parameters:
+      - description: token
+        in: header
+        name: Cookie
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: A Basket
+          schema:
+            $ref: '#/definitions/utils.Order'
+        "404":
+          description: No such order
+          schema:
+            $ref: '#/definitions/utils.ApiErrorResponse'
+      summary: Fetches an order given a token
+  /api/order/basket:
+    get:
+      description: The same session cookie that created the basket is needed
+      operationId: GetBasket
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: A Basket
+          schema:
+            $ref: '#/definitions/utils.Basket'
+      summary: Gets the user's Basket
+    post:
+      consumes:
+      - application/json
+      description: Sets a session cookie which is needed to later get the basket
+      operationId: PostBasket
+      parameters:
+      - description: A Basket
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/utils.Basket'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: A Basket
+          schema:
+            $ref: '#/definitions/utils.Basket'
+      summary: Creates or updates the user's Basket
+  /api/order/checkout:
+    post:
+      consumes:
+      - application/json
+      description: Checks the stock levels and paymentToken. If Ok creates a new order.
+        If not gives an error and the products there is not enough stock for. Sets
+        a session cookie which can be used later to tie this order to a signed in
+        user. Does not require a signed in user so guests can check out
+      operationId: PostCheckout
+      parameters:
+      - description: An order
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/utils.Order'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: A Basket
+          schema:
+            $ref: '#/definitions/utils.Order'
+        "400":
+          description: An error. If the request was well formed this will be payment
+            or stock level error. If stock level error, the quantityRemaining is returned
+            for products with not enough stock.
+          schema:
+            $ref: '#/definitions/utils.ApiErrorResponse'
+      summary: Creates a new order
+  /api/order/history:
+    get:
+      operationId: GetHistory
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: A Basket
+          schema:
+            $ref: '#/definitions/utils.Basket'
+      summary: Gets the user's Order history
+  /api/product/catalogue:
+    get:
+      operationId: Search
+      parameters:
+      - description: Text to search for
+        in: path
+        name: search
+        type: integer
+      - description: A Category Id to filter Products on
+        in: path
+        name: caregory
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: A JSON array of Products
+          schema:
+            items:
+              $ref: '#/definitions/utils.Product'
+            type: array
+      summary: Query or get all Products
+  /api/product/categories:
+    get:
+      description: Signs up, deletes any existing session, creates a new one for this
+        user. Will give an error if the user already exists.
+      operationId: Categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: A JSON array of Categories
+          schema:
+            items:
+              $ref: '#/definitions/utils.ProductCategory'
+            type: array
+      summary: Get a list of product Categories
+  /api/product/deals:
+    post:
+      operationId: Deals
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: A JSON array of Products
+          schema:
+            items:
+              $ref: '#/definitions/utils.Product'
+            type: array
+      summary: Get deals that are valid for today
+swagger: "2.0"
