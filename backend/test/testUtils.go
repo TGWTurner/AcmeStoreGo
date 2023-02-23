@@ -3,8 +3,9 @@ package test
 import (
 	"bjssStoreGo/backend/layers/api"
 	da "bjssStoreGo/backend/layers/dataAccess"
-	"bjssStoreGo/backend/layers/dataAccess/testData"
+	td "bjssStoreGo/backend/layers/dataAccess/testData"
 	"bjssStoreGo/backend/utils"
+	"encoding/json"
 	"reflect"
 	"strings"
 	"testing"
@@ -83,20 +84,8 @@ func AssertCategorySetsMatch(t *testing.T, expected, actual []utils.ProductCateg
 	}
 }
 
-func AssertSignedIn(t *testing.T, ar *ApiRequester) {
-	response := ar.Get("/api/account")
-
-	AssertResponseCode(t, 200, response.Code)
-}
-
-func AssertNotSignedIn(t *testing.T, ar *ApiRequester) {
-	response := ar.Get("/api/account")
-
-	AssertResponseCode(t, 401, response.Code)
-}
-
 func GetTestProductById(id int) utils.Product {
-	expectedProducts := testData.GetProductTestData().Products
+	expectedProducts := td.GetProductTestData().Products
 	idx := slices.IndexFunc(
 		expectedProducts,
 		func(p utils.Product) bool { return p.Id == id },
@@ -106,7 +95,7 @@ func GetTestProductById(id int) utils.Product {
 }
 
 func GetTestProductsByText(text string) []utils.Product {
-	expectedProducts := testData.GetProductTestData().Products
+	expectedProducts := td.GetProductTestData().Products
 	resProducts := []utils.Product{}
 
 	for _, product := range expectedProducts {
@@ -119,7 +108,7 @@ func GetTestProductsByText(text string) []utils.Product {
 }
 
 func GetTestProductsByCategory(categoryId int) []utils.Product {
-	expectedProducts := testData.GetProductTestData().Products
+	expectedProducts := td.GetProductTestData().Products
 	resProducts := []utils.Product{}
 
 	for _, product := range expectedProducts {
@@ -132,7 +121,7 @@ func GetTestProductsByCategory(categoryId int) []utils.Product {
 }
 
 func GetTestProductsWithCurrentDeals(currentDate string) []utils.Product {
-	deals := testData.GetProductTestData().Deals
+	deals := td.GetProductTestData().Deals
 	products := []utils.Product{}
 
 	for _, deal := range deals {
@@ -142,4 +131,49 @@ func GetTestProductsWithCurrentDeals(currentDate string) []utils.Product {
 	}
 
 	return products
+}
+
+func AssertOrderItemsMatch(t *testing.T, expected, actual []utils.OrderItem) {
+	if len(expected) != len(actual) {
+		t.Errorf("Expected order item length to be %d, got %d", len(expected), len(actual))
+	}
+
+	for _, expectedItem := range expected {
+		found := false
+		for _, actualItem := range actual {
+			if reflect.DeepEqual(expectedItem, actualItem) {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			t.Errorf("Failed to find expected item %v", expectedItem)
+		}
+	}
+}
+func SignInPrePopulatedUser(t *testing.T, ar *ApiRequester, index ...int) utils.AccountApiResponse {
+	var credentials struct {
+		Email    string
+		Password string
+	}
+
+	if len(index) == 0 {
+		credentials = td.GetTestAccountCredentials(1)
+	} else {
+		credentials = td.GetTestAccountCredentials(index[0])
+	}
+
+	body, err := json.Marshal(credentials)
+
+	AssertNil(t, err)
+
+	response := ar.Post("/api/account/sign-in", body)
+
+	var newAccount utils.AccountApiResponse
+	err = json.NewDecoder(response.Body).Decode(&newAccount)
+
+	AssertNil(t, err)
+
+	return newAccount
 }

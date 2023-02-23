@@ -56,27 +56,6 @@ func TestUpdatesBasket(t *testing.T) {
 	}
 }
 
-func AssertOrderItemsMatch(t *testing.T, expected, actual []utils.OrderItem) {
-	if len(expected) != len(actual) {
-		t.Errorf("Expected order item length to be %d, got %d", len(expected), len(actual))
-	}
-
-	for _, expectedItem := range expected {
-		found := false
-		for _, actualItem := range actual {
-			if reflect.DeepEqual(expectedItem, actualItem) {
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			t.Errorf("Failed to find expected item %v", expectedItem)
-		}
-	}
-
-}
-
 func TestCreatesAnOrder(t *testing.T) {
 	os, ps := setUpOrder()
 	defer func() { os.Close(); ps.Close() }()
@@ -98,7 +77,7 @@ func TestCreatesAnOrder(t *testing.T) {
 		t.Errorf("Expected shipping details to match, they did not")
 	}
 
-	AssertOrderItemsMatch(t, request.items, response.Items)
+	test.AssertOrderItemsMatch(t, request.items, response.Items)
 
 	if time.Now().Add(tenSec).Format("2006-01-02 15:04:05.0000000") < response.UpdatedDate {
 		t.Errorf("Expected updatedDate to be less than current datetime")

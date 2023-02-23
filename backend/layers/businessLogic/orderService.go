@@ -41,7 +41,6 @@ func (os *OrderService) CreateOrder(
 	shippingDetails utils.ShippingDetails,
 	orderItems []utils.OrderItem,
 ) (utils.Order, error) {
-
 	notEnoughStock, total, err := os.ps.CheckStock(orderItems)
 
 	if err != nil {

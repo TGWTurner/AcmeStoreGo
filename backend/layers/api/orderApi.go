@@ -116,16 +116,10 @@ func (o *OrderApi) GetOrder(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(order)
 }
 
-type OrderRequest struct {
-	PaymentToken    string
-	ShippingDetails utils.ShippingDetails
-	Items           []utils.OrderItem
-}
-
 func (o *OrderApi) PostCheckout(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	var order OrderRequest
+	var order utils.OrderRequest
 
 	err := json.NewDecoder(r.Body).Decode(&order)
 
@@ -134,11 +128,6 @@ func (o *OrderApi) PostCheckout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	customerId := GetSignedInUserId(r, o.s)
-
-	if customerId == 0 {
-		Error(w, r, http.StatusUnauthorized, "error", "User is not signed in")
-		return
-	}
 
 	newOrder, err := o.os.CreateOrder(customerId, order.ShippingDetails, order.Items)
 

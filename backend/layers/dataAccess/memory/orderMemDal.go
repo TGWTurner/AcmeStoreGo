@@ -41,7 +41,11 @@ func (od *OrderDatabaseImpl) GetByToken(orderId string) (utils.Order, error) {
 
 func (od *OrderDatabaseImpl) Add(customerId int, order utils.Order) (utils.Order, error) {
 	order.UpdatedDate = time.Now().String()
-	order.CustomerId = customerId
+
+	if customerId != 0 {
+		order.CustomerId = customerId
+	}
+
 	order.Id = utils.UrlSafeUniqueId()
 
 	od.orders = append(

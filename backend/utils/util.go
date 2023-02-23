@@ -63,6 +63,12 @@ type ProductDeal struct {
 	EndDate   string
 }
 
+type OrderRequest struct {
+	PaymentToken    string
+	ShippingDetails ShippingDetails
+	Items           []OrderItem
+}
+
 type OrderItem struct {
 	ProductId int
 	Quantity  int
