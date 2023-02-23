@@ -10,6 +10,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func NewWiring(db utils.Database, r *mux.Router, s *sessions.CookieStore) *Wiring {
@@ -32,6 +33,8 @@ func (w *Wiring) AsyncListen(port string) {
 
 func (w *Wiring) SetUpRoutes() {
 	app := w.Router.PathPrefix("/api").Subrouter()
+
+	w.Router.PathPrefix("/api-docs").Handler(httpSwagger.WrapHandler)
 
 	app.HandleFunc("/values", w.Values).Methods("GET")
 

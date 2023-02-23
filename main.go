@@ -13,6 +13,11 @@ import (
 	"github.com/gorilla/sessions"
 )
 
+// @title BJSS Store
+// @version 1.0
+// @description Simple store for teaching and learning
+// @host  localhost:4001
+// @BasePath /
 func main() {
 	//SET UP <<<<<<<<<<<<<<<
 	setUp("sql")

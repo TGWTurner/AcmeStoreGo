@@ -40,6 +40,16 @@ func (a *AccountApi) setSignedInUserId(w http.ResponseWriter, r *http.Request, c
 	session.Save(r, w)
 }
 
+// PostSignIn godoc
+// @Summary Signs in
+// @Description Signs in, deletes any existing session, creates a new one for this user.
+// @ID PostSignIn
+// @Accept json
+// @Produce json
+// @Param user body UserDetails true "account information"
+// @Success 200 {object} utils.AccountApiResponse "The user's account"
+// @Failure 401 {object} utils.ApiErrorResponse "Invalid credentials"
+// @Router /api/account/sign-in [post]
 func (a *AccountApi) PostSignIn(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -68,6 +78,16 @@ func (a *AccountApi) PostSignIn(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(account)
 }
 
+// PostSignUp godoc
+// @Summary Registers a new user
+// @Description Signs up, deletes any existing session, creates a new one for this user. Will give an error if the user already exists.
+// @ID PostSignUp
+// @Accept json
+// @Produce json
+// @Param user body utils.AccountDetails true "account information"
+// @Success 200 {object} utils.AccountApiResponse "The user's account"
+// @Failure 400 {object} utils.ApiErrorResponse "Malformed request or account already exists"
+// @Router /api/account/sign-up [post]
 func (a *AccountApi) PostSignUp(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -99,6 +119,16 @@ func (a *AccountApi) PostSignUp(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(account)
 }
 
+// GetAccount godoc
+// @Summary Gets the user's Account
+// @Description
+// @ID GetAccount
+// @Accept json
+// @Produce json
+// @Param Cookie header string false "token"
+// @Success 200 {object} utils.AccountApiResponse "The user's account"
+// @Failure 401 {object} utils.ApiErrorResponse "User is not signed in"
+// @Router /api/account [get]
 func (a *AccountApi) GetAccount(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -120,6 +150,16 @@ func (a *AccountApi) GetAccount(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(account)
 }
 
+// PostAccount godoc
+// @Summary Updates the users account
+// @Description
+// @ID PostAccount
+// @Accept json
+// @Produce json
+// @Param user body utils.AccountDetails true "account information"
+// @Success 200 {object} utils.AccountApiResponse "The user's account"
+// @Failure 401 {object} utils.ApiErrorResponse "User is not signed in"
+// @Router /api/account [post]
 func (a *AccountApi) PostAccount(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
