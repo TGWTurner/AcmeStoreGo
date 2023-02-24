@@ -29,11 +29,11 @@ func GetSignedInUserId(r *http.Request, s *sessions.CookieStore) int {
 }
 
 type OrderApiResponse struct {
-	Id              string
-	Total           int
-	UpdatedDate     string
-	ShippingDetails utils.ShippingDetails
-	Items           []utils.OrderItem
+	Id              string                `json:"id"`
+	Total           int                   `json:"total"`
+	UpdatedDate     string                `json:"updatedDate"`
+	ShippingDetails utils.ShippingDetails `json:"shippingDetails"`
+	Items           []utils.OrderItem     `json:"items"`
 }
 
 type OrderRequest struct {
@@ -48,8 +48,8 @@ type AccountDetails struct {
 }
 
 type ApiErrorResponse struct {
-	Error string
-	Msg   string
+	Error string `json:"error"`
+	Msg   string `json:"msg"`
 }
 
 type BasketRequest struct {

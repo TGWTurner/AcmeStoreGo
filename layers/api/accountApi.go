@@ -57,6 +57,7 @@ type UserDetails struct {
 // @Router /api/account/sign-in [post]
 func (a *AccountApi) PostSignIn(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	var userDetails UserDetails
 
@@ -92,6 +93,7 @@ func (a *AccountApi) PostSignIn(w http.ResponseWriter, r *http.Request) {
 // @Router /api/account/sign-up [post]
 func (a *AccountApi) PostSignUp(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	var acc AccountDetails
 
@@ -126,6 +128,7 @@ func (a *AccountApi) PostSignUp(w http.ResponseWriter, r *http.Request) {
 // @Router /api/account [get]
 func (a *AccountApi) GetAccount(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	userId, err := a.getSignedInUserId(r)
 
@@ -157,6 +160,7 @@ func (a *AccountApi) GetAccount(w http.ResponseWriter, r *http.Request) {
 // @Router /api/account [post]
 func (a *AccountApi) PostAccount(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	userId, err := a.getSignedInUserId(r)
 

@@ -7,10 +7,10 @@ import (
 )
 
 type ShippingDetails struct {
-	Email    string
-	Name     string
-	Address  string
-	Postcode string
+	Email    string `json:"email"`
+	Name     string `json:"name"`
+	Address  string `json:"address"`
+	Postcode string `json:"postcode"`
 }
 
 type Account struct {
@@ -20,7 +20,7 @@ type Account struct {
 }
 
 type AccountApiResponse struct {
-	Id int
+	Id int `json:"id"`
 	ShippingDetails
 }
 
@@ -38,28 +38,28 @@ func (a *Account) OmitPasswordHash() AccountApiResponse {
 }
 
 type Product struct {
-	Id                int
-	QuantityRemaining int
-	CategoryId        int
-	Price             int
-	ShortDescription  string
-	LongDescription   string
+	Id                int    `json:"id"`
+	QuantityRemaining int    `json:"quantityRemaining"`
+	CategoryId        int    `json:"categoryId"`
+	Price             int    `json:"price"`
+	ShortDescription  string `json:"shortDescription"`
+	LongDescription   string `json:"longDescription"`
 }
 
 type ProductCategory struct {
-	Id   int
-	Name string
+	Id   int    `json:"id"`
+	Name string `json:"name"`
 }
 
 type ProductDeal struct {
-	ProductId int
-	StartDate string
-	EndDate   string
+	ProductId int    `json:"productId"`
+	StartDate string `json:"startDate"`
+	EndDate   string `json:"endDate"`
 }
 
 type OrderItem struct {
-	ProductId int
-	Quantity  int
+	ProductId int `json:"productId"`
+	Quantity  int `json:"quantity"`
 }
 
 type Order struct {
@@ -121,6 +121,6 @@ type Database struct {
 }
 
 type Basket struct {
-	Total int
-	Items []OrderItem
+	Total int         `json:"total"`
+	Items []OrderItem `json:"items"`
 }

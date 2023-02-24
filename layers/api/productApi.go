@@ -30,6 +30,7 @@ func (p *ProductApi) Close() {
 // @Router /api/product/catalogue [get]
 func (p *ProductApi) Search(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	query := map[string]string{}
 
@@ -60,6 +61,7 @@ func (p *ProductApi) Search(w http.ResponseWriter, r *http.Request) {
 // @Router /api/product/categories [get]
 func (p *ProductApi) Categories(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	categories, err := p.ps.GetProductcategories()
 
@@ -80,6 +82,7 @@ func (p *ProductApi) Categories(w http.ResponseWriter, r *http.Request) {
 // @Router /api/product/deals [get]
 func (p *ProductApi) Deals(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	query := map[string]string{
 		"dealDate": utils.GetFormattedDate(),

@@ -48,6 +48,7 @@ func (o *OrderApi) setBasket(w http.ResponseWriter, r *http.Request, basket util
 // @Router /api/order/basket [get]
 func (o *OrderApi) GetBasket(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	basket := o.getBasket(r)
 
@@ -68,6 +69,7 @@ func (o *OrderApi) GetBasket(w http.ResponseWriter, r *http.Request) {
 // @Router /api/order/basket [post]
 func (o *OrderApi) PostBasket(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	currentBasket := o.getBasket(r)
 
@@ -100,6 +102,7 @@ func (o *OrderApi) PostBasket(w http.ResponseWriter, r *http.Request) {
 // @Router /api/order/history [get]
 func (o *OrderApi) GetHistory(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	customerId := GetSignedInUserId(r, o.s)
 
@@ -131,6 +134,8 @@ func (o *OrderApi) GetHistory(w http.ResponseWriter, r *http.Request) {
 // @Router /api/order/{token} [get]
 func (o *OrderApi) GetOrder(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	params := mux.Vars(r)
 	orderToken, ok := params["id"]
 
@@ -164,6 +169,7 @@ func (o *OrderApi) GetOrder(w http.ResponseWriter, r *http.Request) {
 // @Router /api/order/checkout [post]
 func (o *OrderApi) PostCheckout(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	var order OrderRequest
 
