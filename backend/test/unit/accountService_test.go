@@ -23,9 +23,6 @@ var signUpData = struct {
 }
 
 func setUpAccount(t *testing.T) bl.AccountService {
-	//"sql" or "sql-mem" or ""
-	t.Setenv("DB_CONNECTION", "sql-mem")
-
 	db := da.InitiateConnection()
 	return *bl.NewAccountService(db.Account)
 }

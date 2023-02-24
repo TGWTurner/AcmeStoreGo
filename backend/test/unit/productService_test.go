@@ -14,9 +14,6 @@ import (
 )
 
 func setUpProduct(t *testing.T) bl.ProductService {
-	//"sql" or "sql-mem" or ""
-	t.Setenv("DB_CONNECTION", "sql-mem")
-
 	db := da.InitiateConnection()
 	return *bl.NewProductService(db.Product)
 }

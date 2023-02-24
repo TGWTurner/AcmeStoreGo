@@ -11,9 +11,6 @@ import (
 )
 
 func setUpOrder(t *testing.T) (bl.OrderService, bl.ProductService) {
-	//"sql" or "sql-mem" or ""
-	t.Setenv("DB_CONNECTION", "sql-mem")
-
 	db := da.InitiateConnection()
 	ps := bl.NewProductService(db.Product)
 	return *bl.NewOrderService(db.Order, *ps), *ps

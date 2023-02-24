@@ -4,11 +4,14 @@ import (
 	"bjssStoreGo/backend/layers/dataAccess/memory"
 	"bjssStoreGo/backend/layers/dataAccess/sqlite"
 	"bjssStoreGo/backend/utils"
+	"fmt"
 	"os"
 )
 
 func InitiateConnection() utils.Database {
 	dbConnection := os.Getenv("DB_CONNECTION")
+
+	fmt.Println(dbConnection)
 
 	if dbConnection == "sql" {
 		return connectToSqlite()
