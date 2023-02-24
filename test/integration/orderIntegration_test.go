@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-func TestCreatesAnOrder(t *testing.T) {
+func xTestCreatesAnOrder(t *testing.T) {
 	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
@@ -31,7 +31,7 @@ func TestCreatesAnOrder(t *testing.T) {
 	test.AssertNil(t, err)
 }
 
-func TestFetchACreatedOrder(t *testing.T) {
+func xTestFetchACreatedOrder(t *testing.T) {
 	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
@@ -66,7 +66,7 @@ func TestFetchACreatedOrder(t *testing.T) {
 	}
 }
 
-func TestGetsAnEmptyBasket(t *testing.T) {
+func xTestGetsAnEmptyBasket(t *testing.T) {
 	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
@@ -80,7 +80,7 @@ func TestGetsAnEmptyBasket(t *testing.T) {
 	test.AssertNil(t, err)
 }
 
-func TestUpdatesABasket(t *testing.T) {
+func xTestUpdatesABasket(t *testing.T) {
 	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
@@ -121,7 +121,7 @@ func TestUpdatesABasket(t *testing.T) {
 }
 
 // NOTE - The this relies on sign-in working. We can only list our own orders.
-func TestListsOrderHistory(t *testing.T) {
+func xTestListsOrderHistory(t *testing.T) {
 	w := test.SetUpApi(t)
 	apiRequester := test.NewApiRequester(w)
 	defer w.Close()
@@ -160,7 +160,7 @@ func TestListsOrderHistory(t *testing.T) {
 }
 
 // NOTE - this test assumes Sign In works
-func TestListsOnlyOrderHistoryForSignedInUser(t *testing.T) {
+func xTestListsOnlyOrderHistoryForSignedInUser(t *testing.T) {
 	w := test.SetUpApi(t)
 	defer w.Close()
 

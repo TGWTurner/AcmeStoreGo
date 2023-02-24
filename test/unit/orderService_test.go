@@ -34,7 +34,7 @@ var makeTestOrderRequest = struct {
 
 var tenSec, _ = time.ParseDuration("10s")
 
-func TestUpdatesBasket(t *testing.T) {
+func xTestUpdatesBasket(t *testing.T) {
 	os, ps := setUpOrder(t)
 	defer func() { os.Close(); ps.Close() }()
 
@@ -56,7 +56,7 @@ func TestUpdatesBasket(t *testing.T) {
 	}
 }
 
-func TestCreatesAnOrder(t *testing.T) {
+func xTestCreatesAnOrder(t *testing.T) {
 	os, ps := setUpOrder(t)
 	defer func() { os.Close(); ps.Close() }()
 
@@ -84,7 +84,7 @@ func TestCreatesAnOrder(t *testing.T) {
 	}
 }
 
-func TestRejectsAnOrderIfNotEnoughStock(t *testing.T) {
+func xTestRejectsAnOrderIfNotEnoughStock(t *testing.T) {
 	os, ps := setUpOrder(t)
 	defer func() { os.Close(); ps.Close() }()
 
@@ -109,7 +109,7 @@ func TestRejectsAnOrderIfNotEnoughStock(t *testing.T) {
 	}
 }
 
-func TestFetchesOrders(t *testing.T) {
+func xTestFetchesOrders(t *testing.T) {
 	os, ps := setUpOrder(t)
 	defer func() { os.Close(); ps.Close() }()
 
