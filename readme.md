@@ -132,4 +132,5 @@ Desired user behaviour is
 
 Other design notes
 - Using Go 1.19.4 windows/amd64
-- Uses Go package swaggo to produce the js/html page /api-docs/. This package uses the doc comments to generate the /docs folder and api spec.
+- Uses Go package swaggo to produce the js/html page /api-docs/. This package uses the doc comments to generate the /docs folder and api spec
+	- To update api-docs page if changes are made to the comments run the command `swaggo init` to update the ui

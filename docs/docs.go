@@ -186,7 +186,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/utils.Basket"
+                            "$ref": "#/definitions/api.BasketRequest"
                         }
                     }
                 ],
@@ -396,6 +396,17 @@ const docTemplate = `{
                 },
                 "msg": {
                     "type": "string"
+                }
+            }
+        },
+        "api.BasketRequest": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/utils.OrderItem"
+                    }
                 }
             }
         },

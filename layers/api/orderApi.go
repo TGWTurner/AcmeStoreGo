@@ -63,7 +63,7 @@ func (o *OrderApi) GetBasket(w http.ResponseWriter, r *http.Request) {
 // @ID PostBasket
 // @Accept json
 // @Produce json
-// @Param Basket body utils.Basket true "A Basket"
+// @Param Basket body BasketRequest true "A Basket"
 // @Success 200 {object} utils.Basket "A Basket"
 // @Router /api/order/basket [post]
 func (o *OrderApi) PostBasket(w http.ResponseWriter, r *http.Request) {
@@ -71,15 +71,15 @@ func (o *OrderApi) PostBasket(w http.ResponseWriter, r *http.Request) {
 
 	currentBasket := o.getBasket(r)
 
-	var basket utils.Basket
+	var basketRequest BasketRequest
 
-	err := json.NewDecoder(r.Body).Decode(&basket)
+	err := json.NewDecoder(r.Body).Decode(&basketRequest)
 
 	if err != nil {
 		Error(w, r, http.StatusInternalServerError, "error", err.Error())
 	}
 
-	newBasket, err := o.os.UpdateBasket(basket.Items, currentBasket)
+	newBasket, err := o.os.UpdateBasket(basketRequest.Items, currentBasket)
 
 	if err != nil {
 		Error(w, r, http.StatusUnauthorized, "error", err.Error())

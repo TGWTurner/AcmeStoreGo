@@ -4,14 +4,11 @@ import (
 	"backend/layers/dataAccess/memory"
 	"backend/layers/dataAccess/sqlite"
 	"backend/utils"
-	"fmt"
 	"os"
 )
 
 func InitiateConnection() utils.Database {
 	dbConnection := os.Getenv("DB_CONNECTION")
-
-	fmt.Println(dbConnection)
 
 	if dbConnection == "sql" {
 		return connectToSqlite()

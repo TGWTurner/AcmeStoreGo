@@ -25,7 +25,13 @@ func (os *OrderService) UpdateBasket(items []utils.OrderItem, currentBasket util
 	}
 
 	if len(notEnoughStock) > 0 {
-		msg := fmt.Sprintf("Not enough stock for: %v", notEnoughStock)
+		var productIds []int
+
+		for _, product := range notEnoughStock {
+			productIds = append(productIds, product.ProductId)
+		}
+
+		msg := fmt.Sprintf("Not enough stock for products with ids: %v", productIds)
 		return utils.Basket{}, errors.New(msg)
 	}
 

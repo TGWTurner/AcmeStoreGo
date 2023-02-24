@@ -20,6 +20,13 @@ definitions:
       msg:
         type: string
     type: object
+  api.BasketRequest:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/utils.OrderItem'
+        type: array
+    type: object
   api.OrderApiResponse:
     properties:
       id:
@@ -262,7 +269,7 @@ paths:
         name: Basket
         required: true
         schema:
-          $ref: '#/definitions/utils.Basket'
+          $ref: '#/definitions/api.BasketRequest'
       produces:
       - application/json
       responses:

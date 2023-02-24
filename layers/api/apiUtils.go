@@ -51,3 +51,7 @@ type ApiErrorResponse struct {
 	Error string
 	Msg   string
 }
+
+type BasketRequest struct {
+	Items []utils.OrderItem
+}
