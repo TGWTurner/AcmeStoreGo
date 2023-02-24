@@ -1,9 +1,9 @@
 package main
 
 import (
-	"bjssStoreGo/backend/layers/api"
-	da "bjssStoreGo/backend/layers/dataAccess"
-	"bjssStoreGo/backend/utils"
+	"backend/layers/api"
+	da "backend/layers/dataAccess"
+	"backend/utils"
 	"fmt"
 	"os"
 
