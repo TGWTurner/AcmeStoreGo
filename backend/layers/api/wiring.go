@@ -36,6 +36,7 @@ func (w *Wiring) AsyncListen(port string) {
 func (w *Wiring) SetUpRoutes() {
 	app := w.Router.PathPrefix("/api").Subrouter()
 
+	w.Router.Use(w.printRequest)
 	w.Router.PathPrefix("/api-docs").Handler(httpSwagger.WrapHandler)
 
 	app.HandleFunc("/values", w.Values).Methods("GET")
@@ -81,6 +82,16 @@ func (w *Wiring) Values(writer http.ResponseWriter, request *http.Request) {
 	fmt.Println()
 	fmt.Println("Current session: ", session.Values)
 	fmt.Println()
+}
+func (w *Wiring) printRequest(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		fmt.Println()
+		fmt.Println(request.RequestURI)
+		fmt.Printf("\t%v\n", request.Header.Values("Cookie"))
+		w.Values(writer, request)
+		fmt.Println()
+		next.ServeHTTP(writer, request)
+	})
 }
 
 //TEST /\/\/\/\

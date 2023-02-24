@@ -1,5 +1,51 @@
 basePath: /
 definitions:
+  api.AccountDetails:
+    properties:
+      address:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      postcode:
+        type: string
+    type: object
+  api.ApiErrorResponse:
+    properties:
+      error:
+        type: string
+      msg:
+        type: string
+    type: object
+  api.OrderApiResponse:
+    properties:
+      id:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/utils.OrderItem'
+        type: array
+      shippingDetails:
+        $ref: '#/definitions/utils.ShippingDetails'
+      total:
+        type: integer
+      updatedDate:
+        type: string
+    type: object
+  api.OrderRequest:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/utils.OrderItem'
+        type: array
+      paymentToken:
+        type: string
+      shippingDetails:
+        $ref: '#/definitions/utils.ShippingDetails'
+    type: object
   api.UserDetails:
     properties:
       email:
@@ -20,26 +66,6 @@ definitions:
       postcode:
         type: string
     type: object
-  utils.AccountDetails:
-    properties:
-      address:
-        type: string
-      email:
-        type: string
-      name:
-        type: string
-      password:
-        type: string
-      postcode:
-        type: string
-    type: object
-  utils.ApiErrorResponse:
-    properties:
-      error:
-        type: string
-      msg:
-        type: string
-    type: object
   utils.Basket:
     properties:
       items:
@@ -48,23 +74,6 @@ definitions:
         type: array
       total:
         type: integer
-    type: object
-  utils.Order:
-    properties:
-      customerId:
-        type: integer
-      id:
-        type: string
-      items:
-        items:
-          $ref: '#/definitions/utils.OrderItem'
-        type: array
-      shippingDetails:
-        $ref: '#/definitions/utils.ShippingDetails'
-      total:
-        type: integer
-      updatedDate:
-        type: string
     type: object
   utils.OrderItem:
     properties:
@@ -118,11 +127,6 @@ paths:
       consumes:
       - application/json
       operationId: GetAccount
-      parameters:
-      - description: token
-        in: header
-        name: Cookie
-        type: string
       produces:
       - application/json
       responses:
@@ -133,7 +137,7 @@ paths:
         "401":
           description: User is not signed in
           schema:
-            $ref: '#/definitions/utils.ApiErrorResponse'
+            $ref: '#/definitions/api.ApiErrorResponse'
       summary: Gets the user's Account
     post:
       consumes:
@@ -145,7 +149,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/utils.AccountDetails'
+          $ref: '#/definitions/api.AccountDetails'
       produces:
       - application/json
       responses:
@@ -156,7 +160,7 @@ paths:
         "401":
           description: User is not signed in
           schema:
-            $ref: '#/definitions/utils.ApiErrorResponse'
+            $ref: '#/definitions/api.ApiErrorResponse'
       summary: Updates the users account
   /api/account/sign-in:
     post:
@@ -182,7 +186,7 @@ paths:
         "401":
           description: Invalid credentials
           schema:
-            $ref: '#/definitions/utils.ApiErrorResponse'
+            $ref: '#/definitions/api.ApiErrorResponse'
       summary: Signs in
   /api/account/sign-up:
     post:
@@ -197,7 +201,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/utils.AccountDetails'
+          $ref: '#/definitions/api.AccountDetails'
       produces:
       - application/json
       responses:
@@ -208,7 +212,7 @@ paths:
         "400":
           description: Malformed request or account already exists
           schema:
-            $ref: '#/definitions/utils.ApiErrorResponse'
+            $ref: '#/definitions/api.ApiErrorResponse'
       summary: Registers a new user
   /api/order/{token}:
     get:
@@ -218,21 +222,22 @@ paths:
         an order via a link in an email, etc.
       operationId: GetOrder
       parameters:
-      - description: token
-        in: header
-        name: Cookie
+      - description: Order token. Currently same as order.id
+        in: path
+        name: token
+        required: true
         type: string
       produces:
       - application/json
       responses:
         "200":
-          description: A Basket
+          description: The newly created order
           schema:
-            $ref: '#/definitions/utils.Order'
+            $ref: '#/definitions/api.OrderApiResponse'
         "404":
           description: No such order
           schema:
-            $ref: '#/definitions/utils.ApiErrorResponse'
+            $ref: '#/definitions/api.ApiErrorResponse'
       summary: Fetches an order given a token
   /api/order/basket:
     get:
@@ -281,20 +286,20 @@ paths:
         name: order
         required: true
         schema:
-          $ref: '#/definitions/utils.Order'
+          $ref: '#/definitions/api.OrderRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: A Basket
+          description: The newly created order
           schema:
-            $ref: '#/definitions/utils.Order'
+            $ref: '#/definitions/api.OrderApiResponse'
         "400":
           description: An error. If the request was well formed this will be payment
             or stock level error. If stock level error, the quantityRemaining is returned
             for products with not enough stock.
           schema:
-            $ref: '#/definitions/utils.ApiErrorResponse'
+            $ref: '#/definitions/api.ApiErrorResponse'
       summary: Creates a new order
   /api/order/history:
     get:

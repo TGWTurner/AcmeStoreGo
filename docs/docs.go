@@ -25,14 +25,6 @@ const docTemplate = `{
                 ],
                 "summary": "Gets the user's Account",
                 "operationId": "GetAccount",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "token",
-                        "name": "Cookie",
-                        "in": "header"
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "The user's account",
@@ -43,7 +35,7 @@ const docTemplate = `{
                     "401": {
                         "description": "User is not signed in",
                         "schema": {
-                            "$ref": "#/definitions/utils.ApiErrorResponse"
+                            "$ref": "#/definitions/api.ApiErrorResponse"
                         }
                     }
                 }
@@ -64,7 +56,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/utils.AccountDetails"
+                            "$ref": "#/definitions/api.AccountDetails"
                         }
                     }
                 ],
@@ -78,7 +70,7 @@ const docTemplate = `{
                     "401": {
                         "description": "User is not signed in",
                         "schema": {
-                            "$ref": "#/definitions/utils.ApiErrorResponse"
+                            "$ref": "#/definitions/api.ApiErrorResponse"
                         }
                     }
                 }
@@ -116,7 +108,7 @@ const docTemplate = `{
                     "401": {
                         "description": "Invalid credentials",
                         "schema": {
-                            "$ref": "#/definitions/utils.ApiErrorResponse"
+                            "$ref": "#/definitions/api.ApiErrorResponse"
                         }
                     }
                 }
@@ -140,7 +132,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/utils.AccountDetails"
+                            "$ref": "#/definitions/api.AccountDetails"
                         }
                     }
                 ],
@@ -154,7 +146,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Malformed request or account already exists",
                         "schema": {
-                            "$ref": "#/definitions/utils.ApiErrorResponse"
+                            "$ref": "#/definitions/api.ApiErrorResponse"
                         }
                     }
                 }
@@ -226,21 +218,21 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/utils.Order"
+                            "$ref": "#/definitions/api.OrderRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "A Basket",
+                        "description": "The newly created order",
                         "schema": {
-                            "$ref": "#/definitions/utils.Order"
+                            "$ref": "#/definitions/api.OrderApiResponse"
                         }
                     },
                     "400": {
                         "description": "An error. If the request was well formed this will be payment or stock level error. If stock level error, the quantityRemaining is returned for products with not enough stock.",
                         "schema": {
-                            "$ref": "#/definitions/utils.ApiErrorResponse"
+                            "$ref": "#/definitions/api.ApiErrorResponse"
                         }
                     }
                 }
@@ -277,22 +269,23 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "token",
-                        "name": "Cookie",
-                        "in": "header"
+                        "description": "Order token. Currently same as order.id",
+                        "name": "token",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "A Basket",
+                        "description": "The newly created order",
                         "schema": {
-                            "$ref": "#/definitions/utils.Order"
+                            "$ref": "#/definitions/api.OrderApiResponse"
                         }
                     },
                     "404": {
                         "description": "No such order",
                         "schema": {
-                            "$ref": "#/definitions/utils.ApiErrorResponse"
+                            "$ref": "#/definitions/api.ApiErrorResponse"
                         }
                     }
                 }
@@ -375,6 +368,77 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "api.AccountDetails": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "postcode": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.ApiErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.OrderApiResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/utils.OrderItem"
+                    }
+                },
+                "shippingDetails": {
+                    "$ref": "#/definitions/utils.ShippingDetails"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "updatedDate": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.OrderRequest": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/utils.OrderItem"
+                    }
+                },
+                "paymentToken": {
+                    "type": "string"
+                },
+                "shippingDetails": {
+                    "$ref": "#/definitions/utils.ShippingDetails"
+                }
+            }
+        },
         "api.UserDetails": {
             "type": "object",
             "properties": {
@@ -406,37 +470,6 @@ const docTemplate = `{
                 }
             }
         },
-        "utils.AccountDetails": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "postcode": {
-                    "type": "string"
-                }
-            }
-        },
-        "utils.ApiErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string"
-                },
-                "msg": {
-                    "type": "string"
-                }
-            }
-        },
         "utils.Basket": {
             "type": "object",
             "properties": {
@@ -448,32 +481,6 @@ const docTemplate = `{
                 },
                 "total": {
                     "type": "integer"
-                }
-            }
-        },
-        "utils.Order": {
-            "type": "object",
-            "properties": {
-                "customerId": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "items": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/utils.OrderItem"
-                    }
-                },
-                "shippingDetails": {
-                    "$ref": "#/definitions/utils.ShippingDetails"
-                },
-                "total": {
-                    "type": "integer"
-                },
-                "updatedDate": {
-                    "type": "string"
                 }
             }
         },

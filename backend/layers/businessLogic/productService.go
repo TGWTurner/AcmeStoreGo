@@ -65,7 +65,13 @@ func (ps ProductService) DecreaseStock(productQuantities []utils.OrderItem) erro
 	}
 
 	if len(notEnoughStock) > 0 {
-		msg := fmt.Sprintf("Trying to decrease stock of %v below zero", notEnoughStock)
+		var productIds []int
+
+		for _, product := range notEnoughStock {
+			productIds = append(productIds, product.ProductId)
+		}
+
+		msg := fmt.Sprintf("Trying to decrease stock of products with id's: %v below zero", productIds)
 		return errors.New(msg)
 	}
 

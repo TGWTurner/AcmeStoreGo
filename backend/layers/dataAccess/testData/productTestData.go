@@ -75,17 +75,17 @@ func GetProductTestData() Data {
 		},
 		Deals: []utils.ProductDeal{
 			{
-				ProductId: 1,
-				StartDate: "2021-02-13",
-				EndDate:   "2030-02-13",
-			},
-			{
 				ProductId: 2,
 				StartDate: "2021-02-13",
 				EndDate:   "2030-02-13",
 			},
 			{
 				ProductId: 4,
+				StartDate: "2021-02-13",
+				EndDate:   "2030-02-13",
+			},
+			{
+				ProductId: 5,
 				StartDate: "1970-01-13",
 				EndDate:   "1970-01-13",
 			},

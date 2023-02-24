@@ -121,7 +121,6 @@ func (a *AccountApi) PostSignUp(w http.ResponseWriter, r *http.Request) {
 // @ID GetAccount
 // @Accept json
 // @Produce json
-// @Param Cookie header string false "token"
 // @Success 200 {object} utils.AccountApiResponse "The user's account"
 // @Failure 401 {object} ApiErrorResponse "User is not signed in"
 // @Router /api/account [get]
@@ -152,7 +151,6 @@ func (a *AccountApi) GetAccount(w http.ResponseWriter, r *http.Request) {
 // @ID PostAccount
 // @Accept json
 // @Produce json
-// @Param Cookie header string false "token"
 // @Param user body AccountDetails true "account information"
 // @Success 200 {object} utils.AccountApiResponse "The user's account"
 // @Failure 401 {object} ApiErrorResponse "User is not signed in"

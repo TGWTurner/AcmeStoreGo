@@ -96,7 +96,6 @@ func (o *OrderApi) PostBasket(w http.ResponseWriter, r *http.Request) {
 // @Summary Gets the user's Order history
 // @ID GetHistory
 // @Produce json
-// @Param Cookie header string false "token"
 // @Success 200 {object} utils.Basket "A Basket"
 // @Router /api/order/history [get]
 func (o *OrderApi) GetHistory(w http.ResponseWriter, r *http.Request) {
@@ -126,7 +125,7 @@ func (o *OrderApi) GetHistory(w http.ResponseWriter, r *http.Request) {
 // @ID GetOrder
 // @Accept json
 // @Produce json
-// @Param Token header string true "Order token. Currently same as order.id"
+// @Param token path string true "Order token. Currently same as order.id"
 // @Success 200 {object} OrderApiResponse "The newly created order"
 // @Failure 404 {object} ApiErrorResponse "No such order"
 // @Router /api/order/{token} [get]
