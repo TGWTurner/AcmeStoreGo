@@ -2,8 +2,6 @@ package api
 
 import (
 	bl "backend/layers/businessLogic"
-	"backend/utils"
-	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -56,28 +54,7 @@ type UserDetails struct {
 // @Failure 401 {object} ApiErrorResponse "Invalid credentials"
 // @Router /api/account/sign-in [post]
 func (a *AccountApi) PostSignIn(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	var userDetails UserDetails
-
-	err := json.NewDecoder(r.Body).Decode(&userDetails)
-
-	if err != nil {
-		Error(w, r, http.StatusInternalServerError, "error", err.Error())
-		return
-	}
-
-	account, err := a.as.SignIn(userDetails.Email, userDetails.Password)
-
-	if err != nil {
-		Error(w, r, http.StatusInternalServerError, "forbidden", "Invalid credentials")
-		return
-	}
-
-	a.setSignedInUserId(w, r, account.Id)
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(account)
+	// To implement
 }
 
 // PostSignUp godoc
@@ -91,28 +68,7 @@ func (a *AccountApi) PostSignIn(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} ApiErrorResponse "Malformed request or account already exists"
 // @Router /api/account/sign-up [post]
 func (a *AccountApi) PostSignUp(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	var acc AccountDetails
-
-	err := json.NewDecoder(r.Body).Decode(&acc)
-
-	if err != nil {
-		Error(w, r, http.StatusBadRequest, "error", "Malformed request or account already exists")
-		return
-	}
-
-	account, err := a.as.SignUp(acc.Email, acc.Password, acc.Name, acc.Address, acc.Postcode)
-
-	if err != nil {
-		Error(w, r, http.StatusBadRequest, "error", "Malformed request or account already exists")
-		return
-	}
-
-	a.setSignedInUserId(w, r, account.Id)
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(account)
+	// To implement
 }
 
 // GetAccount godoc
@@ -125,24 +81,7 @@ func (a *AccountApi) PostSignUp(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} ApiErrorResponse "User is not signed in"
 // @Router /api/account [get]
 func (a *AccountApi) GetAccount(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	userId, err := a.getSignedInUserId(r)
-
-	if err != nil {
-		Error(w, r, http.StatusUnauthorized, "error", "User is not signed in")
-		return
-	}
-
-	account, err := a.as.GetById(userId)
-
-	if err != nil {
-		Error(w, r, http.StatusInternalServerError, "error", err.Error())
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(account)
+	// To implement
 }
 
 // PostAccount godoc
@@ -156,42 +95,7 @@ func (a *AccountApi) GetAccount(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} ApiErrorResponse "User is not signed in"
 // @Router /api/account [post]
 func (a *AccountApi) PostAccount(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	userId, err := a.getSignedInUserId(r)
-
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-	}
-
-	var acc AccountDetails
-
-	err = json.NewDecoder(r.Body).Decode(&acc)
-
-	updateAccount := utils.UpdateAccount{
-		Id:              userId,
-		Password:        acc.Password,
-		ShippingDetails: acc.ShippingDetails,
-	}
-
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-
-		json.NewEncoder(w).Encode(ApiErrorResponse{
-			Error: "forbidden",
-			Msg:   "user is not signed in",
-		})
-		return
-	}
-
-	account, err := a.as.Update(updateAccount)
-
-	if err != nil {
-		panic(err)
-	}
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(account)
+	// To implement
 }
 
 type AccountApi struct {

@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 )
 
@@ -67,29 +66,7 @@ func (o *OrderApi) GetBasket(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} utils.Basket "A Basket"
 // @Router /api/order/basket [post]
 func (o *OrderApi) PostBasket(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	currentBasket := o.getBasket(r)
-
-	var basketRequest BasketRequest
-
-	err := json.NewDecoder(r.Body).Decode(&basketRequest)
-
-	if err != nil {
-		Error(w, r, http.StatusInternalServerError, "error", err.Error())
-	}
-
-	newBasket, err := o.os.UpdateBasket(basketRequest.Items, currentBasket)
-
-	if err != nil {
-		Error(w, r, http.StatusUnauthorized, "error", err.Error())
-		return
-	}
-
-	o.setBasket(w, r, newBasket)
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(newBasket)
+	// To implement
 }
 
 // GetHistory godoc
@@ -99,24 +76,7 @@ func (o *OrderApi) PostBasket(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} utils.Basket "A Basket"
 // @Router /api/order/history [get]
 func (o *OrderApi) GetHistory(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	customerId := GetSignedInUserId(r, o.s)
-
-	if customerId == 0 {
-		Error(w, r, http.StatusUnauthorized, "error", "User is not signed in")
-		return
-	}
-
-	orderHistory, err := o.os.GetOrdersByCustomerId(customerId)
-
-	if err != nil {
-		Error(w, r, http.StatusInternalServerError, "error", err.Error())
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(orderHistory)
+	// To implement
 }
 
 // GetOrder godoc
@@ -130,26 +90,7 @@ func (o *OrderApi) GetHistory(w http.ResponseWriter, r *http.Request) {
 // @Failure 404 {object} ApiErrorResponse "No such order"
 // @Router /api/order/{token} [get]
 func (o *OrderApi) GetOrder(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	params := mux.Vars(r)
-	orderToken, ok := params["id"]
-
-	if !ok {
-		Error(w, r, http.StatusBadRequest, "error", "Missing id in request")
-		return
-	}
-
-	order, err := o.os.GetOrderByToken(orderToken)
-
-	if err != nil {
-		Error(w, r, http.StatusNotFound, "error", err.Error())
-		return
-	}
-
-	response := convertOrderToOrderApiResponse(order)
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
+	// To implement
 }
 
 // PostCheckout godoc
@@ -163,39 +104,7 @@ func (o *OrderApi) GetOrder(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} ApiErrorResponse "An error. If the request was well formed this will be payment or stock level error. If stock level error, the quantityRemaining is returned for products with not enough stock."
 // @Router /api/order/checkout [post]
 func (o *OrderApi) PostCheckout(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	var order OrderRequest
-
-	err := json.NewDecoder(r.Body).Decode(&order)
-
-	if err != nil {
-		Error(w, r, http.StatusInternalServerError, "error", err.Error())
-	}
-
-	customerId := GetSignedInUserId(r, o.s)
-
-	newOrder, err := o.os.CreateOrder(customerId, order.ShippingDetails, order.Items)
-
-	if err != nil {
-		Error(w, r, http.StatusInternalServerError, "error", err.Error())
-		return
-	}
-
-	response := convertOrderToOrderApiResponse(newOrder)
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
-}
-
-func convertOrderToOrderApiResponse(order utils.Order) OrderApiResponse {
-	return OrderApiResponse{
-		Id:              order.Id,
-		Total:           order.Total,
-		UpdatedDate:     order.UpdatedDate,
-		ShippingDetails: order.ShippingDetails,
-		Items:           order.Items,
-	}
+	// To implement
 }
 
 type OrderApi struct {
