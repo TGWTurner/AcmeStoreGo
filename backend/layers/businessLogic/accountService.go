@@ -55,14 +55,13 @@ func (as AccountService) SignUp(email string, password string, name string, addr
 }
 
 func (as AccountService) Update(account utils.UpdateAccount) (utils.AccountApiResponse, error) {
-	updateAccount := utils.Account{
-		Id:              account.Id,
-		ShippingDetails: account.ShippingDetails,
+	oldAccount, err := as.db.GetById(account.Id)
+
+	if err != nil {
+		return utils.AccountApiResponse{}, err
 	}
 
-	if account.Password != "" {
-		updateAccount.PasswordHash = as.HashPassword(account.Password)
-	}
+	updateAccount := as.populateSetAccountValues(oldAccount, account)
 
 	updatedAccount, err := as.db.Update(updateAccount)
 
@@ -71,6 +70,30 @@ func (as AccountService) Update(account utils.UpdateAccount) (utils.AccountApiRe
 	}
 
 	return updatedAccount.OmitPasswordHash(), nil
+}
+
+func (as AccountService) populateSetAccountValues(oldAccount utils.Account, newAccount utils.UpdateAccount) utils.Account {
+	if newAccount.Address != "" {
+		oldAccount.Address = newAccount.Address
+	}
+
+	if newAccount.Email != "" {
+		oldAccount.Email = newAccount.Email
+	}
+
+	if newAccount.Name != "" {
+		oldAccount.Name = newAccount.Name
+	}
+
+	if newAccount.Postcode != "" {
+		oldAccount.Postcode = newAccount.Postcode
+	}
+
+	if newAccount.Password != "" {
+		oldAccount.PasswordHash = as.HashPassword(newAccount.Password)
+	}
+
+	return oldAccount
 }
 
 func (as AccountService) GetById(accountId int) (utils.AccountApiResponse, error) {
