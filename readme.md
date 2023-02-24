@@ -8,13 +8,19 @@ Assumes you are running on
 * Visual Studio Code
     * Install the Go package (https://marketplace.visualstudio.com/items?itemName=golang.Go)
     * This will not install extra optional packages for debugging, click the `⚠️ Analysis Tools Missing` warning to install these
-
 ```
 cd backend
 code .
 ```
+* After cloning you will need to install the swaggo library:
+```
+go get github.com/swaggo/swag/cmd/swag
+go get -u github.com/swaggo/http-swagger
+```
+
+
 Things to try:
-* Start the server `go run main.go`, poke around here: http://localhost:4002/api-docs
+* Start the server `go run main.go`, poke around here: http://localhost:4001/api-docs/
 * Run the unit tests `go test ./...` (Defaults to in memory store)
 * Change the environment variable `DB_CONNECTION` to choose database options `sql`/`sql-mem`/`""`
 
