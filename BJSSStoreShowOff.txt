@@ -1,0 +1,22 @@
+Things to show off:
+ - General functionality
+  - Wiring, example of api (products api), session management, db switch
+ - Swaggo UI
+  - Match to js version
+  - Explain small differences in look but for this, the same functionality
+  - Browser manages the session cookie, so once logged in app sets it and browser sorts it
+   - Therefore can log in and then perform other requests that require authentication
+  - Show the comments that make it work and explain how that is
+  - Two downsides:
+   - Requirement for these api function comments adds bloat to files
+   - Doesnt seem to auto-magically import with the rest of the application so students need to run two `go get` commands to allow functionality
+ - GORM database
+  - Very powerful and useful
+  - Really easy to use once used to it
+  - Show my handler implementation, database objects and comments they require for correct naming
+  - Conversion from other objects to db objects required to use model based queries rather than forming SQL manually
+ - Hook up to frontend package
+  - Explain that its the one my team had so doesnt fully work
+  - Shows that the go backend can work with the frontend js implementation
+  - Show the comments on objects to be returned by the api so it works with frontend
+ - Any questions?
