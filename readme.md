@@ -6,6 +6,8 @@ This is a Go backend using a package called Gorilla Mux to help implement the AP
 Assumes you are running on 
 * Windows and have go installed (https://go.dev/doc/install)
 * Visual Studio Code
+    * Install the Go package (https://marketplace.visualstudio.com/items?itemName=golang.Go)
+    * This will not install extra optional packages for debugging, click the `⚠️ Analysis Tools Missing` warning to install these
 
 ```
 cd backend
@@ -13,17 +15,17 @@ code .
 ```
 Things to try:
 * Start the server `go run main.go`, poke around here: http://localhost:4002/api-docs
-* Run the unit tests `go test ./...`
-* Change the environment variable `DB_CONNECTION` to choose database options `sql`/`sql-mem`/``
+* Run the unit tests `go test ./...` (Defaults to in memory store)
+* Change the environment variable `DB_CONNECTION` to choose database options `sql`/`sql-mem`/`""`
 
 ** The integration tests also run the server. **
 
 # Debugging
 
 In VS Code:
-* Set a breakpoint by clicking to the right of the line number of the line of code you want to the debugger to stop on. A red dot will appear. 
-* Go to the run/debug tab. In the drop down select `Node.js...` then npm run script you want to debug. Try `Run Script: test`
-If you choose to debug the server you'll have to make requests to it somehow.
+* After having installed the Go package and optional additional packages
+* Set a breakpoint by clicking to the left of the line number of the line of code you want to the debugger to stop on. A red dot will appear. 
+* Navigate to `main.go` and select `Run > Start Debugging` (or press `F5`)
 * Assuming it reaches the line of code you set a breakpoint on, you can now hover over variables to see what they are set to and use the controls at the top to step to the next line or step into a function or run to the next breakpoint. 
 
 # Databases
