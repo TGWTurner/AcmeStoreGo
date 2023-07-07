@@ -76,6 +76,7 @@ func (w *Wiring) SetUpRoutes() {
 func (w *Wiring) Close() {
 	w.productApi.Close()
 	w.orderApi.Close()
+	w.accountApi.Close()
 }
 
 func (w *Wiring) mustBeSignedIn(next http.Handler) http.Handler {
