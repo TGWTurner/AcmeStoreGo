@@ -27,6 +27,7 @@ func main() {
 	store := sessions.NewCookieStore([]byte("my session encryption secret"))
 
 	wiring := api.NewWiring(db, r, store)
+	defer wiring.Close()
 
 	wiring.SetUpRoutes()
 	//SET UP <<<<<<<<<<<<<<<
